@@ -58,6 +58,19 @@ class _MyAppState extends State<MyApp> {
                   new FlatButton(
                       onPressed: () => delete(), child: new Text("Delete")),
                 ],
+              ),
+              new ButtonBar(
+                children: <Widget>[
+                  new FlatButton(
+                      onPressed: () => _textController.text = "Value1",
+                      child: new Text("Value1")),
+                  new FlatButton(
+                      onPressed: () => _textController.text = "Value2",
+                      child: new Text("Value2")),
+                  new FlatButton(
+                      onPressed: () => _textController.text = "Value3",
+                      child: new Text("Value3")),
+                ],
               )
             ],
           ),
