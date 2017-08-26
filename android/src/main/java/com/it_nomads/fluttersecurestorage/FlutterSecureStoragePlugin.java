@@ -81,6 +81,11 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
           result.success(value);
           break;
         }
+        case "delete": {
+          delete(key);
+          result.success(null);
+          break;
+        }
         default:
           result.notImplemented();
           break;
@@ -107,6 +112,11 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
     byte[] result = decrypt(data);
 
     return new String(result, charset);
+  }
+
+  private void delete(String key) throws Exception {
+    editor.remove(key);
+    editor.apply();
   }
 
   private byte[] encrypt(byte[] input) throws Exception {

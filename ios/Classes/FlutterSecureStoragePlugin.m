@@ -39,7 +39,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         result(InvalidParameters);
         return;
     }
-    
+    if ([@"read" isEqualToString:call.method]) {
+        NSString *value = [self read:key];
+        
+        result(value);
+    } else
     if ([@"write" isEqualToString:call.method]) {
         NSString *value = arguments[@"value"];
         if (![value isKindOfClass:[NSString class]]){
@@ -50,11 +54,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         [self write:value forKey:key];
         
         result(nil);
-    } else if ([@"read" isEqualToString:call.method]) {
-        NSString *value = [self read:key];
+    } else if ([@"delete" isEqualToString:call.method]) {
+        [self delete:key];
         
-        result(value);
-    } else {
+        result(nil);
+    }else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -103,6 +107,14 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
     
     return value;
+}
+
+- (void)delete:(NSString *)key {
+    NSMutableDictionary *search = [self.query mutableCopy];
+    search[(__bridge id)kSecAttrAccount] = key;
+    search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
+    
+    SecItemDelete((__bridge CFDictionaryRef)search);
 }
 
 

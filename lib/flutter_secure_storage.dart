@@ -16,4 +16,9 @@ class FlutterSecureStorage {
       _channel.invokeMethod("read", <String, String>{
         "key": key
       });
+
+  Future delete({@required String key}) =>
+      _channel.invokeMethod("delete", <String, String>{
+        "key": key
+      });
 }

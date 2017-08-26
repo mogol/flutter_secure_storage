@@ -15,14 +15,21 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _textController = new TextEditingController();
   final _storage = new FlutterSecureStorage();
+  final _key = "my_key1";
 
   Future read() async {
-    String value = await _storage.read(key: "my_key");
+    String value = await _storage.read(key: _key);
+    print("value = $value");
     _textController.text = value;
   }
 
   Future write() async {
-    _storage.write(key: "my_key", value: _textController.text);
+    _storage.write(key: _key, value: _textController.text);
+  }
+
+  Future delete() async {
+    await _storage.delete(key: _key);
+    _textController.text = "";
   }
 
   @override
@@ -48,6 +55,8 @@ class _MyAppState extends State<MyApp> {
                       onPressed: () => read(), child: new Text("Read")),
                   new FlatButton(
                       onPressed: () => write(), child: new Text("Write")),
+                  new FlatButton(
+                      onPressed: () => delete(), child: new Text("Delete")),
                 ],
               )
             ],
