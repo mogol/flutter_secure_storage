@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_secure_storage (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `/Users/herman/Projects/github/flutter/bin/cache/artifacts/engine/ios`)
+  - flutter_secure_storage (from `/Users/herman/Projects/it-nomads/flutter_secure_storage/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: "/Users/herman/Projects/github/flutter/bin/cache/artifacts/engine/ios"
+  flutter_secure_storage:
+    :path: "/Users/herman/Projects/it-nomads/flutter_secure_storage/ios"
+
+SPEC CHECKSUMS:
+  Flutter: d674e78c937094a75ac71dd77e921e840bea3dbf
+  flutter_secure_storage: 7639ca8ea99db021d1639cbeb54cb4e434fe6eea
+
+PODFILE CHECKSUM: 351e02e34b831289961ec3558a535cbd2c4965d2
+
+COCOAPODS: 1.2.1

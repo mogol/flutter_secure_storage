@@ -1,0 +1,14 @@
+name: flutter_secure_storage
+description: A new flutter plugin project.
+version: 0.0.1
+author:
+homepage:
+
+flutter:
+  plugin:
+    androidPackage: com.it_nomads.fluttersecurestorage
+    pluginClass: FlutterSecureStoragePlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
