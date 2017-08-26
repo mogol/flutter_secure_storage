@@ -29,6 +29,7 @@ public class StorageCipher18Implementation implements StorageCipher {
     createKeysIfNeeded(context);
   }
 
+  @Override
   public byte[] encrypt(byte[] input) throws Exception {
     PublicKey publicKey = getEntry().getCertificate().getPublicKey();
     Cipher cipher = getCipher();
@@ -37,6 +38,7 @@ public class StorageCipher18Implementation implements StorageCipher {
     return cipher.doFinal(input);
   }
 
+  @Override
   public byte[] decrypt(byte[] input) throws Exception {
     PrivateKey privateKey = getEntry().getPrivateKey();
     Cipher cipher = getCipher();

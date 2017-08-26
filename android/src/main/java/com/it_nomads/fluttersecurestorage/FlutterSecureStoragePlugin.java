@@ -61,7 +61,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
         case "write": {
           String value = (String) arguments.get("value");
           write(key, value);
-          result.success("success");
+          result.success(null);
           break;
         }
         case "read": {
@@ -107,10 +107,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
     editor.apply();
   }
 
-
   private String addPrefixToKey(String key) {
     return KEY_PREFIX + "_" + key;
   }
-
-
 }
