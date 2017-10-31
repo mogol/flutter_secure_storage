@@ -6,7 +6,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
-import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher16Implementation;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher18Implementation;
 
 import java.nio.charset.Charset;
@@ -42,12 +41,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
     preferences = activity.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
     editor = preferences.edit();
     charset = Charset.forName("UTF-8");
-
-    if (StorageCipher18Implementation.isAvailable()) {
-      storageCipher = new StorageCipher18Implementation(activity);
-    } else {
-      storageCipher = new StorageCipher16Implementation();
-    }
+    storageCipher = new StorageCipher18Implementation(activity);
   }
 
   @Override

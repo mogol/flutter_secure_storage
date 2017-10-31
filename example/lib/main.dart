@@ -49,25 +49,27 @@ class _MyAppState extends State<MyApp> {
                   controller: _textController,
                 ),
               ),
-              new ButtonBar(
+              new Row(
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => read(), child: new Text("Read")),
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => write(), child: new Text("Write")),
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => delete(), child: new Text("Delete")),
                 ],
               ),
-              new ButtonBar(
+              new Row(
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => _textController.text = "Value1",
                       child: new Text("Value1")),
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => _textController.text = "Value2",
                       child: new Text("Value2")),
-                  new FlatButton(
+                  new RaisedButton(
                       onPressed: () => _textController.text = "Value3",
                       child: new Text("Value3")),
                 ],
