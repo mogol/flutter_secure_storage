@@ -3,7 +3,6 @@ package com.it_nomads.fluttersecurestorage.ciphers;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
-import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 
@@ -82,6 +81,7 @@ public class StorageCipher18Implementation implements StorageCipher {
   }
 
   @SuppressLint("NewApi")
+  @SuppressWarnings("deprecation")
   private void createKeys(Context context) throws Exception {
     Calendar start = Calendar.getInstance();
     Calendar end = Calendar.getInstance();
@@ -93,7 +93,7 @@ public class StorageCipher18Implementation implements StorageCipher {
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       //noinspection deprecation
-      spec = new KeyPairGeneratorSpec.Builder(context)
+      spec = new android.security.KeyPairGeneratorSpec.Builder(context)
           .setAlias(KEY_ALIAS)
           .setSubject(new X500Principal("CN=" + KEY_ALIAS))
           .setSerialNumber(BigInteger.valueOf(1))
