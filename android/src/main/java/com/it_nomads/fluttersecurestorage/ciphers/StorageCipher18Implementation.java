@@ -19,7 +19,7 @@ import javax.security.auth.x500.X500Principal;
 
 public class StorageCipher18Implementation implements StorageCipher {
 
-  private static final String KEY_ALIAS;
+  private final String KEY_ALIAS;
   private static final String KEYSTORE_PROVIDER_ANDROID = "AndroidKeyStore";
   private static final String TYPE_RSA = "RSA";
 
