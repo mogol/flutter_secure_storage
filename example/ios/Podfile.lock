@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_secure_storage (0.0.1):
+  - flutter_secure_storage (3.0.0):
     - Flutter
 
 DEPENDENCIES:
@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
-  flutter_secure_storage: 5b656c2e04f24829ff6db0ef70c736ec3face7e7
+  flutter_secure_storage: 294dc6fe9a6ae15cdeae9807a68a779b5cbec27d
 
 PODFILE CHECKSUM: 351e02e34b831289961ec3558a535cbd2c4965d2
 
