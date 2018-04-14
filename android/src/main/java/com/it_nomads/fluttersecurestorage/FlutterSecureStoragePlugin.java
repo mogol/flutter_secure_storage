@@ -18,9 +18,6 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 public class FlutterSecureStoragePlugin implements MethodCallHandler {
-  private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-
-  private static final String KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
 
   private final android.content.SharedPreferences preferences;
   private final android.content.SharedPreferences.Editor editor;
@@ -38,7 +35,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
   }
 
   private FlutterSecureStoragePlugin(Activity activity) throws Exception {
-    preferences = activity.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+    preferences = activity.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
     editor = preferences.edit();
     charset = Charset.forName("UTF-8");
     storageCipher = new StorageCipher18Implementation(activity);
@@ -102,6 +99,6 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
   }
 
   private String addPrefixToKey(String key) {
-    return KEY_PREFIX + "_" + key;
+    return Constants.ELEMENT_KEY_PREFIX + "_" + key;
   }
 }
