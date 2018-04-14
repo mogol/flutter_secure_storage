@@ -12,17 +12,18 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import static com.it_nomads.fluttersecurestorage.Constants.AES_KEY;
 import static com.it_nomads.fluttersecurestorage.Constants.SHARED_PREFERENCES_NAME;
 
 public class StorageCipher18Implementation implements StorageCipher {
 
-    private final Key secretKey;
-    private final Cipher cipher;
-    private final SecureRandom secureRandom;
     private static final int ivSize = 16;
     private static final int keySize = 16;
     private static final String KEY_ALGORITHM = "AES";
+    private static final String AES_PREFERENCES_KEY = "VGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
+
+    private final Key secretKey;
+    private final Cipher cipher;
+    private final SecureRandom secureRandom;
 
     @SuppressLint("ApplySharedPref")
     public StorageCipher18Implementation(Context context) throws Exception {
@@ -32,7 +33,7 @@ public class StorageCipher18Implementation implements StorageCipher {
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
-        String aesKey = preferences.getString(AES_KEY, null);
+        String aesKey = preferences.getString(AES_PREFERENCES_KEY, null);
         byte[] key;
 
         if (aesKey == null) {
@@ -41,7 +42,7 @@ public class StorageCipher18Implementation implements StorageCipher {
             secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
 
             byte[] encryptedKey = rsaCipher.wrap(secretKey);
-            editor.putString(AES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
+            editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
             editor.commit();
         } else {
             byte[] encrypted = Base64.decode(aesKey, Base64.DEFAULT);
