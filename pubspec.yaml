@@ -1,6 +1,6 @@
 name: flutter_secure_storage
 description: Secure Storage plugin for Flutter.
-version: 2.0.0
+version: 3.0.0
 author: German Saprykin <saprykin.h@gmail.com>
 homepage: https://github.com/mogol/flutter_secure_storage
 
@@ -10,7 +10,7 @@ flutter:
     pluginClass: FlutterSecureStoragePlugin
 
 dependencies:
-  meta: "^1.1.1"
+  meta: "^1.1.2"
   flutter:
     sdk: flutter
 

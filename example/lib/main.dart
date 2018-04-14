@@ -40,42 +40,53 @@ class _MyAppState extends State<MyApp> {
           title: new Text('Plugin example app'),
         ),
         body: new Center(
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Container(
-                width: 100.0,
-                child: new TextField(
-                  controller: _textController,
-                ),
+          child: new Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: new TextField(
+                controller: _textController,
               ),
-              new Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new RaisedButton(
-                      onPressed: () => read(), child: new Text("Read")),
-                  new RaisedButton(
-                      onPressed: () => write(), child: new Text("Write")),
-                  new RaisedButton(
-                      onPressed: () => delete(), child: new Text("Delete")),
-                ],
-              ),
-              new Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new RaisedButton(
-                      onPressed: () => _textController.text = "Value1",
-                      child: new Text("Value1")),
-                  new RaisedButton(
-                      onPressed: () => _textController.text = "Value2",
-                      child: new Text("Value2")),
-                  new RaisedButton(
-                      onPressed: () => _textController.text = "Value3",
-                      child: new Text("Value3")),
-                ],
-              )
-            ],
-          ),
+            ),
+            new Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new RaisedButton(
+                    onPressed: () => read(), child: new Text("Read")),
+                new RaisedButton(
+                    onPressed: () => write(), child: new Text("Write")),
+                new RaisedButton(
+                    onPressed: () => delete(), child: new Text("Delete")),
+              ],
+            ),
+            new Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new RaisedButton(
+                    onPressed: () => _textController.text = "Value1",
+                    child: new Text("Value1")),
+                new RaisedButton(
+                    onPressed: () => _textController.text = "Value2",
+                    child: new Text("Value2")),
+                new RaisedButton(
+                    onPressed: () => _textController.text = "Value3",
+                    child: new Text("Value3")),
+              ],
+            ),
+            new Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                new RaisedButton(
+                    onPressed: () {
+                      var value = "";
+                      for (var i = 0; i < 1000; i++) {
+                        value += "Value1";
+                      }
+                      _textController.text = value;
+                    },
+                    child: new Text("1000 x Value1"))
+              ],
+            ),
+          ]),
         ),
       ),
     );

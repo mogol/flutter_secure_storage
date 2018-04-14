@@ -18,90 +18,88 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 public class FlutterSecureStoragePlugin implements MethodCallHandler {
-  private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
 
-  private static final String KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
+    private final android.content.SharedPreferences preferences;
+    private final android.content.SharedPreferences.Editor editor;
+    private final Charset charset;
+    private final StorageCipher storageCipher;
+    private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
 
-  private final android.content.SharedPreferences preferences;
-  private final android.content.SharedPreferences.Editor editor;
-  private final Charset charset;
-  private final StorageCipher storageCipher;
-
-  public static void registerWith(Registrar registrar) {
-    try {
-      FlutterSecureStoragePlugin plugin = new FlutterSecureStoragePlugin(registrar.activity());
-      final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.it_nomads.com/flutter_secure_storage");
-      channel.setMethodCallHandler(plugin);
-    } catch (Exception e) {
-      Log.e("FlutterSecureStoragePl", "Registration failed", e);
-    }
-  }
-
-  private FlutterSecureStoragePlugin(Activity activity) throws Exception {
-    preferences = activity.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-    editor = preferences.edit();
-    charset = Charset.forName("UTF-8");
-    storageCipher = new StorageCipher18Implementation(activity);
-  }
-
-  @Override
-  public void onMethodCall(MethodCall call, Result result) {
-    try {
-      Map arguments = (Map) call.arguments;
-      String rawKey = (String) arguments.get("key");
-      String key = addPrefixToKey(rawKey);
-
-      switch (call.method) {
-        case "write": {
-          String value = (String) arguments.get("value");
-          write(key, value);
-          result.success(null);
-          break;
+    public static void registerWith(Registrar registrar) {
+        try {
+            FlutterSecureStoragePlugin plugin = new FlutterSecureStoragePlugin(registrar.activity());
+            final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.it_nomads.com/flutter_secure_storage");
+            channel.setMethodCallHandler(plugin);
+        } catch (Exception e) {
+            Log.e("FlutterSecureStoragePl", "Registration failed", e);
         }
-        case "read": {
-          String value = read(key);
-          result.success(value);
-          break;
-        }
-        case "delete": {
-          delete(key);
-          result.success(null);
-          break;
-        }
-        default:
-          result.notImplemented();
-          break;
-      }
-
-    } catch (Exception e) {
-      result.error("Exception encountered", call.method, e);
-    }
-  }
-
-  private void write(String key, String value) throws Exception {
-    byte[] result = storageCipher.encrypt(value.getBytes(charset));
-    editor.putString(key, Base64.encodeToString(result, 0));
-    editor.apply();
-  }
-
-  private String read(String key) throws Exception {
-    String encoded = preferences.getString(key, null);
-    if (encoded == null) {
-      return null;
     }
 
-    byte[] data = Base64.decode(encoded, 0);
-    byte[] result = storageCipher.decrypt(data);
+    private FlutterSecureStoragePlugin(Activity activity) throws Exception {
+        preferences = activity.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        editor = preferences.edit();
+        charset = Charset.forName("UTF-8");
+        storageCipher = new StorageCipher18Implementation(activity);
+    }
 
-    return new String(result, charset);
-  }
+    @Override
+    public void onMethodCall(MethodCall call, Result result) {
+        try {
+            Map arguments = (Map) call.arguments;
+            String rawKey = (String) arguments.get("key");
+            String key = addPrefixToKey(rawKey);
 
-  private void delete(String key) throws Exception {
-    editor.remove(key);
-    editor.apply();
-  }
+            switch (call.method) {
+                case "write": {
+                    String value = (String) arguments.get("value");
+                    write(key, value);
+                    result.success(null);
+                    break;
+                }
+                case "read": {
+                    String value = read(key);
+                    result.success(value);
+                    break;
+                }
+                case "delete": {
+                    delete(key);
+                    result.success(null);
+                    break;
+                }
+                default:
+                    result.notImplemented();
+                    break;
+            }
 
-  private String addPrefixToKey(String key) {
-    return KEY_PREFIX + "_" + key;
-  }
+        } catch (Exception e) {
+            result.error("Exception encountered", call.method, e);
+        }
+    }
+
+    private void write(String key, String value) throws Exception {
+        byte[] result = storageCipher.encrypt(value.getBytes(charset));
+        editor.putString(key, Base64.encodeToString(result, 0));
+        editor.apply();
+    }
+
+    private String read(String key) throws Exception {
+        String encoded = preferences.getString(key, null);
+        if (encoded == null) {
+            return null;
+        }
+
+        byte[] data = Base64.decode(encoded, 0);
+        byte[] result = storageCipher.decrypt(data);
+
+        return new String(result, charset);
+    }
+
+    private void delete(String key) throws Exception {
+        editor.remove(key);
+        editor.apply();
+    }
+
+    private String addPrefixToKey(String key) {
+        return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key;
+    }
 }
