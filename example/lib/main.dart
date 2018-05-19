@@ -1,7 +1,5 @@
 import 'dart:async';
-
-import 'package:uuid/uuid.dart';
-import 'package:english_words/english_words.dart';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -45,8 +43,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   void _addNewItem() async {
-    final String key = new Uuid().v4();
-    final String value = generateWordPairs().take(2).join(' ');
+    final String key = _randomValue();
+    final String value = _randomValue();
 
     await _storage.write(key: key, value: value);
     _readAll();
@@ -115,6 +113,15 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         }
         break;
     }
+  }
+
+  String _randomValue() {
+    final rand = new Random();
+    final codeUnits = new List.generate(20, (index) {
+      return rand.nextInt(26) + 65;
+    });
+
+    return new String.fromCharCodes(codeUnits);
   }
 }
 

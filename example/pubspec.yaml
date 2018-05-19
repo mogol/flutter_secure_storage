@@ -11,8 +11,6 @@ dev_dependencies:
 
   flutter_secure_storage:
     path: ../
-  uuid: "^1.0.0"
-  english_words: "^3.1.0"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
