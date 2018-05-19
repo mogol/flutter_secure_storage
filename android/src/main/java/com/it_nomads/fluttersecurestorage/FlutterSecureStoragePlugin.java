@@ -30,7 +30,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
 
     public static void registerWith(Registrar registrar) {
         try {
-            FlutterSecureStoragePlugin plugin = new FlutterSecureStoragePlugin(registrar.activity());
+            FlutterSecureStoragePlugin plugin = new FlutterSecureStoragePlugin(registrar.context());
             final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.it_nomads.com/flutter_secure_storage");
             channel.setMethodCallHandler(plugin);
         } catch (Exception e) {
@@ -38,12 +38,12 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
         }
     }
 
-    private FlutterSecureStoragePlugin(Context activity) throws Exception {
-        preferences = activity.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+    private FlutterSecureStoragePlugin(Context context) throws Exception {
+        preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         charset = Charset.forName("UTF-8");
 
-        StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, activity);
-        storageCipher = new StorageCipher18Implementation(activity);
+        StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
+        storageCipher = new StorageCipher18Implementation(context);
     }
 
     @Override
