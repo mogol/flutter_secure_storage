@@ -1,94 +1,152 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
+import 'package:english_words/english_words.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
-  runApp(new MyApp());
+  runApp(new MaterialApp(home: new ItemsWidget()));
 }
 
-class MyApp extends StatefulWidget {
+class ItemsWidget extends StatefulWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  _ItemsWidgetState createState() => new _ItemsWidgetState();
 }
 
-class _MyAppState extends State<MyApp> {
-  final _textController = new TextEditingController();
+enum _Actions { deleteAll }
+enum _ItemActions { delete, edit }
+
+class _ItemsWidgetState extends State<ItemsWidget> {
   final _storage = new FlutterSecureStorage();
-  final _key = "my_key1";
 
-  Future read() async {
-    String value = await _storage.read(key: _key);
-    print("value = $value");
-    _textController.text = value;
+  List<_SecItem> _items = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _readAll();
   }
 
-  Future write() async {
-    _storage.write(key: _key, value: _textController.text);
+  Future<Null> _readAll() async {
+    final all = await _storage.readAll();
+    setState(() {
+      return _items = all.keys
+          .map((key) => new _SecItem(key, all[key]))
+          .toList(growable: false);
+    });
   }
 
-  Future delete() async {
-    await _storage.delete(key: _key);
-    _textController.text = "";
+  void _deleteAll() async {
+    await _storage.deleteAll();
+    _readAll();
   }
+
+  void _addNewItem() async {
+    final String key = new Uuid().v4();
+    final String value = generateWordPairs().take(2).join(' ');
+
+    await _storage.write(key: key, value: value);
+    _readAll();
+  }
+
+  @override
+  Widget build(BuildContext context) => new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Plugin example app'),
+          actions: <Widget>[
+            new IconButton(onPressed: _addNewItem, icon: new Icon(Icons.add)),
+            new PopupMenuButton<_Actions>(
+                onSelected: (action) {
+                  switch (action) {
+                    case _Actions.deleteAll:
+                      _deleteAll();
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<_Actions>>[
+                      new PopupMenuItem(
+                        value: _Actions.deleteAll,
+                        child: new Text('Delete all'),
+                      ),
+                    ])
+          ],
+        ),
+        body: new ListView.builder(
+          itemCount: _items.length,
+          itemBuilder: (BuildContext context, int index) => new ListTile(
+                trailing: new PopupMenuButton(
+                    onSelected: (_ItemActions action) =>
+                        _performAction(action, _items[index]),
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<_ItemActions>>[
+                          new PopupMenuItem(
+                            value: _ItemActions.delete,
+                            child: new Text('Delete'),
+                          ),
+                          new PopupMenuItem(
+                            value: _ItemActions.edit,
+                            child: new Text('Edit'),
+                          ),
+                        ]),
+                title: new Text(_items[index].value),
+                subtitle: new Text(_items[index].key),
+              ),
+        ),
+      );
+
+  Future<Null> _performAction(_ItemActions action, _SecItem item) async {
+    switch (action) {
+      case _ItemActions.delete:
+        await _storage.delete(key: item.key);
+        _readAll();
+
+        break;
+      case _ItemActions.edit:
+        final result = await showDialog<String>(
+            context: context,
+            builder: (context) => new _EditItemWidget(item.value));
+        if (result != null) {
+          _storage.write(key: item.key, value: result);
+          _readAll();
+        }
+        break;
+    }
+  }
+}
+
+class _EditItemWidget extends StatelessWidget {
+  final TextEditingController _controller;
+
+  _EditItemWidget(String text)
+      : _controller = new TextEditingController(text: text);
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Plugin example app'),
-        ),
-        body: new Center(
-          child: new Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-            new Container(
-              width: 100.0,
-              child: new TextField(
-                controller: _textController,
-              ),
-            ),
-            new Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new RaisedButton(
-                    onPressed: () => read(), child: new Text("Read")),
-                new RaisedButton(
-                    onPressed: () => write(), child: new Text("Write")),
-                new RaisedButton(
-                    onPressed: () => delete(), child: new Text("Delete")),
-              ],
-            ),
-            new Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new RaisedButton(
-                    onPressed: () => _textController.text = "Value1",
-                    child: new Text("Value1")),
-                new RaisedButton(
-                    onPressed: () => _textController.text = "Value2",
-                    child: new Text("Value2")),
-                new RaisedButton(
-                    onPressed: () => _textController.text = "Value3",
-                    child: new Text("Value3")),
-              ],
-            ),
-            new Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                new RaisedButton(
-                    onPressed: () {
-                      var value = "";
-                      for (var i = 0; i < 1000; i++) {
-                        value += "Value1";
-                      }
-                      _textController.text = value;
-                    },
-                    child: new Text("1000 x Value1"))
-              ],
-            ),
-          ]),
-        ),
+    return new AlertDialog(
+      title: new Text('Edit item'),
+      content: new TextField(
+        controller: _controller,
+        autofocus: true,
       ),
+      actions: <Widget>[
+        new FlatButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: new Text('Cancel')),
+        new FlatButton(
+            onPressed: () => Navigator.of(context).pop(_controller.text),
+            child: new Text('Save')),
+      ],
     );
   }
+}
+
+class _SecItem {
+  final String key;
+  final String value;
+
+  _SecItem(this.key, this.value);
 }

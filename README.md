@@ -14,11 +14,18 @@ final storage = new FlutterSecureStorage();
 // Read value 
 String value = await storage.read(key: key);
 
+// Read all values
+await storage.readAll();
+
 // Delete value 
 await storage.delete(key: key);
 
+// Delete all 
+await storage.deleteAll();
+
 // Write value 
-storage.write(key: key, value: value);
+await storage.write(key: key, value: value);
+
 ```
 
 ### Configure Android version 
