@@ -19,4 +19,11 @@ class FlutterSecureStorage {
 
   Future<void> delete({@required String key}) =>
       _channel.invokeMethod('delete', <String, String>{'key': key});
+
+  Future<Map<String, String>> readAll() async {
+    final Map results = await _channel.invokeMethod('readAll');
+    return results.cast<String, String>();
+  }
+
+  Future<void> deleteAll() => _channel.invokeMethod('deleteAll');
 }

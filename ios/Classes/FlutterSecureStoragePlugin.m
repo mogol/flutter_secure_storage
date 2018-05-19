@@ -34,17 +34,15 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *arguments = [call arguments];
-    NSString *key = arguments[@"key"];
-    if (![key isKindOfClass:[NSString class]]){
-        result(InvalidParameters);
-        return;
-    }
+
     if ([@"read" isEqualToString:call.method]) {
+        NSString *key = arguments[@"key"];
         NSString *value = [self read:key];
         
         result(value);
     } else
     if ([@"write" isEqualToString:call.method]) {
+        NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
@@ -55,9 +53,18 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
+        NSString *key = arguments[@"key"];
         [self delete:key];
         
         result(nil);
+    } else if ([@"deleteAll" isEqualToString:call.method]) {
+        [self deleteAll];
+        
+        result(nil);
+    } else if ([@"readAll" isEqualToString:call.method]) {
+        NSDictionary *value = [self readAll];
+
+        result(value);
     }else {
         result(FlutterMethodNotImplemented);
     }
@@ -117,5 +124,35 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     SecItemDelete((__bridge CFDictionaryRef)search);
 }
 
+- (void)deleteAll {
+    NSMutableDictionary *search = [self.query mutableCopy];
+    SecItemDelete((__bridge CFDictionaryRef)search);
+}
+
+- (NSDictionary *)readAll {
+    NSMutableDictionary *search = [self.query mutableCopy];
+    search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
+
+    search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitAll;
+    search[(__bridge id)kSecReturnAttributes] = (__bridge id)kCFBooleanTrue;
+
+    CFArrayRef resultData = NULL;
+    
+    OSStatus status;
+    status = SecItemCopyMatching((__bridge CFDictionaryRef)search, (CFTypeRef*)&resultData);
+    if (status == noErr){
+        NSArray *items = (__bridge NSArray*)resultData;
+        
+        NSMutableDictionary *results = [[NSMutableDictionary alloc] init];
+        for (NSDictionary *item in items){
+            NSString *key = item[(__bridge NSString *)kSecAttrAccount];
+            NSString *value = [[NSString alloc] initWithData:item[(__bridge NSString *)kSecValueData] encoding:NSUTF8StringEncoding];
+            results[key] = value;
+        }
+        return [results copy];
+    }
+    
+    return @{};
+}
 
 @end
