@@ -1,3 +1,6 @@
+## [3.1.0]
+* Added `readAll` and `deleteAll`.
+
 ## [3.0.0]
 * **Breaking change**. Changed payloads encryption for Android from RSA to AES, AES secret key is encrypted with RSA. 
 

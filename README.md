@@ -15,7 +15,7 @@ final storage = new FlutterSecureStorage();
 String value = await storage.read(key: key);
 
 // Read all values
-await storage.readAll();
+Map<String, String> await storage.readAll();
 
 // Delete value 
 await storage.delete(key: key);
