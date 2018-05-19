@@ -9,9 +9,9 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: /Users/german/Projects/github/flutter/bin/cache/artifacts/engine/ios
+    :path: "/Users/german/Projects/github/flutter/bin/cache/artifacts/engine/ios"
   flutter_secure_storage:
-    :path: /Users/german/Projects/nomads/flutter_secure_storage/ios
+    :path: "/Users/german/Projects/nomads/flutter_secure_storage/ios"
 
 SPEC CHECKSUMS:
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
@@ -19,4 +19,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 351e02e34b831289961ec3558a535cbd2c4965d2
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.2
