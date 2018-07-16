@@ -101,6 +101,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
     }
 
     private Map<String, String> readAll() throws Exception {
+        @SuppressWarnings("unchecked")
         Map<String, String> raw = (Map<String, String>) preferences.getAll();
 
         Map<String, String> all = new HashMap<>();
