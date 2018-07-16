@@ -1,3 +1,6 @@
+## [3.1.1]
+* Suppress warning about unchecked operations when compiling for Android.
+
 ## [3.1.0]
 * Added `readAll` and `deleteAll`.
 
