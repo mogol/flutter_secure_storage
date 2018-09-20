@@ -38,12 +38,14 @@ public class StorageCipher18Implementation implements StorageCipher {
         cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
 
         if (aesKey != null) {
+            byte[] encrypted;
             try {
-                byte[] encrypted = Base64.decode(aesKey, Base64.DEFAULT);
+                encrypted = Base64.decode(aesKey, Base64.DEFAULT);
                 secretKey = rsaCipher.unwrap(encrypted, KEY_ALGORITHM);
                 return;
             } catch (Exception e) {
                 Log.e("StorageCipher18Impl", "unwrap key failed", e);
+                encrypted = new byte[0];
             }
         }
 
