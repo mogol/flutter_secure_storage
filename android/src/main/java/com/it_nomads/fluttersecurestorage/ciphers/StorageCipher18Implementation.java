@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
+import android.util.Log;
 
 import java.security.Key;
 import java.security.SecureRandom;
@@ -21,7 +22,7 @@ public class StorageCipher18Implementation implements StorageCipher {
     private static final String AES_PREFERENCES_KEY = "VGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureKeyStorage";
 
-    private final Key secretKey;
+    private Key secretKey;
     private final Cipher cipher;
     private final SecureRandom secureRandom;
 
@@ -33,22 +34,26 @@ public class StorageCipher18Implementation implements StorageCipher {
         SharedPreferences.Editor editor = preferences.edit();
 
         String aesKey = preferences.getString(AES_PREFERENCES_KEY, null);
-        byte[] key;
-
-        if (aesKey == null) {
-            key = new byte[keySize];
-            secureRandom.nextBytes(key);
-            secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
-
-            byte[] encryptedKey = rsaCipher.wrap(secretKey);
-            editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
-            editor.commit();
-        } else {
-            byte[] encrypted = Base64.decode(aesKey, Base64.DEFAULT);
-            secretKey = rsaCipher.unwrap(encrypted, KEY_ALGORITHM);
-        }
 
         cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+
+        if (aesKey != null) {
+            try {
+                byte[] encrypted = Base64.decode(aesKey, Base64.DEFAULT);
+                secretKey = rsaCipher.unwrap(encrypted, KEY_ALGORITHM);
+                return;
+            } catch (Exception e) {
+                Log.e("StorageCipher18Impl", "unwrap key failed", e);
+            }
+        }
+
+        byte[] key = new byte[keySize];
+        secureRandom.nextBytes(key);
+        secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
+
+        byte[] encryptedKey = rsaCipher.wrap(secretKey);
+        editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
+        editor.commit();
     }
 
     @Override
@@ -99,8 +104,6 @@ public class StorageCipher18Implementation implements StorageCipher {
         SharedPreferences.Editor newEditor = newPreferences.edit();
         newEditor.putString(AES_PREFERENCES_KEY, existedSecretKey);
         newEditor.commit();
-
-
     }
 
 }

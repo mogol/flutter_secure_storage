@@ -120,6 +120,7 @@ class RSACipher18Implementation {
             spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
                     .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
                     .setDigests(KeyProperties.DIGEST_SHA256)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
                     .setCertificateSerialNumber(BigInteger.valueOf(1))
                     .setCertificateNotBefore(start.getTime())
