@@ -1,5 +1,5 @@
 ## [3.1.2]
-* Added recreating secretKey if its decoding failed. Fix for [unwrap key](https://github.com/mogol/flutter_secure_storage/issues/13). Thanks to [hnvn](https://github.com/hnvn).
+* Added recreating secretKey if secretKey's decoding failed. Fix for https://github.com/mogol/flutter_secure_storage/issues/13. Thanks to https://github.com/hnvn for fix. 
 
 ## [3.1.1]
 * Suppress warning about unchecked operations when compiling for Android.
