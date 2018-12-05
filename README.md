@@ -15,7 +15,7 @@ final storage = new FlutterSecureStorage();
 String value = await storage.read(key: key);
 
 // Read all values
-Map<String, String> await storage.readAll();
+Map<String, String> allValues = await storage.readAll();
 
 // Delete value 
 await storage.delete(key: key);
@@ -42,3 +42,5 @@ android {
 
 }
 ```
+*Note* By default Android backups data on Google Drive. It can cause exception java.security.InvalidKeyException:Failed to unwrap key. You need to disable backup to fix this issue. https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742
+
