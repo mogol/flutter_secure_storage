@@ -17,6 +17,12 @@ class FlutterSecureStorage {
     return value;
   }
 
+  Future<bool> contains({@required String key}) async {
+    final bool value =
+    await _channel.invokeMethod('contains', <String, String>{'key': key});
+    return value;
+  }
+
   Future<void> delete({@required String key}) =>
       _channel.invokeMethod('delete', <String, String>{'key': key});
 

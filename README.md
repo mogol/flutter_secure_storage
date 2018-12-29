@@ -11,6 +11,9 @@ A Flutter plugin to store data in secure storage:
 // Create storage
 final storage = new FlutterSecureStorage();
 
+// Check the value exists
+bool exists = await storage.contains(key: key);
+
 // Read value 
 String value = await storage.read(key: key);
 

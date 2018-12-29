@@ -59,6 +59,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
                     result.success(null);
                     break;
                 }
+                case "contains": {
+                    String key = getKeyFromCall(call);
+
+                    boolean value = contains(key);
+                    result.success(value);
+                    break;
+                }
                 case "read": {
                     String key = getKeyFromCall(call);
 
@@ -134,6 +141,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler {
         String encoded = preferences.getString(key, null);
 
         return decodeRawValue(encoded);
+    }
+
+    private boolean contains(String key)  {
+        return preferences.contains(key);
     }
 
     private void delete(String key) {
