@@ -12,6 +12,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Calendar;
 
@@ -31,7 +32,7 @@ class RSACipher18Implementation {
     }
 
     public byte[] wrap(Key key) throws Exception {
-        PublicKey publicKey = getEntry().getCertificate().getPublicKey();
+        PublicKey publicKey = getPublicKey();
         Cipher cipher = getRSACipher();
         cipher.init(Cipher.WRAP_MODE, publicKey);
 
@@ -39,7 +40,7 @@ class RSACipher18Implementation {
     }
 
     public Key unwrap(byte[] wrappedKey, String algorithm) throws Exception {
-        PrivateKey privateKey = getEntry().getPrivateKey();
+        PrivateKey privateKey = getPrivateKey();
         Cipher cipher = getRSACipher();
         cipher.init(Cipher.UNWRAP_MODE, privateKey);
 
@@ -47,7 +48,7 @@ class RSACipher18Implementation {
     }
 
     public byte[] encrypt(byte[] input) throws Exception {
-        PublicKey publicKey = getEntry().getCertificate().getPublicKey();
+        PublicKey publicKey = getPublicKey();
         Cipher cipher = getRSACipher();
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
@@ -55,27 +56,44 @@ class RSACipher18Implementation {
     }
 
     public byte[] decrypt(byte[] input) throws Exception {
-        PrivateKey privateKey = getEntry().getPrivateKey();
+        PrivateKey privateKey = getPrivateKey();
         Cipher cipher = getRSACipher();
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
         return cipher.doFinal(input);
     }
 
-    private KeyStore.PrivateKeyEntry getEntry() throws Exception {
+    private PrivateKey getPrivateKey() throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
         ks.load(null);
 
-        KeyStore.Entry entry = ks.getEntry(KEY_ALIAS, null);
-        if (entry == null) {
+        Key key = ks.getKey(KEY_ALIAS, null);
+        if (key == null) {
             throw new Exception("No key found under alias: " + KEY_ALIAS);
         }
 
-        if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
-            throw new Exception("Not an instance of a PrivateKeyEntry");
+        if (!(key instanceof PrivateKey)) {
+            throw new Exception("Not an instance of a PrivateKey");
         }
 
-        return (KeyStore.PrivateKeyEntry) entry;
+        return (PrivateKey) key;
+    }
+
+    private PublicKey getPublicKey() throws Exception {
+        KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
+        ks.load(null);
+
+        Certificate cert = ks.getCertificate(KEY_ALIAS);
+        if (cert == null) {
+            throw new Exception("No certificate found under alias: " + KEY_ALIAS);
+        }
+
+        PublicKey key = cert.getPublicKey();
+        if (key == null) {
+            throw new Exception("No key found under alias: " + KEY_ALIAS);
+        }
+
+        return key;
     }
 
     private Cipher getRSACipher() throws Exception {
