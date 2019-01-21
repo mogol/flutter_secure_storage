@@ -1,3 +1,6 @@
+## [3.1.3]
+* Fix Android 9.0 Pie KeyStore exception. Thanks to [hacker1024](https://github.com/hacker1024)
+
 ## [3.1.2]
 * Added recreating secretKey if its decoding failed. Fix for [unwrap key](https://github.com/mogol/flutter_secure_storage/issues/13). Thanks to [hnvn](https://github.com/hnvn).
 
