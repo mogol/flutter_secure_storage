@@ -1,3 +1,10 @@
+## [3.1.4]
+* **Breaking change**. Migrate from the deprecated original Android Support
+    Library to AndroidX. This shouldn't result in any functional changes, but it
+    requires any Android apps using this plugin to [also
+    migrate](https://developer.android.com/jetpack/androidx/migrate) if they're
+    using the original support library.
+    
 ## [3.1.3]
 * Fix Android 9.0 Pie KeyStore exception. Thanks to [hacker1024](https://github.com/hacker1024)
 
