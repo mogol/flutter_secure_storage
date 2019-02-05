@@ -150,6 +150,7 @@ class RSACipher18Implementation {
         }
         try {
             kpGenerator.initialize(spec);
+            kpGenerator.generateKeyPair();
         } catch (StrongBoxUnavailableException se) {
             spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
                     .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
@@ -161,8 +162,8 @@ class RSACipher18Implementation {
                     .setCertificateNotAfter(end.getTime())
                     .build();
             kpGenerator.initialize(spec);
+            kpGenerator.generateKeyPair();
         }
-        kpGenerator.generateKeyPair();
     }
 
 }
