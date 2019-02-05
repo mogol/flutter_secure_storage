@@ -5,11 +5,13 @@ import android.content.Context;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.security.keystore.StrongBoxUnavailableException;
 
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -135,16 +137,28 @@ class RSACipher18Implementation {
                     .setEndDate(end.getTime())
                     .build();
         } else {
-            spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
-                    .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
-                    .setDigests(KeyProperties.DIGEST_SHA256)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                    .setCertificateSerialNumber(BigInteger.valueOf(1))
-                    .setCertificateNotBefore(start.getTime())
-                    .setCertificateNotAfter(end.getTime())
-                    .setIsStrongBoxBacked(true)
-                    .build();
+            try {
+                spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
+                        .setDigests(KeyProperties.DIGEST_SHA256)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                        .setCertificateSerialNumber(BigInteger.valueOf(1))
+                        .setCertificateNotBefore(start.getTime())
+                        .setCertificateNotAfter(end.getTime())
+                        .setIsStrongBoxBacked(true)
+                        .build();
+            } catch (StrongBoxUnavailableException e) {
+                spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
+                        .setDigests(KeyProperties.DIGEST_SHA256)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                        .setCertificateSerialNumber(BigInteger.valueOf(1))
+                        .setCertificateNotBefore(start.getTime())
+                        .setCertificateNotAfter(end.getTime())
+                        .build();
+            }
         }
         kpGenerator.initialize(spec);
         kpGenerator.generateKeyPair();
