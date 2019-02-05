@@ -143,6 +143,7 @@ class RSACipher18Implementation {
                     .setCertificateSerialNumber(BigInteger.valueOf(1))
                     .setCertificateNotBefore(start.getTime())
                     .setCertificateNotAfter(end.getTime())
+                    .setIsStrongBoxBacked(true)
                     .build();
         }
         kpGenerator.initialize(spec);
