@@ -137,16 +137,20 @@ class RSACipher18Implementation {
                     .setEndDate(end.getTime())
                     .build();
         } else {
-            spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
                     .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
                     .setDigests(KeyProperties.DIGEST_SHA256)
                     .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
                     .setCertificateSerialNumber(BigInteger.valueOf(1))
                     .setCertificateNotBefore(start.getTime())
-                    .setCertificateNotAfter(end.getTime())
-                    .setIsStrongBoxBacked(true)
-                    .build();
+                    .setCertificateNotAfter(end.getTime());
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                builder.setIsStrongBoxBacked(true);
+            }
+
+            spec = builder.build();
         }
         try {
             kpGenerator.initialize(spec);
