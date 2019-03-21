@@ -26,4 +26,26 @@ class FlutterSecureStorage {
   }
 
   Future<void> deleteAll() => _channel.invokeMethod('deleteAll');
+
+
+  @visibleForTesting
+  static void setMockInitialValues(Map<String, dynamic> mockValue) {
+    _channel
+  .setMockMethodCallHandler((MethodCall methodCall) async {
+      if(methodCall.method=='write'){
+        mockValue[methodCall.arguments['key']]=methodCall.arguments['value'];
+      }else if(methodCall.method=='read'){
+        return mockValue.containsKey(methodCall.arguments['key'])?mockValue[methodCall.arguments['key']]:null;
+      }
+      else if(methodCall.method=='delete'){
+        if(mockValue.containsKey(methodCall.arguments['key']))
+          mockValue.remove(methodCall.arguments['key']);
+      }
+      else if(methodCall.method=='readAll'){
+        return mockValue;
+      }else if(methodCall.method=='deleteAll'){
+        mockValue.clear();
+      }
+  });
+  }
 }

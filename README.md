@@ -44,3 +44,11 @@ android {
 ```
 *Note* By default Android backups data on Google Drive. It can cause exception java.security.InvalidKeyException:Failed to unwrap key. You need to disable backup to fix this issue. https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742
 
+
+### Testing
+
+```
+//set initial values here
+FlutterSecureStorage.setMockInitialValues({})
+
+```
