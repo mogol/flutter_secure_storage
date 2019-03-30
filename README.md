@@ -42,5 +42,6 @@ android {
 
 }
 ```
-*Note* By default Android backups data on Google Drive. It can cause exception java.security.InvalidKeyException:Failed to unwrap key. You need to disable backup to fix this issue. https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742
+*Note* By default Android backups data on Google Drive. It can cause exception java.security.InvalidKeyException:Failed to unwrap key. 
+You need to [disable backup](https://developer.android.com/guide/topics/data/autobackup#EnablingAutoBackup) to fix this issue or to [exclude sharedprefs](https://developer.android.com/guide/topics/data/autobackup#IncludingFiles) FlutterSecureStorage used by the plugin =.
 
