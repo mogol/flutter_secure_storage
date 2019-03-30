@@ -1,7 +1,9 @@
+## [3.2.1]
+* Fix Android 9.0 Pie [KeyStore exception](https://github.com/mogol/flutter_secure_storage/issues/46). 
+
 ## [3.2.0]
 * **Breaking change**. Migrate from the deprecated original Android Support Library to AndroidX. This shouldn't result in any functional changes, but it requires any Android apps using this plugin to [also migrate](https://developer.android.com/jetpack/androidx/migrate) if they're using the original support library. Thanks [I-am-original](https://github.com/I-am-original).
 * Enable StrongBox on Android devices that support it. Thanks [bbedward](https://github.com/bbedward).
-
 
 ## [3.1.3]
 * Fix Android 9.0 Pie KeyStore exception. Thanks [hacker1024](https://github.com/hacker1024)
