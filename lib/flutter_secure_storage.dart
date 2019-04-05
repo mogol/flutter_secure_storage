@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 class FlutterSecureStorage {
+  const FlutterSecureStorage();
+
   static const MethodChannel _channel =
       const MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
 
