@@ -63,7 +63,7 @@ class FlutterSecureStorage {
   }
 }
 
-class Options {
+abstract class Options {
   Map<String, String> get params => _toMap();
 
   Map<String, String> _toMap() {
