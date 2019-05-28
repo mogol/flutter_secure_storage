@@ -34,10 +34,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *arguments = [call arguments];
+    NSDictionary *options = arguments[@"options"];
 
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *groupId = arguments[@"groupId"];
+        NSString *groupId = options[@"groupId"];
         NSString *value = [self read:key forGroup:groupId];
         
         result(value);
@@ -45,7 +46,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if ([@"write" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
-        NSString *groupId = arguments[@"groupId"];
+        NSString *groupId = options[@"groupId"];
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
@@ -56,17 +57,17 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *groupId = arguments[@"groupId"];
+        NSString *groupId = options[@"groupId"];
         [self delete:key forGroup:groupId];
         
         result(nil);
     } else if ([@"deleteAll" isEqualToString:call.method]) {
-        NSString *groupId = arguments[@"groupId"];
+        NSString *groupId = options[@"groupId"];
         [self deleteAll: groupId];
         
         result(nil);
     } else if ([@"readAll" isEqualToString:call.method]) {
-        NSString *groupId = arguments[@"groupId"];
+        NSString *groupId = options[@"groupId"];
         NSDictionary *value = [self readAll: groupId];
 
         result(value);
