@@ -34,35 +34,41 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *arguments = [call arguments];
+    NSDictionary *options = arguments[@"options"];
 
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *value = [self read:key];
+        NSString *groupId = options[@"groupId"];
+        NSString *value = [self read:key forGroup:groupId];
         
         result(value);
     } else
     if ([@"write" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
+        NSString *groupId = options[@"groupId"];
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
         }
         
-        [self write:value forKey:key];
+        [self write:value forKey:key forGroup:groupId];
         
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        [self delete:key];
+        NSString *groupId = options[@"groupId"];
+        [self delete:key forGroup:groupId];
         
         result(nil);
     } else if ([@"deleteAll" isEqualToString:call.method]) {
-        [self deleteAll];
+        NSString *groupId = options[@"groupId"];
+        [self deleteAll: groupId];
         
         result(nil);
     } else if ([@"readAll" isEqualToString:call.method]) {
-        NSDictionary *value = [self readAll];
+        NSString *groupId = options[@"groupId"];
+        NSDictionary *value = [self readAll: groupId];
 
         result(value);
     }else {
@@ -70,8 +76,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (void)write:(NSString *)value forKey:(NSString *)key {
+- (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+        search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
     
@@ -97,8 +106,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (NSString *)read:(NSString *)key {
+- (NSString *)read:(NSString *)key forGroup:(NSString *)groupId {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+     search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
     
@@ -110,27 +122,36 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if (status == noErr){
         NSData *data = (__bridge NSData*)resultData;
         value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        
     }
     
     return value;
 }
 
-- (void)delete:(NSString *)key {
+- (void)delete:(NSString *)key forGroup:(NSString *)groupId {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+        search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
     
     SecItemDelete((__bridge CFDictionaryRef)search);
 }
 
-- (void)deleteAll {
+- (void)deleteAll:(NSString *)groupId {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+        search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
     SecItemDelete((__bridge CFDictionaryRef)search);
 }
 
-- (NSDictionary *)readAll {
+- (NSDictionary *)readAll:(NSString *)groupId {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+        search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
+    
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
 
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitAll;
