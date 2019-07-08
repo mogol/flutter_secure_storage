@@ -1,1 +1,4 @@
-<manifest package="com.it_nomads.fluttersecurestorage" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.it_nomads.fluttersecurestorage">
+  <uses-sdk android:minSdkVersion="18" />
+</manifest>
