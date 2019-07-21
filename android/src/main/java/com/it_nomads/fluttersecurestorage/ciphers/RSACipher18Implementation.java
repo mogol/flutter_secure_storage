@@ -110,8 +110,16 @@ class RSACipher18Implementation {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
         ks.load(null);
 
-        Key privateKey = ks.getKey(KEY_ALIAS, null);
-        if (privateKey == null) {
+        // see:
+        // https://stackoverflow.com/questions/36488219/android-security-keystoreexception-invalid-key-blob
+        KeyStore.Entry entry = null;
+        try {
+            entry = ks.getEntry(KEY_ALIAS, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ks.deleteEntry(KEY_ALIAS);
+        }
+        if (entry == null) {
             createKeys(context);
         }
     }
@@ -156,6 +164,7 @@ class RSACipher18Implementation {
             kpGenerator.initialize(spec);
             kpGenerator.generateKeyPair();
         } catch (StrongBoxUnavailableException se) {
+            se.printStackTrace();
             spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
                     .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
                     .setDigests(KeyProperties.DIGEST_SHA256)
