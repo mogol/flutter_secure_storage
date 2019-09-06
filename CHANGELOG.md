@@ -1,3 +1,6 @@
+## [3.2.1+2]
+* Fix Gradle version in `gradle-wrapper.properties`. 
+
 ## [3.2.1]
 * Fix Android 9.0 Pie [KeyStore exception](https://github.com/mogol/flutter_secure_storage/issues/46). 
 
