@@ -55,8 +55,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         appBar: AppBar(
           title: Text('Plugin example app'),
           actions: <Widget>[
-            IconButton(onPressed: _addNewItem, icon: Icon(Icons.add)),
+            IconButton(
+                key: Key('add_random'),
+                onPressed: _addNewItem,
+                icon: Icon(Icons.add)),
             PopupMenuButton<_Actions>(
+                key: Key('popup_menu'),
                 onSelected: (action) {
                   switch (action) {
                     case _Actions.deleteAll:
@@ -67,6 +71,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                 itemBuilder: (BuildContext context) =>
                     <PopupMenuEntry<_Actions>>[
                       PopupMenuItem(
+                        key: Key('delete_all'),
                         value: _Actions.deleteAll,
                         child: Text('Delete all'),
                       ),
@@ -77,21 +82,34 @@ class _ItemsWidgetState extends State<ItemsWidget> {
           itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
             trailing: PopupMenuButton(
+                key: Key('popup_row_$index'),
                 onSelected: (_ItemActions action) =>
                     _performAction(action, _items[index]),
                 itemBuilder: (BuildContext context) =>
                     <PopupMenuEntry<_ItemActions>>[
                       PopupMenuItem(
                         value: _ItemActions.delete,
-                        child: Text('Delete'),
+                        child: Text(
+                          'Delete',
+                          key: Key('delete_row_$index'),
+                        ),
                       ),
                       PopupMenuItem(
                         value: _ItemActions.edit,
-                        child: Text('Edit'),
+                        child: Text(
+                          'Edit',
+                          key: Key('edit_row_$index'),
+                        ),
                       ),
                     ]),
-            title: Text(_items[index].value),
-            subtitle: Text(_items[index].key),
+            title: Text(
+              _items[index].value,
+              key: Key('title_row_$index'),
+            ),
+            subtitle: Text(
+              _items[index].key,
+              key: Key('subtitle_row_$index'),
+            ),
           ),
         ),
       );
@@ -126,24 +144,27 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 }
 
 class _EditItemWidget extends StatelessWidget {
-  final TextEditingController _controller;
-
   _EditItemWidget(String text)
       : _controller = TextEditingController(text: text);
+
+  final TextEditingController _controller;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Edit item'),
       content: TextField(
+        key: Key('title_field'),
         controller: _controller,
         autofocus: true,
       ),
       actions: <Widget>[
         FlatButton(
+            key: Key('cancel'),
             onPressed: () => Navigator.of(context).pop(),
             child: Text('Cancel')),
         FlatButton(
+            key: Key('save'),
             onPressed: () => Navigator.of(context).pop(_controller.text),
             child: Text('Save')),
       ],
@@ -152,8 +173,8 @@ class _EditItemWidget extends StatelessWidget {
 }
 
 class _SecItem {
+  _SecItem(this.key, this.value);
+
   final String key;
   final String value;
-
-  _SecItem(this.key, this.value);
 }

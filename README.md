@@ -47,3 +47,9 @@ You need to
 * [disable autobackup](https://developer.android.com/guide/topics/data/autobackup#EnablingAutoBackup), [details](https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742)
 * [exclude sharedprefs](https://developer.android.com/guide/topics/data/autobackup#IncludingFiles) `FlutterSecureStorage` used by the plugin, [details](https://github.com/mogol/flutter_secure_storage/issues/43#issuecomment-471642126)
 
+## Integration Tests
+
+Run the following command from `example` directory
+```
+flutter drive --target=test_driver/app.dart
+```
