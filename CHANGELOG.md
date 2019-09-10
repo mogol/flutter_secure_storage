@@ -1,5 +1,7 @@
-## [3.2.1+2]
-* Fix Gradle version in `gradle-wrapper.properties`. 
+## [3.3.0]
+* Added groupId for iOS keychain sharing. Thanks [Maleandr](https://github.com/Maleandr). 
+* Fix Gradle version in `gradle-wrapper.properties`. Thanks [blasten](https://github.com/blasten). 
+* Added minimum sdk requirement on AndroidManifest. Thanks [lidongze91](https://github.com/lidongze91). 
 
 ## [3.2.1]
 * Fix Android 9.0 Pie [KeyStore exception](https://github.com/mogol/flutter_secure_storage/issues/46). 
