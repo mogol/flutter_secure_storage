@@ -29,7 +29,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 28
         versionCode 6
-        versionName "3.3.0"
+        versionName "3.3.1"
     }
     lintOptions {
         disable 'InvalidPackage'

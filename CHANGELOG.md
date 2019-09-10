@@ -1,3 +1,6 @@
+## [3.3.1]
+* Fix crash without [iOSOptions](https://github.com/mogol/flutter_secure_storage/issues/73).
+
 ## [3.3.0]
 * Added groupId for iOS keychain sharing. Thanks [Maleandr](https://github.com/Maleandr). 
 * Fix Gradle version in `gradle-wrapper.properties`. Thanks [blasten](https://github.com/blasten). 
