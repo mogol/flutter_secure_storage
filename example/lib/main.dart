@@ -5,19 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
-  runApp(new MaterialApp(home: new ItemsWidget()));
+  runApp(MaterialApp(home: ItemsWidget()));
 }
 
 class ItemsWidget extends StatefulWidget {
   @override
-  _ItemsWidgetState createState() => new _ItemsWidgetState();
+  _ItemsWidgetState createState() => _ItemsWidgetState();
 }
 
 enum _Actions { deleteAll }
 enum _ItemActions { delete, edit }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
-  final _storage = new FlutterSecureStorage();
+  final _storage = FlutterSecureStorage();
 
   List<_SecItem> _items = [];
 
@@ -32,7 +32,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     final all = await _storage.readAll();
     setState(() {
       return _items = all.keys
-          .map((key) => new _SecItem(key, all[key]))
+          .map((key) => _SecItem(key, all[key]))
           .toList(growable: false);
     });
   }
@@ -51,12 +51,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Plugin example app'),
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text('Plugin example app'),
           actions: <Widget>[
-            new IconButton(onPressed: _addNewItem, icon: new Icon(Icons.add)),
-            new PopupMenuButton<_Actions>(
+            IconButton(onPressed: _addNewItem, icon: Icon(Icons.add)),
+            PopupMenuButton<_Actions>(
                 onSelected: (action) {
                   switch (action) {
                     case _Actions.deleteAll:
@@ -66,33 +66,33 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                 },
                 itemBuilder: (BuildContext context) =>
                     <PopupMenuEntry<_Actions>>[
-                      new PopupMenuItem(
+                      PopupMenuItem(
                         value: _Actions.deleteAll,
-                        child: new Text('Delete all'),
+                        child: Text('Delete all'),
                       ),
                     ])
           ],
         ),
-        body: new ListView.builder(
+        body: ListView.builder(
           itemCount: _items.length,
-          itemBuilder: (BuildContext context, int index) => new ListTile(
-                trailing: new PopupMenuButton(
-                    onSelected: (_ItemActions action) =>
-                        _performAction(action, _items[index]),
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<_ItemActions>>[
-                          new PopupMenuItem(
-                            value: _ItemActions.delete,
-                            child: new Text('Delete'),
-                          ),
-                          new PopupMenuItem(
-                            value: _ItemActions.edit,
-                            child: new Text('Edit'),
-                          ),
-                        ]),
-                title: new Text(_items[index].value),
-                subtitle: new Text(_items[index].key),
-              ),
+          itemBuilder: (BuildContext context, int index) => ListTile(
+            trailing: PopupMenuButton(
+                onSelected: (_ItemActions action) =>
+                    _performAction(action, _items[index]),
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<_ItemActions>>[
+                      PopupMenuItem(
+                        value: _ItemActions.delete,
+                        child: Text('Delete'),
+                      ),
+                      PopupMenuItem(
+                        value: _ItemActions.edit,
+                        child: Text('Edit'),
+                      ),
+                    ]),
+            title: Text(_items[index].value),
+            subtitle: Text(_items[index].key),
+          ),
         ),
       );
 
@@ -106,7 +106,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       case _ItemActions.edit:
         final result = await showDialog<String>(
             context: context,
-            builder: (context) => new _EditItemWidget(item.value));
+            builder: (context) => _EditItemWidget(item.value));
         if (result != null) {
           _storage.write(key: item.key, value: result);
           _readAll();
@@ -116,12 +116,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   String _randomValue() {
-    final rand = new Random();
-    final codeUnits = new List.generate(20, (index) {
+    final rand = Random();
+    final codeUnits = List.generate(20, (index) {
       return rand.nextInt(26) + 65;
     });
 
-    return new String.fromCharCodes(codeUnits);
+    return String.fromCharCodes(codeUnits);
   }
 }
 
@@ -129,23 +129,23 @@ class _EditItemWidget extends StatelessWidget {
   final TextEditingController _controller;
 
   _EditItemWidget(String text)
-      : _controller = new TextEditingController(text: text);
+      : _controller = TextEditingController(text: text);
 
   @override
   Widget build(BuildContext context) {
-    return new AlertDialog(
-      title: new Text('Edit item'),
-      content: new TextField(
+    return AlertDialog(
+      title: Text('Edit item'),
+      content: TextField(
         controller: _controller,
         autofocus: true,
       ),
       actions: <Widget>[
-        new FlatButton(
+        FlatButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: new Text('Cancel')),
-        new FlatButton(
+            child: Text('Cancel')),
+        FlatButton(
             onPressed: () => Navigator.of(context).pop(_controller.text),
-            child: new Text('Save')),
+            child: Text('Save')),
       ],
     );
   }
