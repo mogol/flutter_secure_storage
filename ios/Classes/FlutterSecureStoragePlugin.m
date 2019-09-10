@@ -34,7 +34,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *arguments = [call arguments];
-    NSDictionary *options = arguments[@"options"];
+    NSDictionary *options = [arguments[@"options"] isKindOfClass:[NSDictionary class]] ? arguments[@"options"] : nil;
 
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
