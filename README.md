@@ -8,6 +8,8 @@ A Flutter plugin to store data in secure storage:
 
 ## Getting Started
 ```dart
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 // Create storage
 final storage = new FlutterSecureStorage();
 
