@@ -12,12 +12,15 @@ class FlutterSecureStorage {
   /// Encrypts and saves the [key] with the given [value].
   ///
   /// If the key was already in the storage, its associated value is changed.
-  /// [value] and [key] shoudn't be null.
+  /// If the value is null, deletes associated value for the given [key].
+  /// [key] shoudn't be null.
+  /// [value] required value
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<void> write({@required String key, @required String value, IOSOptions iOptions, AndroidOptions aOptions}) async =>
-      _channel.invokeMethod('write', <String, dynamic>{'key': key, 'value': value, 'options': _selectOptions(iOptions, aOptions)});
+  Future<void> write({@required String key, @required String value, IOSOptions iOptions, AndroidOptions aOptions}) => value != null
+      ? _channel.invokeMethod('write', <String, dynamic>{'key': key, 'value': value, 'options': _selectOptions(iOptions, aOptions)})
+      : delete(key: key, iOptions: iOptions, aOptions: aOptions);
 
   /// Decrypts and returns the value for the given [key] or null if [key] is not in the storage.
   ///
