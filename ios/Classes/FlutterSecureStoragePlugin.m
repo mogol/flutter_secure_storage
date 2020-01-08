@@ -93,7 +93,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         
         status = SecItemUpdate((__bridge CFDictionaryRef)search, (__bridge CFDictionaryRef)update);
         if (status != noErr){
-            NSLog(@"SecItemUpdate status = %d", status);
+            NSLog(@"SecItemUpdate status = %d", (int) status);
         }
     }else{
         search[(__bridge id)kSecValueData] = [value dataUsingEncoding:NSUTF8StringEncoding];
@@ -101,7 +101,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         
         status = SecItemAdd((__bridge CFDictionaryRef)search, NULL);
         if (status != noErr){
-            NSLog(@"SecItemAdd status = %d", status);
+            NSLog(@"SecItemAdd status = %d", (int) status);
         }
     }
 }
