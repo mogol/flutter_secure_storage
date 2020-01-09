@@ -1,3 +1,6 @@
+## [3.3.1+2]
+* Fix iOS build warning [Issue 30](https://github.com/mogol/flutter_secure_storage/issues/30)
+
 ## [3.3.1+1]
 * Fix Android Manifest error [Issue 77](https://github.com/mogol/flutter_secure_storage/issues/77) and [Issue 79](https://github.com/mogol/flutter_secure_storage/issues/79). Thanks [nate-eisner](https://github.com/nate-eisner).
 
