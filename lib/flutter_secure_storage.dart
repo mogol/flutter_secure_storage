@@ -104,7 +104,14 @@ class IOSOptions extends Options {
   final IOSAccessibility _accessibility;
   @override
   Map<String, String> _toMap() {
-    return <String, String>{'groupId': _groupId, 'accessibility': describeEnum(_accessibility)};
+    final m = Map<String, String>();
+    if (_groupId != null) {
+      m['groupId'] = _groupId;
+    }
+    if (_accessibility != null) {
+      m['accessibility'] = describeEnum(_accessibility);
+    }
+    return m;
   }
 }
 
