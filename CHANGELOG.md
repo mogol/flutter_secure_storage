@@ -1,3 +1,6 @@
+## [3.3.2]
+* Migrate to Android v2 embedder.
+
 ## [3.3.1+2]
 * Fix iOS build warning [Issue 30](https://github.com/mogol/flutter_secure_storage/issues/30)
 
