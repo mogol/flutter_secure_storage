@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher18Implementation;
@@ -13,6 +14,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -20,30 +23,44 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 @SuppressLint("ApplySharedPref")
-public class FlutterSecureStoragePlugin implements MethodCallHandler {
+public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlugin {
 
-    private final SharedPreferences preferences;
-    private final Charset charset;
-    private final StorageCipher storageCipher;
+    private MethodChannel channel;
+    private SharedPreferences preferences;
+    private Charset charset;
+    private StorageCipher storageCipher;
     private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
 
     public static void registerWith(Registrar registrar) {
-        try {
-            FlutterSecureStoragePlugin plugin = new FlutterSecureStoragePlugin(registrar.context());
-            final MethodChannel channel = new MethodChannel(registrar.messenger(), "plugins.it_nomads.com/flutter_secure_storage");
-            channel.setMethodCallHandler(plugin);
-        } catch (Exception e) {
-            Log.e("FlutterSecureStoragePl", "Registration failed", e);
-        }
+      FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
+      instance.initInstance(registrar.messenger(), registrar.context());
     }
 
-    private FlutterSecureStoragePlugin(Context context) throws Exception {
-        preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        charset = Charset.forName("UTF-8");
+    public void initInstance(BinaryMessenger messenger, Context context) {
+      try {
+          preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+          charset = Charset.forName("UTF-8");
 
-        StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
-        storageCipher = new StorageCipher18Implementation(context);
+          StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
+          storageCipher = new StorageCipher18Implementation(context);
+
+          channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
+          channel.setMethodCallHandler(this);
+      } catch (Exception e) {
+          Log.e("FlutterSecureStoragePl", "Registration failed", e);
+      }
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+      initInstance(binding.getBinaryMessenger(), binding.getApplicationContext());
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+      channel.setMethodCallHandler(null);
+      channel = null;
     }
 
     @Override
