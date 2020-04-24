@@ -61,13 +61,17 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
      * The most convenient place for that appears to be onMethodCall().
      */
     private void ensureInitStorageCipher() {
-        if(storageCipher == null) {
-            try {
-                Log.i("FlutterSecureStoragePl", "Initializing StorageCipher");
-                storageCipher = new StorageCipher18Implementation(applicationContext);
-                Log.i("FlutterSecureStoragePl", "StorageCipher initialization complete");
-            } catch (Exception e) {
-                Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
+        if(storageCipher == null) { //Check to avoid unnecessary entry into syncronized block
+            synchronized (this) {
+                if(storageCipher == null) { //Check inside sync block to avoid race condition.
+                    try {
+                        Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
+                        storageCipher = new StorageCipher18Implementation(applicationContext);
+                        Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
+                    } catch (Exception e) {
+                        Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
+                    }
+                }
             }
         }
     }
