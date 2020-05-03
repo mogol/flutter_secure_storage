@@ -3,6 +3,8 @@ package com.it_nomads.fluttersecurestorage;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 
@@ -30,8 +32,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private StorageCipher storageCipher;
     private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
+    private static Context applicationContext;  //Necessary for deferred initialization of storageCipher
 
     public static void registerWith(Registrar registrar) {
+      applicationContext = registrar.context().getApplicationContext();
       FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
       instance.initInstance(registrar.messenger(), registrar.context());
     }
@@ -42,13 +46,33 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
           charset = Charset.forName("UTF-8");
 
           StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
-          storageCipher = new StorageCipher18Implementation(context);
 
           channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
           channel.setMethodCallHandler(this);
       } catch (Exception e) {
           Log.e("FlutterSecureStoragePl", "Registration failed", e);
       }
+    }
+
+    /**
+     * This must be run in a separate Thread from an async method to avoid hanging UI thread on
+     * live devices in release mode.
+     * The most convenient place for that appears to be onMethodCall().
+     */
+    private void ensureInitStorageCipher() {
+        if(storageCipher == null) { //Check to avoid unnecessary entry into syncronized block
+            synchronized (this) {
+                if(storageCipher == null) { //Check inside sync block to avoid race condition.
+                    try {
+                        Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
+                        storageCipher = new StorageCipher18Implementation(applicationContext);
+                        Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
+                    } catch (Exception e) {
+                        Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -63,50 +87,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
-        try {
-            switch (call.method) {
-                case "write": {
-                    String key = getKeyFromCall(call);
-                    Map arguments = (Map) call.arguments;
-
-                    String value = (String) arguments.get("value");
-                    write(key, value);
-                    result.success(null);
-                    break;
-                }
-                case "read": {
-                    String key = getKeyFromCall(call);
-
-                    String value = read(key);
-                    result.success(value);
-                    break;
-                }
-                case "readAll": {
-                    Map<String, String> value = readAll();
-                    result.success(value);
-                    break;
-                }
-                case "delete": {
-                    String key = getKeyFromCall(call);
-
-                    delete(key);
-                    result.success(null);
-                    break;
-                }
-                case "deleteAll": {
-                    deleteAll();
-                    result.success(null);
-                    break;
-                }
-                default:
-                    result.notImplemented();
-                    break;
-            }
-
-        } catch (Exception e) {
-            result.error("Exception encountered", call.method, e);
-        }
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result rawResult) {
+        MethodResultWrapper result = new MethodResultWrapper(rawResult);
+        new Thread(new MethodRunner(call, result)).start();
     }
 
     private String getKeyFromCall(MethodCall call) {
@@ -171,5 +154,109 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         byte[] result = storageCipher.decrypt(data);
 
         return new String(result, charset);
+    }
+
+    /**
+     * Wraps the functionality of onMethodCall() in a Runnable for execution in a new Thread.
+     */
+    class MethodRunner implements Runnable {
+        private final MethodCall call;
+        private final Result result;
+
+        MethodRunner(MethodCall call, Result result) {
+            this.call = call;
+            this.result = result;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ensureInitStorageCipher();
+                switch (call.method) {
+                    case "write": {
+                        String key = getKeyFromCall(call);
+                        Map arguments = (Map) call.arguments;
+
+                        String value = (String) arguments.get("value");
+                        write(key, value);
+                        result.success(null);
+                        break;
+                    }
+                    case "read": {
+                        String key = getKeyFromCall(call);
+
+                        String value = read(key);
+                        result.success(value);
+                        break;
+                    }
+                    case "readAll": {
+                        Map<String, String> value = readAll();
+                        result.success(value);
+                        break;
+                    }
+                    case "delete": {
+                        String key = getKeyFromCall(call);
+
+                        delete(key);
+                        result.success(null);
+                        break;
+                    }
+                    case "deleteAll": {
+                        deleteAll();
+                        result.success(null);
+                        break;
+                    }
+                    default:
+                        result.notImplemented();
+                        break;
+                }
+
+            } catch (Exception e) {
+                result.error("Exception encountered", call.method, e);
+            }
+        }
+    }
+
+    /**
+     * MethodChannel.Result wrapper that responds on the platform thread.
+     */
+    class MethodResultWrapper implements Result {
+
+        private Result methodResult;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        MethodResultWrapper(Result methodResult) {
+            this.methodResult = methodResult;
+        }
+
+        @Override
+        public void success(final Object result) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    methodResult.success(result);
+                }
+            });
+        }
+
+        @Override
+        public void error(final String errorCode, final String errorMessage, final Object errorDetails) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    methodResult.error(errorCode, errorMessage, errorDetails);
+                }
+            });
+        }
+
+        @Override
+        public void notImplemented() {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    methodResult.notImplemented();
+                }
+            });
+        }
     }
 }
