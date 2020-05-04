@@ -87,7 +87,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull Result rawResult) {
+    public void onMethodCall(MethodCall call, Result rawResult) {
         MethodResultWrapper result = new MethodResultWrapper(rawResult);
         new Thread(new MethodRunner(call, result)).start();
     }
