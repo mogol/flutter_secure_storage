@@ -35,13 +35,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private static Context applicationContext;  //Necessary for deferred initialization of storageCipher
 
     public static void registerWith(Registrar registrar) {
-      applicationContext = registrar.context().getApplicationContext();
       FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
       instance.initInstance(registrar.messenger(), registrar.context());
     }
 
     public void initInstance(BinaryMessenger messenger, Context context) {
       try {
+          applicationContext = context.getApplicationContext();
           preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
           charset = Charset.forName("UTF-8");
 
