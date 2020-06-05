@@ -220,9 +220,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     /**
      * MethodChannel.Result wrapper that responds on the platform thread.
      */
-    class MethodResultWrapper implements Result {
+    static class MethodResultWrapper implements Result {
 
-        private Result methodResult;
+        private final Result methodResult;
         private final Handler handler = new Handler(Looper.getMainLooper());
 
         MethodResultWrapper(Result methodResult) {
