@@ -11,6 +11,8 @@ import android.util.Log;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher18Implementation;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -212,7 +214,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                 }
 
             } catch (Exception e) {
-                result.error("Exception encountered", call.method, e);
+                StringWriter stringWriter = new StringWriter();
+                e.printStackTrace(new PrintWriter(stringWriter));
+                result.error("Exception encountered", call.method, stringWriter.toString());
             }
         }
     }
@@ -220,9 +224,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     /**
      * MethodChannel.Result wrapper that responds on the platform thread.
      */
-    class MethodResultWrapper implements Result {
+    static class MethodResultWrapper implements Result {
 
-        private Result methodResult;
+        private final Result methodResult;
         private final Handler handler = new Handler(Looper.getMainLooper());
 
         MethodResultWrapper(Result methodResult) {
