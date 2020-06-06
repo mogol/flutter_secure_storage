@@ -1,22 +1,24 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
+import android.util.Log;
 
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Calendar;
+import java.util.Locale;
 
 import javax.crypto.Cipher;
 import javax.security.auth.x500.X500Principal;
@@ -26,10 +28,12 @@ class RSACipher18Implementation {
     private final String KEY_ALIAS;
     private static final String KEYSTORE_PROVIDER_ANDROID = "AndroidKeyStore";
     private static final String TYPE_RSA = "RSA";
+    private Context context;
 
 
     public RSACipher18Implementation(Context context) throws Exception {
         KEY_ALIAS = context.getPackageName() + ".FlutterSecureStoragePluginKey";
+        this.context = context;
         createRSAKeysIfNeeded(context);
     }
 
@@ -116,9 +120,22 @@ class RSACipher18Implementation {
         }
     }
 
-    @SuppressLint("NewApi")
-    @SuppressWarnings("deprecation")
+    /**
+     * Sets default locale.
+     */
+    private void setLocale(Locale locale) {
+        Locale.setDefault(locale);
+        Resources resources = context.getResources();
+        Configuration config = resources.getConfiguration();
+        config.locale = locale;
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
+    }
+
     private void createKeys(Context context) throws Exception {
+        Log.i("fluttersecurestorage", "Creating keys!");
+        final Locale localeBeforeFakingEnglishLocale = Locale.getDefault();
+        Locale initialLocale = Locale.getDefault();
+        setLocale(Locale.ENGLISH);
         Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.add(Calendar.YEAR, 25);
@@ -128,7 +145,6 @@ class RSACipher18Implementation {
         AlgorithmParameterSpec spec;
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            //noinspection deprecation
             spec = new android.security.KeyPairGeneratorSpec.Builder(context)
                     .setAlias(KEY_ALIAS)
                     .setSubject(new X500Principal("CN=" + KEY_ALIAS))
@@ -153,7 +169,9 @@ class RSACipher18Implementation {
             spec = builder.build();
         }
         try {
+            Log.i("fluttersecurestorage", "Initializing");
             kpGenerator.initialize(spec);
+            Log.i("fluttersecurestorage", "Generating key pair");
             kpGenerator.generateKeyPair();
         } catch (StrongBoxUnavailableException se) {
             spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
@@ -168,6 +186,6 @@ class RSACipher18Implementation {
             kpGenerator.initialize(spec);
             kpGenerator.generateKeyPair();
         }
+        setLocale(localeBeforeFakingEnglishLocale);
     }
-
 }
