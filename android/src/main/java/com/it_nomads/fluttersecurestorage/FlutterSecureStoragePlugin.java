@@ -31,10 +31,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private MethodChannel channel;
     private SharedPreferences preferences;
     private Charset charset;
-    private StorageCipher storageCipher;
+    // Declaring the storageCipher field to be volatile is required for Double-Checked Locking to
+    // work correctly: https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
+    private volatile StorageCipher storageCipher;
     private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    private static Context applicationContext;  //Necessary for deferred initialization of storageCipher
+    // Necessary for deferred initialization of storageCipher.
+    private static Context applicationContext;
 
     public static void registerWith(Registrar registrar) {
       FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
@@ -62,9 +65,11 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
      * The most convenient place for that appears to be onMethodCall().
      */
     private void ensureInitStorageCipher() {
-        if(storageCipher == null) { //Check to avoid unnecessary entry into syncronized block
+        // Check to avoid unnecessary entry into the synchronized block.
+        if (storageCipher == null) {
             synchronized (this) {
-                if(storageCipher == null) { //Check inside sync block to avoid race condition.
+                // Check inside the synchronized block to avoid race condition.
+                if (storageCipher == null) {
                     try {
                         Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
                         storageCipher = new StorageCipher18Implementation(applicationContext);
