@@ -1,5 +1,6 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -131,61 +132,64 @@ class RSACipher18Implementation {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 
+    @SuppressLint("NewApi")
     private void createKeys(Context context) throws Exception {
         Log.i("fluttersecurestorage", "Creating keys!");
         final Locale localeBeforeFakingEnglishLocale = Locale.getDefault();
-        Locale initialLocale = Locale.getDefault();
-        setLocale(Locale.ENGLISH);
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
-        end.add(Calendar.YEAR, 25);
-
-        KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(TYPE_RSA, KEYSTORE_PROVIDER_ANDROID);
-
-        AlgorithmParameterSpec spec;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            spec = new android.security.KeyPairGeneratorSpec.Builder(context)
-                    .setAlias(KEY_ALIAS)
-                    .setSubject(new X500Principal("CN=" + KEY_ALIAS))
-                    .setSerialNumber(BigInteger.valueOf(1))
-                    .setStartDate(start.getTime())
-                    .setEndDate(end.getTime())
-                    .build();
-        } else {
-            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
-                    .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
-                    .setDigests(KeyProperties.DIGEST_SHA256)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                    .setCertificateSerialNumber(BigInteger.valueOf(1))
-                    .setCertificateNotBefore(start.getTime())
-                    .setCertificateNotAfter(end.getTime());
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                builder.setIsStrongBoxBacked(true);
-            }
-
-            spec = builder.build();
-        }
         try {
-            Log.i("fluttersecurestorage", "Initializing");
-            kpGenerator.initialize(spec);
-            Log.i("fluttersecurestorage", "Generating key pair");
-            kpGenerator.generateKeyPair();
-        } catch (StrongBoxUnavailableException se) {
-            spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
-                    .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
-                    .setDigests(KeyProperties.DIGEST_SHA256)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                    .setCertificateSerialNumber(BigInteger.valueOf(1))
-                    .setCertificateNotBefore(start.getTime())
-                    .setCertificateNotAfter(end.getTime())
-                    .build();
-            kpGenerator.initialize(spec);
-            kpGenerator.generateKeyPair();
+            setLocale(Locale.ENGLISH);
+            Calendar start = Calendar.getInstance();
+            Calendar end = Calendar.getInstance();
+            end.add(Calendar.YEAR, 25);
+
+            KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance(TYPE_RSA, KEYSTORE_PROVIDER_ANDROID);
+
+            AlgorithmParameterSpec spec;
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                spec = new android.security.KeyPairGeneratorSpec.Builder(context)
+                        .setAlias(KEY_ALIAS)
+                        .setSubject(new X500Principal("CN=" + KEY_ALIAS))
+                        .setSerialNumber(BigInteger.valueOf(1))
+                        .setStartDate(start.getTime())
+                        .setEndDate(end.getTime())
+                        .build();
+            } else {
+                KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
+                        .setDigests(KeyProperties.DIGEST_SHA256)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                        .setCertificateSerialNumber(BigInteger.valueOf(1))
+                        .setCertificateNotBefore(start.getTime())
+                        .setCertificateNotAfter(end.getTime());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    builder.setIsStrongBoxBacked(true);
+                }
+
+                spec = builder.build();
+            }
+            try {
+                Log.i("fluttersecurestorage", "Initializing");
+                kpGenerator.initialize(spec);
+                Log.i("fluttersecurestorage", "Generating key pair");
+                kpGenerator.generateKeyPair();
+            } catch (StrongBoxUnavailableException se) {
+                spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
+                        .setDigests(KeyProperties.DIGEST_SHA256)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                        .setCertificateSerialNumber(BigInteger.valueOf(1))
+                        .setCertificateNotBefore(start.getTime())
+                        .setCertificateNotAfter(end.getTime())
+                        .build();
+                kpGenerator.initialize(spec);
+                kpGenerator.generateKeyPair();
+            }
+        } finally {
+            setLocale(localeBeforeFakingEnglishLocale);
         }
-        setLocale(localeBeforeFakingEnglishLocale);
     }
 }
