@@ -31,6 +31,17 @@ class FlutterSecureStorage {
     return value;
   }
 
+  /// Returns true if the storage contains the given [key].
+  ///
+  /// [key] shoudn't be null.
+  /// [iOptions] optional iOS options
+  /// [aOptions] optional Android options
+  /// Can throw a [PlatformException].
+  Future<bool> containsKey({@required String key, IOSOptions iOptions, AndroidOptions aOptions}) async {
+    final String value = await read(key: key, iOptions: iOptions, aOptions: aOptions);
+    return value != null;
+  }
+
   /// Deletes associated value for the given [key].
   ///
   /// [key] shoudn't be null.
