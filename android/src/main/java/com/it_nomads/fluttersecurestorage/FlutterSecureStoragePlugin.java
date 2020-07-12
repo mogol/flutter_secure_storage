@@ -93,7 +93,6 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         channel.setMethodCallHandler(null);
         channel = null;
       }
-
     }
 
     @Override
