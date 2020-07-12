@@ -89,7 +89,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
-      if(channel != null) {
+      if (channel != null) {
         channel.setMethodCallHandler(null);
         channel = null;
       }
