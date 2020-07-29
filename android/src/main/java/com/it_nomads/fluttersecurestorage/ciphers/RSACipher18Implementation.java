@@ -132,7 +132,6 @@ class RSACipher18Implementation {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 
-    @SuppressLint("NewApi")
     private void createKeys(Context context) throws Exception {
         Log.i("fluttersecurestorage", "Creating keys!");
         final Locale localeBeforeFakingEnglishLocale = Locale.getDefault();
@@ -170,23 +169,28 @@ class RSACipher18Implementation {
 
                 spec = builder.build();
             }
+
             try {
                 Log.i("fluttersecurestorage", "Initializing");
                 kpGenerator.initialize(spec);
                 Log.i("fluttersecurestorage", "Generating key pair");
                 kpGenerator.generateKeyPair();
-            } catch (StrongBoxUnavailableException se) {
-                spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
-                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
-                        .setDigests(KeyProperties.DIGEST_SHA256)
-                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                        .setCertificateSerialNumber(BigInteger.valueOf(1))
-                        .setCertificateNotBefore(start.getTime())
-                        .setCertificateNotAfter(end.getTime())
-                        .build();
-                kpGenerator.initialize(spec);
-                kpGenerator.generateKeyPair();
+            } catch (Exception e) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    if (e instanceof StrongBoxUnavailableException) {
+                        spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
+                                .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
+                                .setDigests(KeyProperties.DIGEST_SHA256)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                                .setCertificateSerialNumber(BigInteger.valueOf(1))
+                                .setCertificateNotBefore(start.getTime())
+                                .setCertificateNotAfter(end.getTime())
+                                .build();
+                        kpGenerator.initialize(spec);
+                        kpGenerator.generateKeyPair();
+                    }
+                }
             }
         } finally {
             setLocale(localeBeforeFakingEnglishLocale);
