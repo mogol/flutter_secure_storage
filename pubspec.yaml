@@ -3,18 +3,21 @@ description: Flutter Secure Storage provides API to store data in secure storage
 version: 3.3.4
 homepage: https://github.com/mogol/flutter_secure_storage
 
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.20.0 <2.0.0"
+
 flutter:
   plugin:
-    android:
-      package: com.it_nomads.fluttersecurestorage
-      pluginClass: FlutterSecureStoragePlugin
-    ios:
-      pluginClass: FlutterSecureStoragePlugin
+    platforms:
+      android:
+        package: com.it_nomads.fluttersecurestorage
+        pluginClass: FlutterSecureStoragePlugin
+      ios:
+        pluginClass: FlutterSecureStoragePlugin
 
 dependencies:
   meta: "^1.1.2"
   flutter:
     sdk: flutter
 
-environment:
-    sdk: ">=1.19.0 <3.0.0"
