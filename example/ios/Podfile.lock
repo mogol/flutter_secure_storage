@@ -4,19 +4,19 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Flutter (from `/Users/german/Projects/github/flutter/bin/cache/artifacts/engine/ios`)
-  - flutter_secure_storage (from `/Users/german/Projects/nomads/flutter_secure_storage/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: "/Users/german/Projects/github/flutter/bin/cache/artifacts/engine/ios"
+    :path: Flutter
   flutter_secure_storage:
-    :path: "/Users/german/Projects/nomads/flutter_secure_storage/ios"
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
 
-PODFILE CHECKSUM: 351e02e34b831289961ec3558a535cbd2c4965d2
+PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.9.3

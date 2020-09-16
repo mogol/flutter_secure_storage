@@ -4,12 +4,12 @@ description: Demonstrates how to use the flutter_secure_storage plugin.
 dependencies:
   flutter:
     sdk: flutter
+  flutter_secure_storage:
+    path: ../
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_secure_storage:
-    path: ../
   flutter_driver:
     sdk: flutter
   test: any

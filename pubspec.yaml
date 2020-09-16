@@ -5,11 +5,12 @@ homepage: https://github.com/mogol/flutter_secure_storage
 
 flutter:
   plugin:
-    android:
-      package: com.it_nomads.fluttersecurestorage
-      pluginClass: FlutterSecureStoragePlugin
-    ios:
-      pluginClass: FlutterSecureStoragePlugin
+    platforms:
+      android:
+        package: com.it_nomads.fluttersecurestorage
+        pluginClass: FlutterSecureStoragePlugin
+      ios:
+        pluginClass: FlutterSecureStoragePlugin
 
 dependencies:
   meta: "^1.1.2"
