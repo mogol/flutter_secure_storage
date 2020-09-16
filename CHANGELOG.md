@@ -1,3 +1,12 @@
+## [3.3.4]
+* Fix Android hanging UI on StorageCipher initialization [#116](https://github.com/mogol/flutter_secure_storage/issues/116) by [morrica](https://github.com/morrica)
+* Fix crash only observed for v2 apps [#124](https://github.com/mogol/flutter_secure_storage/pull/124) by [lidongze91](https://github.com/lidongze91)
+* Fix crash when generating keys in android with RTL locales [#132](https://github.com/mogol/flutter_secure_storage/pull/132) by [iassal](https://github.com/iassal)
+* Fix returning the error as String rather than Exception [#134](https://github.com/mogol/flutter_secure_storage/issues/134) by [wytesk133](https://github.com/wytesk133)s
+* Fix Android crash onDetachedFromEngine when init fails [#144](https://github.com/mogol/flutter_secure_storage/issues/144) by [iassal](https://github.com/iassal)
+* Handle null value at write function [#95](https://github.com/mogol/flutter_secure_storage/issues/95) by [ewertonrp](https://github.com/ewertonrp)    
+*  Add support for containsKey [#139](https://github.com/mogol/flutter_secure_storage/issues/139) by [iassal](https://github.com/iassal)    
+
 ## [3.3.3]
 * Fix compatibility with non-AndroidX project. [AndroidX Migration](https://flutter.dev/docs/development/androidx-migration) is recommended.
 
