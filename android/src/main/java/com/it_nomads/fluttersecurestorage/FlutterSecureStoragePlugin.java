@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
@@ -31,13 +32,14 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private MethodChannel channel;
     private SharedPreferences preferences;
     private Charset charset;
-    // Declaring the storageCipher field to be volatile is required for Double-Checked Locking to
-    // work correctly: https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
-    private volatile StorageCipher storageCipher;
+    private StorageCipher storageCipher;
+    // Necessary for deferred initialization of storageCipher.
+    private Context applicationContext;
+    private HandlerThread workerThread;
+    private Handler workerThreadHandler;
+
     private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    // Necessary for deferred initialization of storageCipher.
-    private static Context applicationContext;
 
     public static void registerWith(Registrar registrar) {
       FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
@@ -50,6 +52,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
           preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
           charset = Charset.forName("UTF-8");
 
+          workerThread = new HandlerThread("com.it_nomads.fluttersecurestorage.worker");
+          workerThread.start();
+          workerThreadHandler = new Handler(workerThread.getLooper());
+
           StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
 
           channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
@@ -59,25 +65,14 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
       }
     }
 
-    /**
-     * This must be run in a separate Thread from an async method to avoid hanging UI thread on
-     * live devices in release mode.
-     * The most convenient place for that appears to be onMethodCall().
-     */
     private void ensureInitStorageCipher() {
-        // Check to avoid unnecessary entry into the synchronized block.
         if (storageCipher == null) {
-            synchronized (this) {
-                // Check inside the synchronized block to avoid race condition.
-                if (storageCipher == null) {
-                    try {
-                        Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
-                        storageCipher = new StorageCipher18Implementation(applicationContext);
-                        Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
-                    } catch (Exception e) {
-                        Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
-                    }
-                }
+            try {
+                Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
+                storageCipher = new StorageCipher18Implementation(applicationContext);
+                Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
+            } catch (Exception e) {
+                Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
             }
         }
     }
@@ -90,6 +85,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
       if (channel != null) {
+        workerThread.quitSafely();
+        workerThread = null;
+
         channel.setMethodCallHandler(null);
         channel = null;
       }
@@ -98,7 +96,8 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     @Override
     public void onMethodCall(MethodCall call, Result rawResult) {
         MethodResultWrapper result = new MethodResultWrapper(rawResult);
-        new Thread(new MethodRunner(call, result)).start();
+        // Run all method calls inside the worker thread instead of the platform thread.
+        workerThreadHandler.post(new MethodRunner(call, result));
     }
 
     private String getKeyFromCall(MethodCall call) {
@@ -166,7 +165,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     /**
-     * Wraps the functionality of onMethodCall() in a Runnable for execution in a new Thread.
+     * Wraps the functionality of onMethodCall() in a Runnable for execution in the worker thread.
      */
     class MethodRunner implements Runnable {
         private final MethodCall call;
