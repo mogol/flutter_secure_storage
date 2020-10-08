@@ -1,3 +1,6 @@
+## [3.3.5]
+* Fixes thread safety issues in android code to close [161](https://github.com/mogol/flutter_secure_storage/issues/161). Thanks [koskimas](https://github.com/koskimas)
+
 ## [3.3.4]
 * Fix Android hanging UI on StorageCipher initialization [#116](https://github.com/mogol/flutter_secure_storage/issues/116) by [morrica](https://github.com/morrica)
 * Fix crash only observed for v2 apps [#124](https://github.com/mogol/flutter_secure_storage/pull/124) by [lidongze91](https://github.com/lidongze91)
