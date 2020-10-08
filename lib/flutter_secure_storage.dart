@@ -149,7 +149,7 @@ class IOSOptions extends Options {
   final IOSAccessibility _accessibility;
   @override
   Map<String, String> _toMap() {
-    final m = Map<String, String>();
+    final m = <String, String>{};
     if (_groupId != null) {
       m['groupId'] = _groupId;
     }
