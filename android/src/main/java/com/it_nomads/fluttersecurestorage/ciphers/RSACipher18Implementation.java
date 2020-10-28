@@ -1,6 +1,7 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -126,10 +127,40 @@ class RSACipher18Implementation {
      */
     private void setLocale(Locale locale) {
         Locale.setDefault(locale);
-        Resources resources = context.getResources();
-        Configuration config = resources.getConfiguration();
+        Configuration config = context.getResources().getConfiguration();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            setSystemLocale(config, locale);
+            context = context.createConfigurationContext(config);
+        }else{
+            setSystemLocaleLegacy(config, locale);
+            setContextConfigurationLegacy(context, config);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setContextConfigurationLegacy(Context context, Configuration config){
+        context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setSystemLocaleLegacy(Configuration config, Locale locale){
         config.locale = locale;
-        resources.updateConfiguration(config, resources.getDisplayMetrics());
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private void setSystemLocale(Configuration config, Locale locale){
+        config.setLocale(locale);
+    }
+
+    @SuppressWarnings("deprecation")
+    private AlgorithmParameterSpec makeAlgorithmParameterSpecLegacy(Context context, Calendar start, Calendar end){
+        return new android.security.KeyPairGeneratorSpec.Builder(context)
+                .setAlias(KEY_ALIAS)
+                .setSubject(new X500Principal("CN=" + KEY_ALIAS))
+                .setSerialNumber(BigInteger.valueOf(1))
+                .setStartDate(start.getTime())
+                .setEndDate(end.getTime())
+                .build();
     }
 
     @SuppressLint("NewApi")
@@ -147,13 +178,7 @@ class RSACipher18Implementation {
             AlgorithmParameterSpec spec;
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                spec = new android.security.KeyPairGeneratorSpec.Builder(context)
-                        .setAlias(KEY_ALIAS)
-                        .setSubject(new X500Principal("CN=" + KEY_ALIAS))
-                        .setSerialNumber(BigInteger.valueOf(1))
-                        .setStartDate(start.getTime())
-                        .setEndDate(end.getTime())
-                        .build();
+                spec = makeAlgorithmParameterSpecLegacy(context, start, end);
             } else {
                 KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
                         .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
