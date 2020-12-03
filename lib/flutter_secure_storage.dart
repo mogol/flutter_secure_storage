@@ -141,12 +141,16 @@ enum IOSAccessibility {
 class IOSOptions extends Options {
   IOSOptions(
       {String groupId,
-      IOSAccessibility accessibility = IOSAccessibility.unlocked})
+      IOSAccessibility accessibility = IOSAccessibility.unlocked,
+      bool useFlutterSecureStorageServiceAsAccountName = true,
+      })
       : _groupId = groupId,
-        _accessibility = accessibility;
+        _accessibility = accessibility,
+        _useFlutterSecureStorageServiceAsAccountName = useFlutterSecureStorageServiceAsAccountName;
 
   final String _groupId;
   final IOSAccessibility _accessibility;
+  final bool _useFlutterSecureStorageServiceAsAccountName;
   @override
   Map<String, String> _toMap() {
     final m = <String, String>{};
@@ -156,6 +160,8 @@ class IOSOptions extends Options {
     if (_accessibility != null) {
       m['accessibility'] = describeEnum(_accessibility);
     }
+    m['useFlutterSecureStorageServiceAsAccountName'] = _useFlutterSecureStorageServiceAsAccountName.toString();
+
     return m;
   }
 }
