@@ -38,7 +38,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *groupId = options[@"groupId"];
-        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: "true"];
+        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: @"true"];
         NSString *value = [self read:key forGroup:groupId useAccountNameAttr:useAccountName];
         
         result(value);
@@ -47,7 +47,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         NSString *groupId = options[@"groupId"];
-        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: "true"];
+        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: @"true"];
         NSString *accessibility = options[@"accessibility"];
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
@@ -60,19 +60,19 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     } else if ([@"delete" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *groupId = options[@"groupId"];
-        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: "true"];
+        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: @"true"];
         [self delete:key forGroup:groupId useAccountNameAttr:useAccountName];
         
         result(nil);
     } else if ([@"deleteAll" isEqualToString:call.method]) {
         NSString *groupId = options[@"groupId"];
-        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: "true"];
+        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: @"true"];
         [self deleteAll: groupId useAccountNameAttr:useAccountName];
         
         result(nil);
     } else if ([@"readAll" isEqualToString:call.method]) {
         NSString *groupId = options[@"groupId"];
-        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: "true"];
+        BOOL *useAccountName = [options[@"useFlutterSecureStorageServiceAsAccountName"] isEqualToString: @"true"];
         NSDictionary *value = [self readAll: groupId useAccountNameAttr:useAccountName];
 
         result(value);
@@ -89,7 +89,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if(useAccountName) {
         search[(__bridge id)kSecAttrService] = KEYCHAIN_SERVICE;
     }
-    
+
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
     
