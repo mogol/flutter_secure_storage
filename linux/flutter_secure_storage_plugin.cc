@@ -29,7 +29,11 @@ void write(const gchar *key, const gchar *value) {
 }
 
 FlValue *read(const gchar *key) {
-  return fl_value_new_string(keyring.getItem(key).c_str());
+  auto result = keyring.getItem(key).c_str();
+  if (strcmp(result, "") == 0) {
+    return nullptr;
+  }
+  return fl_value_new_string(result);
 }
 
 FlValue *readAll() {
