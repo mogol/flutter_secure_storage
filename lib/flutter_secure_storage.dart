@@ -142,15 +142,15 @@ class IOSOptions extends Options {
   IOSOptions(
       {String groupId,
       IOSAccessibility accessibility = IOSAccessibility.unlocked,
-      bool useFlutterSecureStorageServiceAsAccountName = true,
+      String accountName = 'flutter_secure_storage_service',
       })
       : _groupId = groupId,
         _accessibility = accessibility,
-        _useFlutterSecureStorageServiceAsAccountName = useFlutterSecureStorageServiceAsAccountName;
+        _accountName = accountName;
 
   final String _groupId;
   final IOSAccessibility _accessibility;
-  final bool _useFlutterSecureStorageServiceAsAccountName;
+  final String _accountName;
   @override
   Map<String, String> _toMap() {
     final m = <String, String>{};
@@ -160,7 +160,9 @@ class IOSOptions extends Options {
     if (_accessibility != null) {
       m['accessibility'] = describeEnum(_accessibility);
     }
-    m['useFlutterSecureStorageServiceAsAccountName'] = _useFlutterSecureStorageServiceAsAccountName.toString();
+    if (_accountName != null) {
+      m['accountName'] = _accountName;
+    }
 
     return m;
   }
