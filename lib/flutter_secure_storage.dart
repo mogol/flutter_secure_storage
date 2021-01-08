@@ -18,7 +18,7 @@ class FlutterSecureStorage {
   /// [value] required value
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<void> write(
           {@required String key,
@@ -39,7 +39,7 @@ class FlutterSecureStorage {
   /// [key] shoudn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<String> read(
       {@required String key,
@@ -58,7 +58,7 @@ class FlutterSecureStorage {
   /// [key] shoudn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<bool> containsKey(
       {@required String key,
@@ -75,7 +75,7 @@ class FlutterSecureStorage {
   /// [key] shoudn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<void> delete(
           {@required String key,
@@ -91,7 +91,7 @@ class FlutterSecureStorage {
   ///
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<Map<String, String>> readAll(
       {IOSOptions iOptions,
@@ -108,7 +108,7 @@ class FlutterSecureStorage {
   ///
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
-  /// [lOptioins] options Linux options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<void> deleteAll(
           {IOSOptions iOptions,
