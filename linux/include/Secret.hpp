@@ -2,6 +2,7 @@
 #include <json/json.h>
 #include <libsecret/secret.h>
 #include <memory>
+#include <sstream>
 
 class SecretStorage {
   FHashTable m_attributes;

@@ -6,7 +6,6 @@
 #include <gtk/gtk.h>
 #include <json/json.h>
 #include <libsecret/secret.h>
-#include <sstream>
 #include <sys/utsname.h>
 
 #define FLUTTER_SECURE_STORAGE_PLUGIN(obj)                                     \
