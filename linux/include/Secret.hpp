@@ -7,12 +7,19 @@
 class SecretStorage {
   FHashTable m_attributes;
   std::string label;
+  SecretSchema the_schema;
 
 public:
   const char *getLabel() { return label.c_str(); }
   void setLabel(const char *label) { this->label = label; }
 
-  SecretStorage(const char *_label = "default") : label(_label) {}
+  SecretStorage(const char *_label = "default") : label(_label) {
+    the_schema = {label.c_str(),
+                  SECRET_SCHEMA_NONE,
+                  {
+                      {"account", SECRET_SCHEMA_ATTRIBUTE_STRING},
+                  }};
+  }
 
   void addAttribute(const char *key, const char *value) {
     m_attributes.insert(key, value);
@@ -51,7 +58,7 @@ public:
 
     auto ptrToErr = err.get();
     bool result = secret_password_storev_sync(
-        nullptr, m_attributes.getGHashTable(), nullptr, label.c_str(),
+        &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
         output.c_str(), nullptr, &ptrToErr);
     if (err != nullptr) {
       throw err;
@@ -65,7 +72,7 @@ public:
     std::unique_ptr<GError> err = nullptr;
     auto ptrToErr = err.get();
     const gchar *result = secret_password_lookupv_sync(
-        nullptr, m_attributes.getGHashTable(), nullptr, &ptrToErr);
+        &the_schema, m_attributes.getGHashTable(), nullptr, &ptrToErr);
     if (err != nullptr) {
       throw err;
     }
