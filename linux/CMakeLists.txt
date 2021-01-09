@@ -10,7 +10,7 @@ add_library(${PLUGIN_NAME} SHARED
   "flutter_secure_storage_plugin.cc"
 )
 apply_standard_settings(${PLUGIN_NAME})
-pkg_search_module(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1>=0.20.4)
+pkg_search_module(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1>=0.18.4)
 pkg_check_modules(JSONCPP REQUIRED IMPORTED_TARGET jsoncpp)
 
 set_target_properties(${PLUGIN_NAME} PROPERTIES
