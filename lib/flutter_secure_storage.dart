@@ -140,21 +140,19 @@ enum IOSAccessibility {
 class IOSOptions extends Options {
   IOSOptions(
       {String? groupId,
-      IOSAccessibility? accessibility = IOSAccessibility.unlocked})
+      IOSAccessibility accessibility = IOSAccessibility.unlocked})
       : _groupId = groupId,
         _accessibility = accessibility;
 
   final String? _groupId;
-  final IOSAccessibility? _accessibility;
+  final IOSAccessibility _accessibility;
   @override
   Map<String, String> _toMap() {
     final m = <String, String>{};
     if (_groupId != null) {
       m['groupId'] = _groupId!;
     }
-    if (_accessibility != null) {
-      m['accessibility'] = describeEnum(_accessibility!);
-    }
+    m['accessibility'] = describeEnum(_accessibility);
     return m;
   }
 }
