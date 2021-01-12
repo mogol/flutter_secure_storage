@@ -50,6 +50,25 @@ You need to
 * [disable autobackup](https://developer.android.com/guide/topics/data/autobackup#EnablingAutoBackup), [details](https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742)
 * [exclude sharedprefs](https://developer.android.com/guide/topics/data/autobackup#IncludingFiles) `FlutterSecureStorage` used by the plugin, [details](https://github.com/mogol/flutter_secure_storage/issues/43#issuecomment-471642126)
 
+## Linux
+
+You need `libsecret-1-dev` and `libjsoncpp-dev` on your machine to build the project, and `libsecret-1-0` and `libjsoncpp1` to run the application (add it as a dependency after packaging your app too). If you using snapcraft to build the project you the following
+
+```yaml
+parts:
+  uet-lms:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart 
+    build-packages:
+     - libsecret-1-dev
+     - libjsoncpp-dev
+    stage-packages:
+     - libsecret-1-dev
+     - libjsoncpp1-dev
+```
+
+
 ## Integration Tests
 
 Run the following command from `example` directory
