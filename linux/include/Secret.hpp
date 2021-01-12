@@ -52,16 +52,17 @@ public:
   bool storeToKeyring(Json::Value value) {
     Json::StreamWriterBuilder builder;
     const std::string output = Json::writeString(builder, value);
-    GError *err = nullptr;
+    std::unique_ptr<GError> err = nullptr;
+    GError *errPtr = err.get();
 
     builder["indentation"] = "";
 
     bool result = secret_password_storev_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
-        output.c_str(), nullptr, &err);
+        output.c_str(), nullptr, &errPtr);
 
-    if (err != nullptr) {
-      throw err;
+    if (err) {
+      throw err->message;
     }
 
     return result;
@@ -70,17 +71,17 @@ public:
   Json::Value readFromKeyring() {
     Json::Value root;
     Json::CharReaderBuilder charBuilder;
-    Json::CharReader *reader = charBuilder.newCharReader();
-
-    GError *err = nullptr;
+    std::unique_ptr<Json::CharReader> reader(charBuilder.newCharReader());
+    std::unique_ptr<GError> err = nullptr;
+    GError *errPtr = err.get();
 
     const gchar *result = secret_password_lookupv_sync(
-        &the_schema, m_attributes.getGHashTable(), nullptr, &err);
+        &the_schema, m_attributes.getGHashTable(), nullptr, &errPtr);
 
-    if (err != nullptr) {
-      throw err;
+    if (err) {
+      throw err->message;
     }
-    
+
     if (result != nullptr && strcmp(result, "") != 0 &&
         reader->parse(result, result + strlen(result), &root, NULL)) {
       return root;

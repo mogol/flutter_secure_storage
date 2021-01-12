@@ -20,7 +20,7 @@ G_DEFINE_TYPE(FlutterSecureStoragePlugin, flutter_secure_storage_plugin,
               g_object_get_type())
 
 static SecretStorage keyring;
-void delete_it(const gchar *key) { keyring.deleteItem(key); }
+void deleteIt(const gchar *key) { keyring.deleteItem(key); }
 void deleteAll() { keyring.deleteKeyring(); }
 
 void write(const gchar *key, const gchar *value) {
@@ -90,7 +90,7 @@ static void flutter_secure_storage_plugin_handle_method_call(
           response = FL_METHOD_RESPONSE(fl_method_error_response_new(
               "Bad arguments", "Key is null", nullptr));
         } else {
-          delete_it(keyString);
+          deleteIt(keyString);
           response =
               FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
         }
@@ -100,10 +100,10 @@ static void flutter_secure_storage_plugin_handle_method_call(
       } else {
         response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
       }
-    } catch (GError *e) {
-      g_error("%s", e->message);
+    } catch (const gchar* e) {
+      g_warning("libsecret_error: %s", e);
       response = FL_METHOD_RESPONSE(
-          fl_method_error_response_new("Libsecret error", e->message, nullptr));
+          fl_method_error_response_new("Libsecret error", e, nullptr));
     } 
     fl_method_call_respond(method_call, response, nullptr);
   }
