@@ -55,7 +55,7 @@ static void flutter_secure_storage_plugin_handle_method_call(
 
   if (fl_value_get_type(args) != FL_VALUE_TYPE_MAP) {
     response = FL_METHOD_RESPONSE(fl_method_error_response_new(
-        "PlatformException", "args given to function is not a map", nullptr));
+        "Bad arguments", "args given to function is not a map", nullptr));
   } else {
     FlValue *key = fl_value_lookup_string(args, "key");
     FlValue *value = fl_value_lookup_string(args, "value");
@@ -64,41 +64,49 @@ static void flutter_secure_storage_plugin_handle_method_call(
     const gchar *valueString =
         value == nullptr ? nullptr : fl_value_get_string(value);
 
-    if (strcmp(method, "write") == 0) {
-      if (!keyString || !valueString) {
-        response = FL_METHOD_RESPONSE(fl_method_error_response_new(
-            "PlatformException", "Key or Value was null", nullptr));
-      } else {
-        write(keyString, valueString);
+    try {
+      if (strcmp(method, "write") == 0) {
+        if (!keyString || !valueString) {
+          response = FL_METHOD_RESPONSE(fl_method_error_response_new(
+              "Bad arguments", "Key or Value was null", nullptr));
+        } else {
+          write(keyString, valueString);
+          response =
+              FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+        }
+      } else if (strcmp(method, "read") == 0) {
+        if (!keyString) {
+          response = FL_METHOD_RESPONSE(fl_method_error_response_new(
+              "Bad arguments", "Key is null", nullptr));
+        } else {
+          g_autoptr(FlValue) result = read(keyString);
+          response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+        }
+      } else if (strcmp(method, "readAll") == 0) {
+        response =
+            FL_METHOD_RESPONSE(fl_method_success_response_new(readAll()));
+      } else if (strcmp(method, "delete") == 0) {
+        if (!keyString) {
+          response = FL_METHOD_RESPONSE(fl_method_error_response_new(
+              "Bad arguments", "Key is null", nullptr));
+        } else {
+          delete_it(keyString);
+          response =
+              FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+        }
+      } else if (strcmp(method, "deleteAll") == 0) {
+        deleteAll();
         response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-      }
-    } else if (strcmp(method, "read") == 0) {
-      if (!keyString) {
-        response = FL_METHOD_RESPONSE(fl_method_error_response_new(
-            "PlatformException", "Key is null", nullptr));
       } else {
-        g_autoptr(FlValue) result = read(keyString);
-        response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+        response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
       }
-    } else if (strcmp(method, "readAll") == 0) {
-      response = FL_METHOD_RESPONSE(fl_method_success_response_new(readAll()));
-    } else if (strcmp(method, "delete") == 0) {
-      if (!keyString) {
-        response = FL_METHOD_RESPONSE(fl_method_error_response_new(
-            "PlatformException", "Key is null", nullptr));
-      } else {
-        delete_it(keyString);
-        response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-      }
-    } else if (strcmp(method, "deleteAll") == 0) {
-      deleteAll();
-      response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-    } else {
-      response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
-    }
+    } catch (GError *e) {
+      g_error("%s", e->message);
+      response = FL_METHOD_RESPONSE(
+          fl_method_error_response_new("Libsecret error", e->message, nullptr));
+    } 
+    fl_method_call_respond(method_call, response, nullptr);
   }
-
-  fl_method_call_respond(method_call, response, nullptr);
 }
 
 static void flutter_secure_storage_plugin_dispose(GObject *object) {

@@ -2,7 +2,6 @@
 #include <json/json.h>
 #include <libsecret/secret.h>
 #include <memory>
-#include <sstream>
 
 class SecretStorage {
   FHashTable m_attributes;
@@ -52,35 +51,42 @@ public:
 
   bool storeToKeyring(Json::Value value) {
     Json::StreamWriterBuilder builder;
-    builder["indentation"] = ""; // If you want whitespace-less output
     const std::string output = Json::writeString(builder, value);
-    std::unique_ptr<GError> err = nullptr;
+    GError *err = nullptr;
 
-    auto ptrToErr = err.get();
+    builder["indentation"] = "";
+
     bool result = secret_password_storev_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
-        output.c_str(), nullptr, &ptrToErr);
+        output.c_str(), nullptr, &err);
+
     if (err != nullptr) {
       throw err;
     }
+
     return result;
   }
 
   Json::Value readFromKeyring() {
-    std::stringstream sstream;
     Json::Value root;
-    std::unique_ptr<GError> err = nullptr;
-    auto ptrToErr = err.get();
+    Json::CharReaderBuilder charBuilder;
+    Json::CharReader *reader = charBuilder.newCharReader();
+
+    GError *err = nullptr;
+
     const gchar *result = secret_password_lookupv_sync(
-        &the_schema, m_attributes.getGHashTable(), nullptr, &ptrToErr);
+        &the_schema, m_attributes.getGHashTable(), nullptr, &err);
+
     if (err != nullptr) {
       throw err;
     }
-    if (result == nullptr || strcmp(result, "") == 0) {
+    
+    if (result != nullptr && strcmp(result, "") != 0 &&
+        reader->parse(result, result + strlen(result), &root, NULL)) {
       return root;
     }
-    sstream << result;
-    sstream >> root;
+
+    this->storeToKeyring(root);
     return root;
   }
 };
