@@ -43,8 +43,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   void _addNewItem() async {
-    final String key = "key ${_randomValue()}";
-    final String value = "value ${_randomValue()}";
+    final String key = _randomValue();
+    final String value = _randomValue();
 
     await _storage.write(key: key, value: value);
     _readAll();

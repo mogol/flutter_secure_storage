@@ -6,16 +6,16 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
+import android.util.Base64;
 import android.util.Log;
 
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
-
+import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
+import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher18Implementation;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -31,56 +31,66 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private MethodChannel channel;
     private SharedPreferences preferences;
+    private Charset charset;
+    private StorageCipher storageCipher;
+    // Necessary for deferred initialization of storageCipher.
+    private Context applicationContext;
     private HandlerThread workerThread;
     private Handler workerThreadHandler;
 
+    private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
 
     public static void registerWith(Registrar registrar) {
-        FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
-        instance.initInstance(registrar.messenger(), registrar.context());
+      FlutterSecureStoragePlugin instance = new FlutterSecureStoragePlugin();
+      instance.initInstance(registrar.messenger(), registrar.context());
     }
 
     public void initInstance(BinaryMessenger messenger, Context context) {
-        try {
-            MasterKey key = new MasterKey.Builder(context)
-                    .setKeyGenParameterSpec(
-                            new KeyGenParameterSpec
-                                    .Builder(MasterKey.DEFAULT_MASTER_KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                                    .setKeySize(256).build())
-                    .build();
-            preferences = EncryptedSharedPreferences.create(context, SHARED_PREFERENCES_NAME, key, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+      try {
+          applicationContext = context.getApplicationContext();
+          preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+          charset = Charset.forName("UTF-8");
 
-            workerThread = new HandlerThread("com.it_nomads.fluttersecurestorage.worker");
-            workerThread.start();
-            workerThreadHandler = new Handler(workerThread.getLooper());
+          workerThread = new HandlerThread("com.it_nomads.fluttersecurestorage.worker");
+          workerThread.start();
+          workerThreadHandler = new Handler(workerThread.getLooper());
 
+          StorageCipher18Implementation.moveSecretFromPreferencesIfNeeded(preferences, context);
 
-            channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
-            channel.setMethodCallHandler(this);
-        } catch (Exception e) {
-            Log.e("FlutterSecureStoragePl", "Registration failed", e);
+          channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
+          channel.setMethodCallHandler(this);
+      } catch (Exception e) {
+          Log.e("FlutterSecureStoragePl", "Registration failed", e);
+      }
+    }
+
+    private void ensureInitStorageCipher() {
+        if (storageCipher == null) {
+            try {
+                Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
+                storageCipher = new StorageCipher18Implementation(applicationContext);
+                Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
+            } catch (Exception e) {
+                Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
+            }
         }
     }
 
-
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
-        initInstance(binding.getBinaryMessenger(), binding.getApplicationContext());
+      initInstance(binding.getBinaryMessenger(), binding.getApplicationContext());
     }
 
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
-        if (channel != null) {
-            workerThread.quitSafely();
-            workerThread = null;
+      if (channel != null) {
+        workerThread.quitSafely();
+        workerThread = null;
 
-            channel.setMethodCallHandler(null);
-            channel = null;
-        }
+        channel.setMethodCallHandler(null);
+        channel = null;
+      }
     }
 
     @Override
@@ -92,12 +102,24 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private String getKeyFromCall(MethodCall call) {
         Map arguments = (Map) call.arguments;
-        return (String) arguments.get("key");
+        String rawKey = (String) arguments.get("key");
+        String key = addPrefixToKey(rawKey);
+        return key;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, String> readAll() {
-        return (Map<String, String>) preferences.getAll();
+    private Map<String, String> readAll() throws Exception {
+        @SuppressWarnings("unchecked")
+        Map<String, String> raw = (Map<String, String>) preferences.getAll();
+
+        Map<String, String> all = new HashMap<>();
+        for (Map.Entry<String, String> entry : raw.entrySet()) {
+            String key = entry.getKey().replaceFirst(ELEMENT_PREFERENCES_KEY_PREFIX + '_', "");
+            String rawValue = entry.getValue();
+            String value = decodeRawValue(rawValue);
+
+            all.put(key, value);
+        }
+        return all;
     }
 
     private void deleteAll() {
@@ -107,14 +129,18 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         editor.commit();
     }
 
-    private void write(String key, String value) {
+    private void write(String key, String value) throws Exception {
+        byte[] result = storageCipher.encrypt(value.getBytes(charset));
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(key, value);
-        editor.apply();
+
+        editor.putString(key, Base64.encodeToString(result, 0));
+        editor.commit();
     }
 
-    private String read(String key) {
-        return preferences.getString(key, null);
+    private String read(String key) throws Exception {
+        String encoded = preferences.getString(key, null);
+
+        return decodeRawValue(encoded);
     }
 
     private void delete(String key) {
@@ -124,6 +150,19 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         editor.commit();
     }
 
+    private String addPrefixToKey(String key) {
+        return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key;
+    }
+
+    private String decodeRawValue(String value) throws Exception {
+        if (value == null) {
+            return null;
+        }
+        byte[] data = Base64.decode(value, 0);
+        byte[] result = storageCipher.decrypt(data);
+
+        return new String(result, charset);
+    }
 
     /**
      * Wraps the functionality of onMethodCall() in a Runnable for execution in the worker thread.
@@ -140,6 +179,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         @Override
         public void run() {
             try {
+                ensureInitStorageCipher();
                 switch (call.method) {
                     case "write": {
                         String key = getKeyFromCall(call);

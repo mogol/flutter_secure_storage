@@ -22,20 +22,16 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 28
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 30
+        minSdkVersion 18
+        targetSdkVersion 28
         versionCode 6
         versionName "3.3.1"
     }
     lintOptions {
         disable 'InvalidPackage'
-    }
-
-    dependencies{
-        implementation "androidx.security:security-crypto:1.1.0-alpha03"
     }
 }
