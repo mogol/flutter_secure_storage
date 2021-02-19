@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 class FlutterSecureStorage {
-  const FlutterSecureStorage();
+  const FlutterSecureStorage({this.androidEncryptedSharedPreferences = false});
+  final bool androidEncryptedSharedPreferences;
 
   static const MethodChannel _channel =
       const MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
@@ -101,9 +102,9 @@ class FlutterSecureStorage {
           <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
 
   /// Select correct options based on current platform
-  Map<String, String> _selectOptions(
-      IOSOptions iOptions, AndroidOptions aOptions) {
-    return Platform.isIOS ? iOptions?.params : aOptions?.params;
+  Map<String, String> _selectOptions(IOSOptions iOptions, AndroidOptions aOptions) {
+    return Platform.isIOS ? iOptions?.params : {'encryptedSharedPreferences': '$androidEncryptedSharedPreferences'}
+      ..addAll(aOptions?.params ?? {});
   }
 }
 

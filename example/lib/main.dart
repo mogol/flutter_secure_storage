@@ -17,7 +17,7 @@ enum _Actions { deleteAll }
 enum _ItemActions { delete, edit }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
-  final _storage = FlutterSecureStorage();
+  final _storage = FlutterSecureStorage(androidEncryptedSharedPreferences: true);
 
   List<_SecItem> _items = [];
 
@@ -43,8 +43,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   void _addNewItem() async {
-    final String key = _randomValue();
-    final String value = _randomValue();
+    final String key = 'key: ${_randomValue()}';
+    final String value = 'val: ${_randomValue()}';
 
     await _storage.write(key: key, value: value);
     _readAll();
