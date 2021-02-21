@@ -85,9 +85,9 @@ class FlutterSecureStorage {
   /// Can throw a [PlatformException].
   Future<Map<String, String>> readAll(
       {IOSOptions? iOptions, AndroidOptions? aOptions}) async {
-    final Map<String, String>? results = await _channel.invokeMethod('readAll',
+    final Map? results = await _channel.invokeMethod('readAll',
         <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
-    return results!;
+    return results?.cast<String, String>() ?? <String, String>{};
   }
 
   /// Deletes all keys with associated values.
@@ -146,6 +146,7 @@ class IOSOptions extends Options {
 
   final String? _groupId;
   final IOSAccessibility _accessibility;
+
   @override
   Map<String, String> _toMap() {
     final m = <String, String>{};
