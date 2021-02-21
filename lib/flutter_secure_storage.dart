@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 class FlutterSecureStorage {
   const FlutterSecureStorage();
@@ -20,10 +19,10 @@ class FlutterSecureStorage {
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
   Future<void> write(
-          {@required String key,
-          @required String value,
-          IOSOptions iOptions,
-          AndroidOptions aOptions}) =>
+          {required String key,
+          required String? value,
+          IOSOptions? iOptions,
+          AndroidOptions? aOptions}) =>
       value != null
           ? _channel.invokeMethod('write', <String, dynamic>{
               'key': key,
@@ -38,11 +37,11 @@ class FlutterSecureStorage {
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<String> read(
-      {@required String key,
-      IOSOptions iOptions,
-      AndroidOptions aOptions}) async {
-    final String value = await _channel.invokeMethod('read', <String, dynamic>{
+  Future<String?> read(
+      {required String key,
+      IOSOptions? iOptions,
+      AndroidOptions? aOptions}) async {
+    final String? value = await _channel.invokeMethod('read', <String, dynamic>{
       'key': key,
       'options': _selectOptions(iOptions, aOptions)
     });
@@ -56,10 +55,10 @@ class FlutterSecureStorage {
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
   Future<bool> containsKey(
-      {@required String key,
-      IOSOptions iOptions,
-      AndroidOptions aOptions}) async {
-    final String value =
+      {required String key,
+      IOSOptions? iOptions,
+      AndroidOptions? aOptions}) async {
+    final String? value =
         await read(key: key, iOptions: iOptions, aOptions: aOptions);
     return value != null;
   }
@@ -71,9 +70,9 @@ class FlutterSecureStorage {
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
   Future<void> delete(
-          {@required String key,
-          IOSOptions iOptions,
-          AndroidOptions aOptions}) =>
+          {required String key,
+          IOSOptions? iOptions,
+          AndroidOptions? aOptions}) =>
       _channel.invokeMethod('delete', <String, dynamic>{
         'key': key,
         'options': _selectOptions(iOptions, aOptions)
@@ -85,10 +84,10 @@ class FlutterSecureStorage {
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
   Future<Map<String, String>> readAll(
-      {IOSOptions iOptions, AndroidOptions aOptions}) async {
-    final Map results = await _channel.invokeMethod('readAll',
+      {IOSOptions? iOptions, AndroidOptions? aOptions}) async {
+    final Map<String, String>? results = await _channel.invokeMethod('readAll',
         <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
-    return results.cast<String, String>();
+    return results!;
   }
 
   /// Deletes all keys with associated values.
@@ -96,13 +95,13 @@ class FlutterSecureStorage {
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<void> deleteAll({IOSOptions iOptions, AndroidOptions aOptions}) =>
+  Future<void> deleteAll({IOSOptions? iOptions, AndroidOptions? aOptions}) =>
       _channel.invokeMethod('deleteAll',
           <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
 
   /// Select correct options based on current platform
-  Map<String, String> _selectOptions(
-      IOSOptions iOptions, AndroidOptions aOptions) {
+  Map<String, String>? _selectOptions(
+      IOSOptions? iOptions, AndroidOptions? aOptions) {
     return Platform.isIOS ? iOptions?.params : aOptions?.params;
   }
 }
@@ -140,22 +139,20 @@ enum IOSAccessibility {
 
 class IOSOptions extends Options {
   IOSOptions(
-      {String groupId,
+      {String? groupId,
       IOSAccessibility accessibility = IOSAccessibility.unlocked})
       : _groupId = groupId,
         _accessibility = accessibility;
 
-  final String _groupId;
+  final String? _groupId;
   final IOSAccessibility _accessibility;
   @override
   Map<String, String> _toMap() {
     final m = <String, String>{};
     if (_groupId != null) {
-      m['groupId'] = _groupId;
+      m['groupId'] = _groupId!;
     }
-    if (_accessibility != null) {
-      m['accessibility'] = describeEnum(_accessibility);
-    }
+    m['accessibility'] = describeEnum(_accessibility);
     return m;
   }
 }
