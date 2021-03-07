@@ -33,11 +33,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *arguments = [call arguments];
     NSDictionary *options = [arguments[@"options"] isKindOfClass:[NSDictionary class]] ? arguments[@"options"] : nil;
-
+    NSString *accountName = options[@"accountName"];
+    NSString *groupId = options[@"groupId"];
+    
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *groupId = options[@"groupId"];
-        NSString *accountName = options[@"accountName"];
         NSString *value = [self read:key forGroup:groupId forAccountName:accountName];
         
         result(value);
@@ -45,9 +45,8 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if ([@"write" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
-        NSString *groupId = options[@"groupId"];
-        NSString *accountName = options[@"accountName"];
         NSString *accessibility = options[@"accessibility"];
+        
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
@@ -58,20 +57,15 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *groupId = options[@"groupId"];
-        NSString *accountName = options[@"accountName"];
+        
         [self delete:key forGroup:groupId forAccountName:accountName];
         
         result(nil);
     } else if ([@"deleteAll" isEqualToString:call.method]) {
-        NSString *groupId = options[@"groupId"];
-        NSString *accountName = options[@"accountName"];
         [self deleteAll: groupId forAccountName:accountName];
         
         result(nil);
     } else if ([@"readAll" isEqualToString:call.method]) {
-        NSString *groupId = options[@"groupId"];
-        NSString *accountName = options[@"accountName"];
         NSDictionary *value = [self readAll: groupId forAccountName:accountName];
 
         result(value);
@@ -82,9 +76,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility forAccountName:(NSString *)accountName {
     NSMutableDictionary *search = [self.query mutableCopy];
+    
     if(groupId != nil) {
         search[(__bridge id)kSecAttrAccessGroup] = groupId;
     }
+    
     if(accountName != nil) {
         search[(__bridge id)kSecAttrService] = accountName;
     }
