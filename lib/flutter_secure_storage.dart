@@ -13,16 +13,17 @@ class FlutterSecureStorage {
   ///
   /// If the key was already in the storage, its associated value is changed.
   /// If the value is null, deletes associated value for the given [key].
-  /// [key] shoudn't be null.
+  /// [key] shouldn't be null.
   /// [value] required value
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<void> write(
-          {required String key,
-          required String? value,
-          IOSOptions? iOptions,
-          AndroidOptions? aOptions}) =>
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) =>
       value != null
           ? _channel.invokeMethod('write', <String, dynamic>{
               'key': key,
@@ -33,14 +34,15 @@ class FlutterSecureStorage {
 
   /// Decrypts and returns the value for the given [key] or null if [key] is not in the storage.
   ///
-  /// [key] shoudn't be null.
+  /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<String?> read(
-      {required String key,
-      IOSOptions? iOptions,
-      AndroidOptions? aOptions}) async {
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) async {
     final String? value = await _channel.invokeMethod('read', <String, dynamic>{
       'key': key,
       'options': _selectOptions(iOptions, aOptions)
@@ -50,14 +52,15 @@ class FlutterSecureStorage {
 
   /// Returns true if the storage contains the given [key].
   ///
-  /// [key] shoudn't be null.
+  /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<bool> containsKey(
-      {required String key,
-      IOSOptions? iOptions,
-      AndroidOptions? aOptions}) async {
+  Future<bool> containsKey({
+    required String key,
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) async {
     final String? value =
         await read(key: key, iOptions: iOptions, aOptions: aOptions);
     return value != null;
@@ -65,14 +68,15 @@ class FlutterSecureStorage {
 
   /// Deletes associated value for the given [key].
   ///
-  /// [key] shoudn't be null.
+  /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<void> delete(
-          {required String key,
-          IOSOptions? iOptions,
-          AndroidOptions? aOptions}) =>
+  Future<void> delete({
+    required String key,
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) =>
       _channel.invokeMethod('delete', <String, dynamic>{
         'key': key,
         'options': _selectOptions(iOptions, aOptions)
@@ -83,8 +87,10 @@ class FlutterSecureStorage {
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<Map<String, String>> readAll(
-      {IOSOptions? iOptions, AndroidOptions? aOptions}) async {
+  Future<Map<String, String>> readAll({
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) async {
     final Map? results = await _channel.invokeMethod('readAll',
         <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
     return results?.cast<String, String>() ?? <String, String>{};
@@ -95,7 +101,10 @@ class FlutterSecureStorage {
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
   /// Can throw a [PlatformException].
-  Future<void> deleteAll({IOSOptions? iOptions, AndroidOptions? aOptions}) =>
+  Future<void> deleteAll({
+    IOSOptions? iOptions = IOSOptions.defaultOptions,
+    AndroidOptions? aOptions,
+  }) =>
       _channel.invokeMethod('deleteAll',
           <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
 
@@ -107,6 +116,8 @@ class FlutterSecureStorage {
 }
 
 abstract class Options {
+  const Options();
+
   Map<String, String> get params => _toMap();
 
   Map<String, String> _toMap() {
@@ -138,29 +149,42 @@ enum IOSAccessibility {
 }
 
 class IOSOptions extends Options {
-  IOSOptions(
-      {String? groupId,
-      IOSAccessibility accessibility = IOSAccessibility.unlocked})
-      : _groupId = groupId,
-        _accessibility = accessibility;
+  const IOSOptions({
+    String? groupId,
+    String? accountName = IOSOptions.defaultAccountName,
+    IOSAccessibility accessibility = IOSAccessibility.unlocked,
+  })  : _groupId = groupId,
+        _accessibility = accessibility,
+        _accountName = accountName;
+
+  static const defaultAccountName = 'flutter_secure_storage_service';
+
+  static const IOSOptions defaultOptions = IOSOptions();
 
   final String? _groupId;
+  final String? _accountName;
   final IOSAccessibility _accessibility;
 
   @override
-  Map<String, String> _toMap() {
-    final m = <String, String>{};
-    if (_groupId != null) {
-      m['groupId'] = _groupId!;
-    }
-    m['accessibility'] = describeEnum(_accessibility);
-    return m;
-  }
+  Map<String, String> _toMap() => <String, String>{
+        'accessibility': describeEnum(_accessibility),
+        if (_accountName != null) 'accountName': _accountName!,
+        if (_groupId != null) 'groupId': _groupId!,
+      };
+
+  IOSOptions copyWith({
+    String? groupId,
+    String? accountName,
+    IOSAccessibility? accessibility,
+  }) =>
+      IOSOptions(
+        groupId: groupId ?? _groupId,
+        accountName: accountName ?? _accountName,
+        accessibility: accessibility ?? _accessibility,
+      );
 }
 
 class AndroidOptions extends Options {
   @override
-  Map<String, String> _toMap() {
-    return <String, String>{};
-  }
+  Map<String, String> _toMap() => <String, String>{};
 }
