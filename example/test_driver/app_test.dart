@@ -4,8 +4,8 @@ import 'package:test/test.dart';
 void main() {
   group('Secure Storage Example', () {
 
-    HomePageObject pageObject;
-    FlutterDriver driver;
+    late HomePageObject pageObject;
+    late FlutterDriver driver;
 
     // Connect to the Flutter driver before running any tests.
     setUpAll(() async {
@@ -17,10 +17,8 @@ void main() {
 
     // Close the connection to the driver after the tests have completed.
     tearDownAll(() async {
-      if (driver != null) {
-        await pageObject.deleteAll();
-        driver.close();
-      }
+      await pageObject.deleteAll();
+      driver.close();
     });
 
     test('basic operations', () async {

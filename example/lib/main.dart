@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ enum _ItemActions { delete, edit }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
   final _storage = FlutterSecureStorage();
+  final _accountNameController =
+      TextEditingController(text: 'flutter_secure_storage_service');
 
   List<_SecItem> _items = [];
 
@@ -25,20 +28,25 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   void initState() {
     super.initState();
 
+    _accountNameController.addListener(() => _readAll());
     _readAll();
   }
 
   Future<Null> _readAll() async {
-    final all = await _storage.readAll();
+    final all = await _storage.readAll(
+      iOptions: _getIOSOptions(),
+    );
     setState(() {
-      return _items = all.keys
-          .map((key) => _SecItem(key, all[key]))
+      _items = all.entries
+          .map((entry) => _SecItem(entry.key, entry.value))
           .toList(growable: false);
     });
   }
 
   void _deleteAll() async {
-    await _storage.deleteAll();
+    await _storage.deleteAll(
+      iOptions: _getIOSOptions(),
+    );
     _readAll();
   }
 
@@ -46,9 +54,20 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     final String key = _randomValue();
     final String value = _randomValue();
 
-    await _storage.write(key: key, value: value);
+    await _storage.write(
+      key: key,
+      value: value,
+      iOptions: _getIOSOptions(),
+    );
     _readAll();
   }
+
+  IOSOptions _getIOSOptions() => IOSOptions(
+        accountName: _getAccountName(),
+      );
+
+  String? _getAccountName() =>
+      _accountNameController.text.isEmpty ? null : _accountNameController.text;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -78,46 +97,63 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                     ])
           ],
         ),
-        body: ListView.builder(
-          itemCount: _items.length,
-          itemBuilder: (BuildContext context, int index) => ListTile(
-            trailing: PopupMenuButton(
-                key: Key('popup_row_$index'),
-                onSelected: (_ItemActions action) =>
-                    _performAction(action, _items[index]),
-                itemBuilder: (BuildContext context) =>
-                    <PopupMenuEntry<_ItemActions>>[
-                      PopupMenuItem(
-                        value: _ItemActions.delete,
-                        child: Text(
-                          'Delete',
-                          key: Key('delete_row_$index'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: _ItemActions.edit,
-                        child: Text(
-                          'Edit',
-                          key: Key('edit_row_$index'),
-                        ),
-                      ),
-                    ]),
-            title: Text(
-              _items[index].value,
-              key: Key('title_row_$index'),
+        body: Column(
+          children: [
+            if (Platform.isIOS)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: _accountNameController,
+                  decoration: InputDecoration(labelText: 'kSecAttrService'),
+                ),
+              ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _items.length,
+                itemBuilder: (BuildContext context, int index) => ListTile(
+                  trailing: PopupMenuButton(
+                      key: Key('popup_row_$index'),
+                      onSelected: (_ItemActions action) =>
+                          _performAction(action, _items[index]),
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<_ItemActions>>[
+                            PopupMenuItem(
+                              value: _ItemActions.delete,
+                              child: Text(
+                                'Delete',
+                                key: Key('delete_row_$index'),
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: _ItemActions.edit,
+                              child: Text(
+                                'Edit',
+                                key: Key('edit_row_$index'),
+                              ),
+                            ),
+                          ]),
+                  title: Text(
+                    _items[index].value,
+                    key: Key('title_row_$index'),
+                  ),
+                  subtitle: Text(
+                    _items[index].key,
+                    key: Key('subtitle_row_$index'),
+                  ),
+                ),
+              ),
             ),
-            subtitle: Text(
-              _items[index].key,
-              key: Key('subtitle_row_$index'),
-            ),
-          ),
+          ],
         ),
       );
 
   Future<Null> _performAction(_ItemActions action, _SecItem item) async {
     switch (action) {
       case _ItemActions.delete:
-        await _storage.delete(key: item.key);
+        await _storage.delete(
+          key: item.key,
+          iOptions: _getIOSOptions(),
+        );
         _readAll();
 
         break;
@@ -126,7 +162,11 @@ class _ItemsWidgetState extends State<ItemsWidget> {
             context: context,
             builder: (context) => _EditItemWidget(item.value));
         if (result != null) {
-          await _storage.write(key: item.key, value: result);
+          await _storage.write(
+            key: item.key,
+            value: result,
+            iOptions: _getIOSOptions(),
+          );
           _readAll();
         }
         break;
@@ -159,11 +199,11 @@ class _EditItemWidget extends StatelessWidget {
         autofocus: true,
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
             key: Key('cancel'),
             onPressed: () => Navigator.of(context).pop(),
             child: Text('Cancel')),
-        FlatButton(
+        TextButton(
             key: Key('save'),
             onPressed: () => Navigator.of(context).pop(_controller.text),
             child: Text('Save')),

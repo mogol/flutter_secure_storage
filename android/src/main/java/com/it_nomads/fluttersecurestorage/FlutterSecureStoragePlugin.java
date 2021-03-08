@@ -29,6 +29,8 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 @SuppressLint("ApplySharedPref")
 public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlugin {
 
+    private static final String TAG = "FlutterSecureStoragePl";
+
     private MethodChannel channel;
     private SharedPreferences preferences;
     private Charset charset;
@@ -61,19 +63,21 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
           channel = new MethodChannel(messenger, "plugins.it_nomads.com/flutter_secure_storage");
           channel.setMethodCallHandler(this);
       } catch (Exception e) {
-          Log.e("FlutterSecureStoragePl", "Registration failed", e);
+          Log.e(TAG, "Registration failed", e);
       }
     }
 
     private void ensureInitStorageCipher() {
         if (storageCipher == null) {
             try {
-                Log.d("FlutterSecureStoragePl", "Initializing StorageCipher");
+                Log.d(TAG, "Initializing StorageCipher");
                 storageCipher = new StorageCipher18Implementation(applicationContext);
-                Log.d("FlutterSecureStoragePl", "StorageCipher initialization complete");
+                Log.d(TAG, "StorageCipher initialization complete");
             } catch (Exception e) {
-                Log.e("FlutterSecureStoragePl", "StorageCipher initialization failed", e);
+                Log.e(TAG, "StorageCipher initialization failed", e);
             }
+        } else {
+            Log.d(TAG, "StorageCipher already initialized");
         }
     }
 
@@ -179,9 +183,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         @Override
         public void run() {
             try {
-                ensureInitStorageCipher();
                 switch (call.method) {
                     case "write": {
+                        ensureInitStorageCipher();
+
                         String key = getKeyFromCall(call);
                         Map arguments = (Map) call.arguments;
 
@@ -193,11 +198,21 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                     case "read": {
                         String key = getKeyFromCall(call);
 
-                        String value = read(key);
-                        result.success(value);
+                        if (preferences.contains(key)) {
+                            Log.d(TAG, "Read: key exists => Running ensureInitStorageCipher");
+                            ensureInitStorageCipher();
+
+                            String value = read(key);
+                            result.success(value);
+                        } else {
+                            Log.d(TAG, "Read: key not present => Skip ensureInitStorageCipher and return null");
+                            result.success(null);
+                        }
                         break;
                     }
                     case "readAll": {
+                        ensureInitStorageCipher();
+
                         Map<String, String> value = readAll();
                         result.success(value);
                         break;
