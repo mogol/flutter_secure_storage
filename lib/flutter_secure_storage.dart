@@ -22,7 +22,7 @@ class FlutterSecureStorage {
   Future<void> write(
           {required String key,
           required String? value,
-          IOSOptions? iOptions,
+          IOSOptions? iOptions = IOSOptions.defaultOptions,
           AndroidOptions? aOptions,
           LinuxOptions? lOptions}) =>
       value != null
@@ -110,7 +110,7 @@ class FlutterSecureStorage {
   /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
   Future<void> deleteAll(
-          {IOSOptions? iOptions,
+          {IOSOptions? iOptions = IOSOptions.defaultOptions,
           AndroidOptions? aOptions,
           LinuxOptions? lOptions}) =>
       _channel.invokeMethod('deleteAll', <String, dynamic>{
