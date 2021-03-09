@@ -17,18 +17,19 @@ class FlutterSecureStorage {
   /// [value] required value
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<void> write({
-    required String key,
-    required String? value,
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) =>
+  Future<void> write(
+          {required String key,
+          required String? value,
+          IOSOptions? iOptions = IOSOptions.defaultOptions,
+          AndroidOptions? aOptions,
+          LinuxOptions? lOptions}) =>
       value != null
           ? _channel.invokeMethod('write', <String, dynamic>{
               'key': key,
               'value': value,
-              'options': _selectOptions(iOptions, aOptions)
+              'options': _selectOptions(iOptions, aOptions, lOptions)
             })
           : delete(key: key, iOptions: iOptions, aOptions: aOptions);
 
@@ -37,15 +38,16 @@ class FlutterSecureStorage {
   /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<String?> read({
-    required String key,
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) async {
+  Future<String?> read(
+      {required String key,
+      IOSOptions? iOptions = IOSOptions.defaultOptions,
+      AndroidOptions? aOptions,
+      LinuxOptions? lOptions}) async {
     final String? value = await _channel.invokeMethod('read', <String, dynamic>{
       'key': key,
-      'options': _selectOptions(iOptions, aOptions)
+      'options': _selectOptions(iOptions, aOptions, lOptions)
     });
     return value;
   }
@@ -55,12 +57,13 @@ class FlutterSecureStorage {
   /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<bool> containsKey({
-    required String key,
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) async {
+  Future<bool> containsKey(
+      {required String key,
+      IOSOptions? iOptions = IOSOptions.defaultOptions,
+      AndroidOptions? aOptions,
+      LinuxOptions? lOptions}) async {
     final String? value =
         await read(key: key, iOptions: iOptions, aOptions: aOptions);
     return value != null;
@@ -71,46 +74,54 @@ class FlutterSecureStorage {
   /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<void> delete({
-    required String key,
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) =>
+  Future<void> delete(
+          {required String key,
+          IOSOptions? iOptions = IOSOptions.defaultOptions,
+          AndroidOptions? aOptions,
+          LinuxOptions? lOptions}) =>
       _channel.invokeMethod('delete', <String, dynamic>{
         'key': key,
-        'options': _selectOptions(iOptions, aOptions)
+        'options': _selectOptions(iOptions, aOptions, lOptions)
       });
 
   /// Decrypts and returns all keys with associated values.
   ///
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<Map<String, String>> readAll({
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) async {
-    final Map? results = await _channel.invokeMethod('readAll',
-        <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
-    return results?.cast<String, String>() ?? <String, String>{};
+  Future<Map<String, String>> readAll(
+      {IOSOptions? iOptions = IOSOptions.defaultOptions,
+      AndroidOptions? aOptions,
+      LinuxOptions? lOptions}) async {
+    final Map? results = await _channel.invokeMethod<Map>(
+        'readAll', <String, dynamic>{
+      'options': _selectOptions(iOptions, aOptions, lOptions)
+    });
+    return results?.cast<String, String>()  ?? <String, String>{};
   }
 
   /// Deletes all keys with associated values.
   ///
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
+  /// [lOptions] options Linux options
   /// Can throw a [PlatformException].
-  Future<void> deleteAll({
-    IOSOptions? iOptions = IOSOptions.defaultOptions,
-    AndroidOptions? aOptions,
-  }) =>
-      _channel.invokeMethod('deleteAll',
-          <String, dynamic>{'options': _selectOptions(iOptions, aOptions)});
+  Future<void> deleteAll(
+          {IOSOptions? iOptions = IOSOptions.defaultOptions,
+          AndroidOptions? aOptions,
+          LinuxOptions? lOptions}) =>
+      _channel.invokeMethod('deleteAll', <String, dynamic>{
+        'options': _selectOptions(iOptions, aOptions, lOptions)
+      });
 
   /// Select correct options based on current platform
   Map<String, String>? _selectOptions(
-      IOSOptions? iOptions, AndroidOptions? aOptions) {
+      IOSOptions? iOptions, AndroidOptions? aOptions, LinuxOptions? lOptions) {
+    if (Platform.isLinux) 
+      return lOptions?.params;
     return Platform.isIOS ? iOptions?.params : aOptions?.params;
   }
 }
@@ -187,4 +198,11 @@ class IOSOptions extends Options {
 class AndroidOptions extends Options {
   @override
   Map<String, String> _toMap() => <String, String>{};
+}
+
+class LinuxOptions extends Options {
+  @override
+  Map<String, String> _toMap() {
+    return <String, String>{};
+  }
 }
