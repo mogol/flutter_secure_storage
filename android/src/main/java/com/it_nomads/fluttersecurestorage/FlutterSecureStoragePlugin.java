@@ -70,14 +70,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private void ensureInitStorageCipher() {
         if (storageCipher == null) {
             try {
-                Log.d(TAG, "Initializing StorageCipher");
                 storageCipher = new StorageCipher18Implementation(applicationContext);
-                Log.d(TAG, "StorageCipher initialization complete");
             } catch (Exception e) {
                 Log.e(TAG, "StorageCipher initialization failed", e);
             }
-        } else {
-            Log.d(TAG, "StorageCipher already initialized");
         }
     }
 
@@ -199,13 +195,11 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         String key = getKeyFromCall(call);
 
                         if (preferences.contains(key)) {
-                            Log.d(TAG, "Read: key exists => Running ensureInitStorageCipher");
                             ensureInitStorageCipher();
 
                             String value = read(key);
                             result.success(value);
                         } else {
-                            Log.d(TAG, "Read: key not present => Skip ensureInitStorageCipher and return null");
                             result.success(null);
                         }
                         break;
