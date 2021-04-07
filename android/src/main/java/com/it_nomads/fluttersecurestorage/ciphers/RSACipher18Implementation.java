@@ -131,29 +131,29 @@ class RSACipher18Implementation {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             setSystemLocale(config, locale);
             context = context.createConfigurationContext(config);
-        }else{
+        } else {
             setSystemLocaleLegacy(config, locale);
             setContextConfigurationLegacy(context, config);
         }
     }
 
     @SuppressWarnings("deprecation")
-    private void setContextConfigurationLegacy(Context context, Configuration config){
+    private void setContextConfigurationLegacy(Context context, Configuration config) {
         context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
     }
 
     @SuppressWarnings("deprecation")
-    private void setSystemLocaleLegacy(Configuration config, Locale locale){
+    private void setSystemLocaleLegacy(Configuration config, Locale locale) {
         config.locale = locale;
     }
 
     @TargetApi(Build.VERSION_CODES.N)
-    private void setSystemLocale(Configuration config, Locale locale){
+    private void setSystemLocale(Configuration config, Locale locale) {
         config.setLocale(locale);
     }
 
     @SuppressWarnings("deprecation")
-    private AlgorithmParameterSpec makeAlgorithmParameterSpecLegacy(Context context, Calendar start, Calendar end){
+    private AlgorithmParameterSpec makeAlgorithmParameterSpecLegacy(Context context, Calendar start, Calendar end) {
         return new android.security.KeyPairGeneratorSpec.Builder(context)
                 .setAlias(KEY_ALIAS)
                 .setSubject(new X500Principal("CN=" + KEY_ALIAS))
@@ -189,30 +189,13 @@ class RSACipher18Implementation {
                         .setCertificateNotBefore(start.getTime())
                         .setCertificateNotAfter(end.getTime());
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    builder.setIsStrongBoxBacked(true);
-                }
-
                 spec = builder.build();
             }
-            try {
-                Log.i("fluttersecurestorage", "Initializing");
-                kpGenerator.initialize(spec);
-                Log.i("fluttersecurestorage", "Generating key pair");
-                kpGenerator.generateKeyPair();
-            } catch (StrongBoxUnavailableException se) {
-                spec = new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_ENCRYPT)
-                        .setCertificateSubject(new X500Principal("CN=" + KEY_ALIAS))
-                        .setDigests(KeyProperties.DIGEST_SHA256)
-                        .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                        .setCertificateSerialNumber(BigInteger.valueOf(1))
-                        .setCertificateNotBefore(start.getTime())
-                        .setCertificateNotAfter(end.getTime())
-                        .build();
-                kpGenerator.initialize(spec);
-                kpGenerator.generateKeyPair();
-            }
+            
+            Log.i("fluttersecurestorage", "Initializing");
+            kpGenerator.initialize(spec);
+            Log.i("fluttersecurestorage", "Generating key pair");
+            kpGenerator.generateKeyPair();
         } finally {
             setLocale(localeBeforeFakingEnglishLocale);
         }
