@@ -165,7 +165,6 @@ class RSACipher18Implementation {
 
     @SuppressLint("NewApi")
     private void createKeys(Context context) throws Exception {
-        Log.i("fluttersecurestorage", "Creating keys!");
         final Locale localeBeforeFakingEnglishLocale = Locale.getDefault();
         try {
             setLocale(Locale.ENGLISH);
@@ -191,10 +190,8 @@ class RSACipher18Implementation {
 
                 spec = builder.build();
             }
-            
-            Log.i("fluttersecurestorage", "Initializing");
+
             kpGenerator.initialize(spec);
-            Log.i("fluttersecurestorage", "Generating key pair");
             kpGenerator.generateKeyPair();
         } finally {
             setLocale(localeBeforeFakingEnglishLocale);
