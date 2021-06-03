@@ -39,7 +39,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *value = [self read:key forGroup:groupId forAccountName:accountName];
+        NSString *value = [self read:key forGroup:groupId forAccountName:accountName forSynchronizable:synchronizable];
         
         result(value);
     } else
