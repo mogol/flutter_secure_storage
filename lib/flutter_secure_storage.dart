@@ -171,9 +171,11 @@ class IOSOptions extends Options {
     String? groupId,
     String? accountName = IOSOptions.defaultAccountName,
     IOSAccessibility accessibility = IOSAccessibility.unlocked,
+    bool synchronizable = false,
   })  : _groupId = groupId,
         _accessibility = accessibility,
-        _accountName = accountName;
+        _accountName = accountName,
+        _synchronizable = synchronizable;
 
   static const defaultAccountName = 'flutter_secure_storage_service';
 
@@ -182,23 +184,27 @@ class IOSOptions extends Options {
   final String? _groupId;
   final String? _accountName;
   final IOSAccessibility _accessibility;
+  final bool _synchronizable;
 
   @override
   Map<String, String> _toMap() => <String, String>{
         'accessibility': describeEnum(_accessibility),
         if (_accountName != null) 'accountName': _accountName!,
         if (_groupId != null) 'groupId': _groupId!,
+        'synchronizable': '$_synchronizable',
       };
 
   IOSOptions copyWith({
     String? groupId,
     String? accountName,
     IOSAccessibility? accessibility,
+    bool? synchronizable,
   }) =>
       IOSOptions(
         groupId: groupId ?? _groupId,
         accountName: accountName ?? _accountName,
         accessibility: accessibility ?? _accessibility,
+        synchronizable: synchronizable ?? _synchronizable,
       );
 }
 

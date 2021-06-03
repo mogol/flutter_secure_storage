@@ -35,7 +35,8 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     NSDictionary *options = [arguments[@"options"] isKindOfClass:[NSDictionary class]] ? arguments[@"options"] : nil;
     NSString *accountName = options[@"accountName"];
     NSString *groupId = options[@"groupId"];
-    
+    NSString *synchronizable = options[@"synchronizable"];
+
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *value = [self read:key forGroup:groupId forAccountName:accountName];
@@ -46,13 +47,13 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         NSString *accessibility = options[@"accessibility"];
-        
+
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
         }
         
-        [self write:value forKey:key forGroup:groupId accessibilityAttr:accessibility forAccountName:accountName];
+        [self write:value forKey:key forGroup:groupId accessibilityAttr:accessibility forAccountName:accountName forSynchronizable:synchronizable];
         
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
@@ -74,7 +75,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility forAccountName:(NSString *)accountName {
+- (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     
     if(groupId != nil) {
@@ -87,7 +88,12 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
-    
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+
     // The default setting is kSecAttrAccessibleWhenUnlocked
     CFStringRef attrAccessible = kSecAttrAccessibleWhenUnlocked;
     if (accessibility != nil) {
@@ -130,7 +136,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (NSString *)read:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName {
+- (NSString *)read:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     if(groupId != nil) {
      search[(__bridge id)kSecAttrAccessGroup] = groupId;
@@ -140,7 +146,13 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
-    
+
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+
     CFDataRef resultData = NULL;
     
     OSStatus status;
