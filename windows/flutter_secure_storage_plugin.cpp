@@ -164,10 +164,11 @@ void FlutterSecureStoragePlugin::HandleMethodCall(
 
 void FlutterSecureStoragePlugin::Write(const std::string& key, const std::string& val) {
   size_t len = 1 + strlen(val.c_str());
+  CA2W keyw(key.c_str());
 
   CREDENTIALW cred = { 0 };
   cred.Type = CRED_TYPE_GENERIC;
-  cred.TargetName = CA2CT(key.c_str());
+  cred.TargetName = keyw.m_psz;
   cred.CredentialBlobSize = (DWORD)len;
   cred.CredentialBlob = (LPBYTE)val.c_str();
   cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
@@ -181,8 +182,8 @@ void FlutterSecureStoragePlugin::Write(const std::string& key, const std::string
 
 std::optional<std::string> FlutterSecureStoragePlugin::Read(const std::string& key) {
   PCREDENTIALW pcred;
-  LPCWSTR target_name = CA2CT(key.c_str());
-  bool ok = CredReadW(target_name, CRED_TYPE_GENERIC, 0, &pcred);
+  CA2W target_name(key.c_str());
+  bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
 
   if (ok) {
     auto val = std::string((char*)pcred->CredentialBlob);
