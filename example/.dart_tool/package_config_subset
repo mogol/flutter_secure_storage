@@ -258,6 +258,10 @@ flutter_secure_storage
 2.12
 file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage/
 file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage/lib/
+flutter_secure_storage_macos
+2.12
+file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_macos/
+file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_macos/lib/
 flutter_secure_storage_platform_interface
 2.12
 file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_platform_interface/
@@ -266,4 +270,8 @@ flutter_secure_storage_web
 2.12
 file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_web/
 file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_web/lib/
+flutter_secure_storage_windows
+2.12
+file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_windows/
+file:///D:/Repos/GitHub/flutter_secure_storage/flutter_secure_storage_windows/lib/
 2
