@@ -1,5 +1,5 @@
 name: flutter_secure_storage_web
-description: A new Flutter package project.
+description: Web implementation of Flutter Secure Storage.
 version: 0.0.1
 publish_to: none
 
