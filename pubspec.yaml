@@ -17,6 +17,8 @@ flutter:
         pluginClass: FlutterSecureStoragePlugin
       linux:
         pluginClass: FlutterSecureStoragePlugin
+      macos:
+        pluginClass: FlutterSecureStoragePlugin
 
 dependencies:
   meta: '^1.3.0'
