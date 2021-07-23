@@ -18,6 +18,8 @@ dependencies:
     path: ../flutter_secure_storage_windows
   flutter_secure_storage_macos:
     path: ../flutter_secure_storage_macos
+  flutter_secure_storage_linux:
+    path: ../flutter_secure_storage_linux
 
 dev_dependencies:
   flutter_test:

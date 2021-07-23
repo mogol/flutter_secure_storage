@@ -116,6 +116,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_secure_storage_linux",
+      "rootUri": "../../flutter_secure_storage_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_secure_storage_macos",
       "rootUri": "../../flutter_secure_storage_macos",
       "packageUri": "lib/",
@@ -416,7 +422,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2021-07-23T13:54:44.455352Z",
+  "generated": "2021-07-23T14:05:20.507450Z",
   "generator": "pub",
   "generatorVersion": "2.13.4"
 }
