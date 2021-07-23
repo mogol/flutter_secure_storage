@@ -47,7 +47,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         NSString *groupId = options[@"groupId"];
-        NSString *accessibility = options[@"accessibility"];        
+        NSString *accessibility = options[@"accessibility"];
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
@@ -79,6 +79,9 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
 - (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility {
     NSMutableDictionary *search = [self.query mutableCopy];
+    if (@available(macOS 10.15, *)) {
+        search[(__bridge id)kSecUseDataProtectionKeychain] = (__bridge id)kCFBooleanTrue;
+    }
     if(groupId != nil) {
         search[(__bridge id)kSecAttrAccessGroup] = groupId;
     }
