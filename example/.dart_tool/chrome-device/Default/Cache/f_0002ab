@@ -1,0 +1,577 @@
+define(['dart_sdk'], (function load__packages__typed_data__src__typed_buffer_dart(dart_sdk) {
+  'use strict';
+  const core = dart_sdk.core;
+  const typed_data = dart_sdk.typed_data;
+  const collection = dart_sdk.collection;
+  const _native_typed_data = dart_sdk._native_typed_data;
+  const dart = dart_sdk.dart;
+  const dartx = dart_sdk.dartx;
+  var typed_buffer = Object.create(dart.library);
+  var $length = dartx.length;
+  var $_get = dartx._get;
+  var $_set = dartx._set;
+  var $isEmpty = dartx.isEmpty;
+  var $setRange = dartx.setRange;
+  var $elementSizeInBytes = dartx.elementSizeInBytes;
+  var $offsetInBytes = dartx.offsetInBytes;
+  var $buffer = dartx.buffer;
+  var $addAll = dartx.addAll;
+  var $insertAll = dartx.insertAll;
+  dart._checkModuleNullSafetyMode(true);
+  const CT = Object.create({
+    _: () => (C, CT)
+  });
+  var I = ["package:typed_data/src/typed_buffer.dart"];
+  var _buffer = dart.privateName(typed_buffer, "_buffer");
+  var _length = dart.privateName(typed_buffer, "_length");
+  var _typedBuffer = dart.privateName(typed_buffer, "_typedBuffer");
+  var _defaultValue = dart.privateName(typed_buffer, "_defaultValue");
+  var _createBuffer = dart.privateName(typed_buffer, "_createBuffer");
+  var _createBiggerBuffer = dart.privateName(typed_buffer, "_createBiggerBuffer");
+  var _grow = dart.privateName(typed_buffer, "_grow");
+  var _add = dart.privateName(typed_buffer, "_add");
+  var _addAll = dart.privateName(typed_buffer, "_addAll");
+  var _insertKnownLength = dart.privateName(typed_buffer, "_insertKnownLength");
+  var _ensureCapacity = dart.privateName(typed_buffer, "_ensureCapacity");
+  var _setRange = dart.privateName(typed_buffer, "_setRange");
+  const _is_TypedDataBuffer_default = Symbol('_is_TypedDataBuffer_default');
+  typed_buffer.TypedDataBuffer$ = dart.generic(E => {
+    var IterableOfE = () => (IterableOfE = dart.constFn(core.Iterable$(E)))();
+    var TypedDataBufferOfE = () => (TypedDataBufferOfE = dart.constFn(typed_buffer.TypedDataBuffer$(E)))();
+    class TypedDataBuffer extends collection.ListBase$(E) {
+      get [_typedBuffer]() {
+        return typed_data.TypedData.as(this[_buffer]);
+      }
+      get length() {
+        return this[_length];
+      }
+      _get(index) {
+        if (index >= this.length) dart.throw(new core.IndexError.new(index, this));
+        return this[_buffer][$_get](index);
+      }
+      _set(index, value$) {
+        let value = value$;
+        E.as(value);
+        if (index >= this.length) dart.throw(new core.IndexError.new(index, this));
+        this[_buffer][$_set](index, value);
+        return value$;
+      }
+      set length(newLength) {
+        if (newLength < this[_length]) {
+          let defaultValue = this[_defaultValue];
+          for (let i = newLength; i < this[_length]; i = i + 1) {
+            this[_buffer][$_set](i, defaultValue);
+          }
+        } else if (newLength > this[_buffer][$length]) {
+          let newBuffer = null;
+          if (this[_buffer][$isEmpty]) {
+            newBuffer = this[_createBuffer](newLength);
+          } else {
+            newBuffer = this[_createBiggerBuffer](newLength);
+          }
+          newBuffer[$setRange](0, this[_length], this[_buffer]);
+          this[_buffer] = newBuffer;
+        }
+        this[_length] = newLength;
+      }
+      [_add](value) {
+        let t0;
+        if (this[_length] === this[_buffer][$length]) this[_grow](this[_length]);
+        this[_buffer][$_set]((t0 = this[_length], this[_length] = t0 + 1, t0), value);
+      }
+      add(value) {
+        E.as(value);
+        this[_add](value);
+      }
+      addAll(values, start = 0, end = null) {
+        IterableOfE().as(values);
+        core.RangeError.checkNotNegative(start, "start");
+        if (end != null && start > dart.notNull(end)) {
+          dart.throw(new core.RangeError.range(end, start, null, "end"));
+        }
+        this[_addAll](values, start, end);
+      }
+      insertAll(index, values, start = 0, end = null) {
+        let t0;
+        IterableOfE().as(values);
+        core.RangeError.checkValidIndex(index, this, "index", this[_length] + 1);
+        core.RangeError.checkNotNegative(start, "start");
+        if (end != null) {
+          if (start > dart.notNull(end)) {
+            dart.throw(new core.RangeError.range(end, start, null, "end"));
+          }
+          if (start === end) return;
+        }
+        if (index === this[_length]) {
+          this[_addAll](values, start, end);
+          return;
+        }
+        if (end == null && core.List.is(values)) {
+          end = values[$length];
+        }
+        if (end != null) {
+          this[_insertKnownLength](index, values, start, end);
+          return;
+        }
+        let writeIndex = this[_length];
+        let skipCount = start;
+        for (let value of values) {
+          if (skipCount > 0) {
+            skipCount = skipCount - 1;
+            continue;
+          }
+          if (writeIndex === this[_buffer][$length]) {
+            this[_grow](writeIndex);
+          }
+          this[_buffer][$_set]((t0 = writeIndex, writeIndex = t0 + 1, t0), value);
+        }
+        if (skipCount > 0) {
+          dart.throw(new core.StateError.new("Too few elements"));
+        }
+        if (end != null && writeIndex < dart.notNull(end)) {
+          dart.throw(new core.RangeError.range(end, start, writeIndex, "end"));
+        }
+        typed_buffer.TypedDataBuffer._reverse(this[_buffer], index, this[_length]);
+        typed_buffer.TypedDataBuffer._reverse(this[_buffer], this[_length], writeIndex);
+        typed_buffer.TypedDataBuffer._reverse(this[_buffer], index, writeIndex);
+        this[_length] = writeIndex;
+        return;
+      }
+      static _reverse(buffer, start, end) {
+        end = end - 1;
+        while (start < end) {
+          let first = buffer[$_get](start);
+          let last = buffer[$_get](end);
+          buffer[$_set](end, first);
+          buffer[$_set](start, last);
+          start = start + 1;
+          end = end - 1;
+        }
+      }
+      [_addAll](values, start = 0, end = null) {
+        if (core.List.is(values)) end == null ? end = values[$length] : null;
+        if (end != null) {
+          this[_insertKnownLength](this[_length], values, start, end);
+          return;
+        }
+        let i = 0;
+        for (let value of values) {
+          if (i >= start) this.add(value);
+          i = i + 1;
+        }
+        if (i < start) dart.throw(new core.StateError.new("Too few elements"));
+      }
+      [_insertKnownLength](index, values, start, end) {
+        if (core.List.is(values)) {
+          if (start > values[$length] || end > values[$length]) {
+            dart.throw(new core.StateError.new("Too few elements"));
+          }
+        }
+        let valuesLength = end - start;
+        let newLength = this[_length] + valuesLength;
+        this[_ensureCapacity](newLength);
+        this[_buffer][$setRange](index + valuesLength, this[_length] + valuesLength, this[_buffer], index);
+        this[_buffer][$setRange](index, index + valuesLength, values, start);
+        this[_length] = newLength;
+      }
+      insert(index, element) {
+        E.as(element);
+        if (index < 0 || index > this[_length]) {
+          dart.throw(new core.RangeError.range(index, 0, this[_length]));
+        }
+        if (this[_length] < this[_buffer][$length]) {
+          this[_buffer][$setRange](index + 1, this[_length] + 1, this[_buffer], index);
+          this[_buffer][$_set](index, element);
+          this[_length] = this[_length] + 1;
+          return;
+        }
+        let newBuffer = this[_createBiggerBuffer](null);
+        newBuffer[$setRange](0, index, this[_buffer]);
+        newBuffer[$setRange](index + 1, this[_length] + 1, this[_buffer], index);
+        newBuffer[$_set](index, element);
+        this[_length] = this[_length] + 1;
+        this[_buffer] = newBuffer;
+      }
+      [_ensureCapacity](requiredCapacity) {
+        if (requiredCapacity <= this[_buffer][$length]) return;
+        let newBuffer = this[_createBiggerBuffer](requiredCapacity);
+        newBuffer[$setRange](0, this[_length], this[_buffer]);
+        this[_buffer] = newBuffer;
+      }
+      [_createBiggerBuffer](requiredCapacity) {
+        let newLength = this[_buffer][$length] * 2;
+        if (requiredCapacity != null && dart.notNull(newLength) < dart.notNull(requiredCapacity)) {
+          newLength = requiredCapacity;
+        } else if (dart.notNull(newLength) < 8) {
+          newLength = 8;
+        }
+        return this[_createBuffer](newLength);
+      }
+      [_grow](length) {
+        let t0;
+        this[_buffer] = (t0 = this[_createBiggerBuffer](null), (() => {
+          t0[$setRange](0, length, this[_buffer]);
+          return t0;
+        })());
+      }
+      setRange(start, end, source, skipCount = 0) {
+        IterableOfE().as(source);
+        if (end > this[_length]) dart.throw(new core.RangeError.range(end, 0, this[_length]));
+        this[_setRange](start, end, source, skipCount);
+      }
+      [_setRange](start, end, source, skipCount) {
+        if (TypedDataBufferOfE().is(source)) {
+          this[_buffer][$setRange](start, end, source[_buffer], skipCount);
+        } else {
+          this[_buffer][$setRange](start, end, source, skipCount);
+        }
+      }
+      get elementSizeInBytes() {
+        return this[_typedBuffer][$elementSizeInBytes];
+      }
+      get lengthInBytes() {
+        return this[_length] * this[_typedBuffer][$elementSizeInBytes];
+      }
+      get offsetInBytes() {
+        return this[_typedBuffer][$offsetInBytes];
+      }
+      get buffer() {
+        return this[_typedBuffer][$buffer];
+      }
+    }
+    (TypedDataBuffer.new = function(buffer) {
+      this[_buffer] = buffer;
+      this[_length] = buffer[$length];
+      ;
+    }).prototype = TypedDataBuffer.prototype;
+    dart.addTypeTests(TypedDataBuffer);
+    TypedDataBuffer.prototype[_is_TypedDataBuffer_default] = true;
+    dart.addTypeCaches(TypedDataBuffer);
+    dart.setMethodSignature(TypedDataBuffer, () => ({
+      __proto__: dart.getMethods(TypedDataBuffer.__proto__),
+      _get: dart.fnType(E, [core.int]),
+      [$_get]: dart.fnType(E, [core.int]),
+      _set: dart.fnType(dart.void, [core.int, dart.nullable(core.Object)]),
+      [$_set]: dart.fnType(dart.void, [core.int, dart.nullable(core.Object)]),
+      [_add]: dart.fnType(dart.void, [E]),
+      addAll: dart.fnType(dart.void, [dart.nullable(core.Object)], [core.int, dart.nullable(core.int)]),
+      [$addAll]: dart.fnType(dart.void, [dart.nullable(core.Object)], [core.int, dart.nullable(core.int)]),
+      insertAll: dart.fnType(dart.void, [core.int, dart.nullable(core.Object)], [core.int, dart.nullable(core.int)]),
+      [$insertAll]: dart.fnType(dart.void, [core.int, dart.nullable(core.Object)], [core.int, dart.nullable(core.int)]),
+      [_addAll]: dart.fnType(dart.void, [core.Iterable$(E)], [core.int, dart.nullable(core.int)]),
+      [_insertKnownLength]: dart.fnType(dart.void, [core.int, core.Iterable$(E), core.int, core.int]),
+      [_ensureCapacity]: dart.fnType(dart.void, [core.int]),
+      [_createBiggerBuffer]: dart.fnType(core.List$(E), [dart.nullable(core.int)]),
+      [_grow]: dart.fnType(dart.void, [core.int]),
+      [_setRange]: dart.fnType(dart.void, [core.int, core.int, core.Iterable$(E), core.int])
+    }));
+    dart.setGetterSignature(TypedDataBuffer, () => ({
+      __proto__: dart.getGetters(TypedDataBuffer.__proto__),
+      [_typedBuffer]: typed_data.TypedData,
+      length: core.int,
+      [$length]: core.int,
+      elementSizeInBytes: core.int,
+      lengthInBytes: core.int,
+      offsetInBytes: core.int,
+      buffer: typed_data.ByteBuffer
+    }));
+    dart.setSetterSignature(TypedDataBuffer, () => ({
+      __proto__: dart.getSetters(TypedDataBuffer.__proto__),
+      length: core.int,
+      [$length]: core.int
+    }));
+    dart.setLibraryUri(TypedDataBuffer, I[0]);
+    dart.setFieldSignature(TypedDataBuffer, () => ({
+      __proto__: dart.getFields(TypedDataBuffer.__proto__),
+      [_buffer]: dart.fieldType(core.List$(E)),
+      [_length]: dart.fieldType(core.int)
+    }));
+    dart.defineExtensionMethods(TypedDataBuffer, [
+      '_get',
+      '_set',
+      'add',
+      'addAll',
+      'insertAll',
+      'insert',
+      'setRange'
+    ]);
+    dart.defineExtensionAccessors(TypedDataBuffer, ['length']);
+    return TypedDataBuffer;
+  });
+  typed_buffer.TypedDataBuffer = typed_buffer.TypedDataBuffer$();
+  dart.defineLazy(typed_buffer.TypedDataBuffer, {
+    /*typed_buffer.TypedDataBuffer._initialLength*/get _initialLength() {
+      return 8;
+    }
+  }, false);
+  dart.addTypeTests(typed_buffer.TypedDataBuffer, _is_TypedDataBuffer_default);
+  typed_buffer._IntBuffer = class _IntBuffer extends typed_buffer.TypedDataBuffer$(core.int) {
+    get [_defaultValue]() {
+      return 0;
+    }
+  };
+  (typed_buffer._IntBuffer.new = function(buffer) {
+    typed_buffer._IntBuffer.__proto__.new.call(this, buffer);
+    ;
+  }).prototype = typed_buffer._IntBuffer.prototype;
+  dart.addTypeTests(typed_buffer._IntBuffer);
+  dart.addTypeCaches(typed_buffer._IntBuffer);
+  dart.setGetterSignature(typed_buffer._IntBuffer, () => ({
+    __proto__: dart.getGetters(typed_buffer._IntBuffer.__proto__),
+    [_defaultValue]: core.int
+  }));
+  dart.setLibraryUri(typed_buffer._IntBuffer, I[0]);
+  typed_buffer._FloatBuffer = class _FloatBuffer extends typed_buffer.TypedDataBuffer$(core.double) {
+    get [_defaultValue]() {
+      return 0.0;
+    }
+  };
+  (typed_buffer._FloatBuffer.new = function(buffer) {
+    typed_buffer._FloatBuffer.__proto__.new.call(this, buffer);
+    ;
+  }).prototype = typed_buffer._FloatBuffer.prototype;
+  dart.addTypeTests(typed_buffer._FloatBuffer);
+  dart.addTypeCaches(typed_buffer._FloatBuffer);
+  dart.setGetterSignature(typed_buffer._FloatBuffer, () => ({
+    __proto__: dart.getGetters(typed_buffer._FloatBuffer.__proto__),
+    [_defaultValue]: core.double
+  }));
+  dart.setLibraryUri(typed_buffer._FloatBuffer, I[0]);
+  typed_buffer.Uint8Buffer = class Uint8Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeUint8List.new(size);
+    }
+  };
+  (typed_buffer.Uint8Buffer.new = function(initialLength = 0) {
+    typed_buffer.Uint8Buffer.__proto__.new.call(this, _native_typed_data.NativeUint8List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Uint8Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Uint8Buffer);
+  dart.addTypeCaches(typed_buffer.Uint8Buffer);
+  dart.setMethodSignature(typed_buffer.Uint8Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Uint8Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Uint8List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Uint8Buffer, I[0]);
+  typed_buffer.Int8Buffer = class Int8Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeInt8List.new(size);
+    }
+  };
+  (typed_buffer.Int8Buffer.new = function(initialLength = 0) {
+    typed_buffer.Int8Buffer.__proto__.new.call(this, _native_typed_data.NativeInt8List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Int8Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Int8Buffer);
+  dart.addTypeCaches(typed_buffer.Int8Buffer);
+  dart.setMethodSignature(typed_buffer.Int8Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Int8Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Int8List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Int8Buffer, I[0]);
+  typed_buffer.Uint8ClampedBuffer = class Uint8ClampedBuffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeUint8ClampedList.new(size);
+    }
+  };
+  (typed_buffer.Uint8ClampedBuffer.new = function(initialLength = 0) {
+    typed_buffer.Uint8ClampedBuffer.__proto__.new.call(this, _native_typed_data.NativeUint8ClampedList.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Uint8ClampedBuffer.prototype;
+  dart.addTypeTests(typed_buffer.Uint8ClampedBuffer);
+  dart.addTypeCaches(typed_buffer.Uint8ClampedBuffer);
+  dart.setMethodSignature(typed_buffer.Uint8ClampedBuffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Uint8ClampedBuffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Uint8ClampedList, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Uint8ClampedBuffer, I[0]);
+  typed_buffer.Uint16Buffer = class Uint16Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeUint16List.new(size);
+    }
+  };
+  (typed_buffer.Uint16Buffer.new = function(initialLength = 0) {
+    typed_buffer.Uint16Buffer.__proto__.new.call(this, _native_typed_data.NativeUint16List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Uint16Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Uint16Buffer);
+  dart.addTypeCaches(typed_buffer.Uint16Buffer);
+  dart.setMethodSignature(typed_buffer.Uint16Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Uint16Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Uint16List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Uint16Buffer, I[0]);
+  typed_buffer.Int16Buffer = class Int16Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeInt16List.new(size);
+    }
+  };
+  (typed_buffer.Int16Buffer.new = function(initialLength = 0) {
+    typed_buffer.Int16Buffer.__proto__.new.call(this, _native_typed_data.NativeInt16List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Int16Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Int16Buffer);
+  dart.addTypeCaches(typed_buffer.Int16Buffer);
+  dart.setMethodSignature(typed_buffer.Int16Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Int16Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Int16List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Int16Buffer, I[0]);
+  typed_buffer.Uint32Buffer = class Uint32Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeUint32List.new(size);
+    }
+  };
+  (typed_buffer.Uint32Buffer.new = function(initialLength = 0) {
+    typed_buffer.Uint32Buffer.__proto__.new.call(this, _native_typed_data.NativeUint32List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Uint32Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Uint32Buffer);
+  dart.addTypeCaches(typed_buffer.Uint32Buffer);
+  dart.setMethodSignature(typed_buffer.Uint32Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Uint32Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Uint32List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Uint32Buffer, I[0]);
+  typed_buffer.Int32Buffer = class Int32Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeInt32List.new(size);
+    }
+  };
+  (typed_buffer.Int32Buffer.new = function(initialLength = 0) {
+    typed_buffer.Int32Buffer.__proto__.new.call(this, _native_typed_data.NativeInt32List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Int32Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Int32Buffer);
+  dart.addTypeCaches(typed_buffer.Int32Buffer);
+  dart.setMethodSignature(typed_buffer.Int32Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Int32Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Int32List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Int32Buffer, I[0]);
+  typed_buffer.Uint64Buffer = class Uint64Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return typed_data.Uint64List.new(size);
+    }
+  };
+  (typed_buffer.Uint64Buffer.new = function(initialLength = 0) {
+    typed_buffer.Uint64Buffer.__proto__.new.call(this, typed_data.Uint64List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Uint64Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Uint64Buffer);
+  dart.addTypeCaches(typed_buffer.Uint64Buffer);
+  dart.setMethodSignature(typed_buffer.Uint64Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Uint64Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Uint64List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Uint64Buffer, I[0]);
+  typed_buffer.Int64Buffer = class Int64Buffer extends typed_buffer._IntBuffer {
+    [_createBuffer](size) {
+      return typed_data.Int64List.new(size);
+    }
+  };
+  (typed_buffer.Int64Buffer.new = function(initialLength = 0) {
+    typed_buffer.Int64Buffer.__proto__.new.call(this, typed_data.Int64List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Int64Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Int64Buffer);
+  dart.addTypeCaches(typed_buffer.Int64Buffer);
+  dart.setMethodSignature(typed_buffer.Int64Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Int64Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Int64List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Int64Buffer, I[0]);
+  typed_buffer.Float32Buffer = class Float32Buffer extends typed_buffer._FloatBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeFloat32List.new(size);
+    }
+  };
+  (typed_buffer.Float32Buffer.new = function(initialLength = 0) {
+    typed_buffer.Float32Buffer.__proto__.new.call(this, _native_typed_data.NativeFloat32List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Float32Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Float32Buffer);
+  dart.addTypeCaches(typed_buffer.Float32Buffer);
+  dart.setMethodSignature(typed_buffer.Float32Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Float32Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Float32List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Float32Buffer, I[0]);
+  typed_buffer.Float64Buffer = class Float64Buffer extends typed_buffer._FloatBuffer {
+    [_createBuffer](size) {
+      return _native_typed_data.NativeFloat64List.new(size);
+    }
+  };
+  (typed_buffer.Float64Buffer.new = function(initialLength = 0) {
+    typed_buffer.Float64Buffer.__proto__.new.call(this, _native_typed_data.NativeFloat64List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Float64Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Float64Buffer);
+  dart.addTypeCaches(typed_buffer.Float64Buffer);
+  dart.setMethodSignature(typed_buffer.Float64Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Float64Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Float64List, [core.int])
+  }));
+  dart.setLibraryUri(typed_buffer.Float64Buffer, I[0]);
+  typed_buffer.Int32x4Buffer = class Int32x4Buffer extends typed_buffer.TypedDataBuffer$(typed_data.Int32x4) {
+    get [_defaultValue]() {
+      return typed_buffer.Int32x4Buffer._zero;
+    }
+    [_createBuffer](size) {
+      return new _native_typed_data.NativeInt32x4List.new(size);
+    }
+  };
+  (typed_buffer.Int32x4Buffer.new = function(initialLength = 0) {
+    typed_buffer.Int32x4Buffer.__proto__.new.call(this, new _native_typed_data.NativeInt32x4List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Int32x4Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Int32x4Buffer);
+  dart.addTypeCaches(typed_buffer.Int32x4Buffer);
+  dart.setMethodSignature(typed_buffer.Int32x4Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Int32x4Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Int32x4List, [core.int])
+  }));
+  dart.setGetterSignature(typed_buffer.Int32x4Buffer, () => ({
+    __proto__: dart.getGetters(typed_buffer.Int32x4Buffer.__proto__),
+    [_defaultValue]: typed_data.Int32x4
+  }));
+  dart.setLibraryUri(typed_buffer.Int32x4Buffer, I[0]);
+  dart.defineLazy(typed_buffer.Int32x4Buffer, {
+    /*typed_buffer.Int32x4Buffer._zero*/get _zero() {
+      return new _native_typed_data.NativeInt32x4.new(0, 0, 0, 0);
+    }
+  }, false);
+  typed_buffer.Float32x4Buffer = class Float32x4Buffer extends typed_buffer.TypedDataBuffer$(typed_data.Float32x4) {
+    get [_defaultValue]() {
+      return new _native_typed_data.NativeFloat32x4.zero();
+    }
+    [_createBuffer](size) {
+      return new _native_typed_data.NativeFloat32x4List.new(size);
+    }
+  };
+  (typed_buffer.Float32x4Buffer.new = function(initialLength = 0) {
+    typed_buffer.Float32x4Buffer.__proto__.new.call(this, new _native_typed_data.NativeFloat32x4List.new(initialLength));
+    ;
+  }).prototype = typed_buffer.Float32x4Buffer.prototype;
+  dart.addTypeTests(typed_buffer.Float32x4Buffer);
+  dart.addTypeCaches(typed_buffer.Float32x4Buffer);
+  dart.setMethodSignature(typed_buffer.Float32x4Buffer, () => ({
+    __proto__: dart.getMethods(typed_buffer.Float32x4Buffer.__proto__),
+    [_createBuffer]: dart.fnType(typed_data.Float32x4List, [core.int])
+  }));
+  dart.setGetterSignature(typed_buffer.Float32x4Buffer, () => ({
+    __proto__: dart.getGetters(typed_buffer.Float32x4Buffer.__proto__),
+    [_defaultValue]: typed_data.Float32x4
+  }));
+  dart.setLibraryUri(typed_buffer.Float32x4Buffer, I[0]);
+  dart.trackLibraries("packages/typed_data/src/typed_buffer.dart", {
+    "package:typed_data/src/typed_buffer.dart": typed_buffer
+  }, {
+  }, '{"version":3,"sourceRoot":"","sources":["typed_buffer.dart"],"names":[],"mappings":"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","file":"../../../../../../../../../../D:/packages/typed_data/src/typed_buffer.dart.lib.js"}');
+  // Exports:
+  return {
+    src__typed_buffer: typed_buffer
+  };
+}));
+
+//# sourceMappingURL=typed_buffer.dart.lib.js.map

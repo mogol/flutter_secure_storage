@@ -1,0 +1,539 @@
+define(['dart_sdk', 'packages/flutter/src/painting/basic_types.dart', 'packages/flutter/src/widgets/widget_span.dart', 'packages/flutter/src/foundation/debug.dart', 'packages/flutter/src/rendering/layer.dart'], (function load__packages__flutter__src__widgets__overflow_bar_dart(dart_sdk, packages__flutter__src__painting__basic_types$46dart, packages__flutter__src__widgets__widget_span$46dart, packages__flutter__src__foundation__debug$46dart, packages__flutter__src__rendering__layer$46dart) {
+  'use strict';
+  const core = dart_sdk.core;
+  const ui = dart_sdk.ui;
+  const math = dart_sdk.math;
+  const dart = dart_sdk.dart;
+  const dartx = dart_sdk.dartx;
+  const basic_types = packages__flutter__src__painting__basic_types$46dart.src__painting__basic_types;
+  const framework = packages__flutter__src__widgets__widget_span$46dart.src__widgets__framework;
+  const basic = packages__flutter__src__widgets__widget_span$46dart.src__widgets__basic;
+  const diagnostics = packages__flutter__src__foundation__debug$46dart.src__foundation__diagnostics;
+  const box = packages__flutter__src__rendering__layer$46dart.src__rendering__box;
+  const object = packages__flutter__src__rendering__layer$46dart.src__rendering__object;
+  var overflow_bar = Object.create(dart.library);
+  dart._checkModuleNullSafetyMode(true);
+  var T = {
+    EnumPropertyOfOverflowBarAlignment: () => (T.EnumPropertyOfOverflowBarAlignment = dart.constFn(diagnostics.EnumProperty$(overflow_bar.OverflowBarAlignment)))(),
+    EnumPropertyOfVerticalDirection: () => (T.EnumPropertyOfVerticalDirection = dart.constFn(diagnostics.EnumProperty$(basic_types.VerticalDirection)))(),
+    EnumPropertyOfTextDirection: () => (T.EnumPropertyOfTextDirection = dart.constFn(diagnostics.EnumProperty$(ui.TextDirection)))(),
+    RenderBoxN: () => (T.RenderBoxN = dart.constFn(dart.nullable(box.RenderBox)))(),
+    VoidToRenderBoxN: () => (T.VoidToRenderBoxN = dart.constFn(dart.fnType(T.RenderBoxN(), [])))()
+  };
+  const CT = Object.create({
+    _: () => (C, CT)
+  });
+  dart.defineLazy(CT, {
+    get C0() {
+      return C[0] = dart.const({
+        __proto__: overflow_bar.OverflowBarAlignment.prototype,
+        [_name$]: "OverflowBarAlignment.start",
+        index: 0
+      });
+    },
+    get C1() {
+      return C[1] = dart.const({
+        __proto__: overflow_bar.OverflowBarAlignment.prototype,
+        [_name$]: "OverflowBarAlignment.end",
+        index: 1
+      });
+    },
+    get C2() {
+      return C[2] = dart.const({
+        __proto__: overflow_bar.OverflowBarAlignment.prototype,
+        [_name$]: "OverflowBarAlignment.center",
+        index: 2
+      });
+    },
+    get C3() {
+      return C[3] = dart.constList([C[0] || CT.C0, C[1] || CT.C1, C[2] || CT.C2], overflow_bar.OverflowBarAlignment);
+    },
+    get C4() {
+      return C[4] = dart.const({
+        __proto__: basic_types.VerticalDirection.prototype,
+        [_name]: "VerticalDirection.down",
+        index: 1
+      });
+    },
+    get C5() {
+      return C[5] = dart.const({
+        __proto__: ui.Clip.prototype,
+        [_name$0]: "Clip.none",
+        index: 0
+      });
+    },
+    get C6() {
+      return C[6] = dart.constList([], framework.Widget);
+    }
+  }, false);
+  var C = Array(7).fill(void 0);
+  var I = [
+    "package:flutter/src/widgets/overflow_bar.dart",
+    "file:///C:/Users/jrlh/flutter/packages/flutter/lib/src/widgets/overflow_bar.dart"
+  ];
+  var _name$ = dart.privateName(overflow_bar, "_name");
+  overflow_bar.OverflowBarAlignment = class OverflowBarAlignment extends core.Object {
+    toString() {
+      return this[_name$];
+    }
+  };
+  (overflow_bar.OverflowBarAlignment.new = function(index, _name) {
+    this.index = index;
+    this[_name$] = _name;
+    ;
+  }).prototype = overflow_bar.OverflowBarAlignment.prototype;
+  dart.addTypeTests(overflow_bar.OverflowBarAlignment);
+  dart.addTypeCaches(overflow_bar.OverflowBarAlignment);
+  dart.setLibraryUri(overflow_bar.OverflowBarAlignment, I[0]);
+  dart.setFieldSignature(overflow_bar.OverflowBarAlignment, () => ({
+    __proto__: dart.getFields(overflow_bar.OverflowBarAlignment.__proto__),
+    index: dart.finalFieldType(core.int),
+    [_name$]: dart.finalFieldType(core.String)
+  }));
+  dart.defineExtensionMethods(overflow_bar.OverflowBarAlignment, ['toString']);
+  overflow_bar.OverflowBarAlignment.start = C[0] || CT.C0;
+  overflow_bar.OverflowBarAlignment.end = C[1] || CT.C1;
+  overflow_bar.OverflowBarAlignment.center = C[2] || CT.C2;
+  overflow_bar.OverflowBarAlignment.values = C[3] || CT.C3;
+  var spacing$ = dart.privateName(overflow_bar, "OverflowBar.spacing");
+  var overflowSpacing$ = dart.privateName(overflow_bar, "OverflowBar.overflowSpacing");
+  var overflowAlignment$ = dart.privateName(overflow_bar, "OverflowBar.overflowAlignment");
+  var overflowDirection$ = dart.privateName(overflow_bar, "OverflowBar.overflowDirection");
+  var textDirection$ = dart.privateName(overflow_bar, "OverflowBar.textDirection");
+  var clipBehavior$ = dart.privateName(overflow_bar, "OverflowBar.clipBehavior");
+  var _name = dart.privateName(basic_types, "_name");
+  var _name$0 = dart.privateName(ui, "_name");
+  overflow_bar.OverflowBar = class OverflowBar extends framework.MultiChildRenderObjectWidget {
+    get spacing() {
+      return this[spacing$];
+    }
+    set spacing(value) {
+      super.spacing = value;
+    }
+    get overflowSpacing() {
+      return this[overflowSpacing$];
+    }
+    set overflowSpacing(value) {
+      super.overflowSpacing = value;
+    }
+    get overflowAlignment() {
+      return this[overflowAlignment$];
+    }
+    set overflowAlignment(value) {
+      super.overflowAlignment = value;
+    }
+    get overflowDirection() {
+      return this[overflowDirection$];
+    }
+    set overflowDirection(value) {
+      super.overflowDirection = value;
+    }
+    get textDirection() {
+      return this[textDirection$];
+    }
+    set textDirection(value) {
+      super.textDirection = value;
+    }
+    get clipBehavior() {
+      return this[clipBehavior$];
+    }
+    set clipBehavior(value) {
+      super.clipBehavior = value;
+    }
+    createRenderObject(context) {
+      let t0;
+      return new overflow_bar._RenderOverflowBar.new({spacing: this.spacing, overflowSpacing: this.overflowSpacing, overflowAlignment: this.overflowAlignment, overflowDirection: this.overflowDirection, textDirection: (t0 = this.textDirection, t0 == null ? basic.Directionality.of(context) : t0), clipBehavior: this.clipBehavior});
+    }
+    updateRenderObject(context, renderObject) {
+      let t1, t0;
+      overflow_bar._RenderOverflowBar.as(renderObject);
+      t0 = renderObject;
+      (() => {
+        t0.spacing = this.spacing;
+        t0.overflowSpacing = this.overflowSpacing;
+        t0.overflowAlignment = this.overflowAlignment;
+        t0.overflowDirection = this.overflowDirection;
+        t0.textDirection = (t1 = this.textDirection, t1 == null ? basic.Directionality.of(context) : t1);
+        t0.clipBehavior = this.clipBehavior;
+        return t0;
+      })();
+    }
+    debugFillProperties(properties) {
+      super.debugFillProperties(properties);
+      properties.add(new diagnostics.DoubleProperty.new("spacing", this.spacing, {defaultValue: 0}));
+      properties.add(new diagnostics.DoubleProperty.new("overflowSpacing", this.overflowSpacing, {defaultValue: 0}));
+      properties.add(new (T.EnumPropertyOfOverflowBarAlignment()).new("overflowAlignment", this.overflowAlignment, {defaultValue: overflow_bar.OverflowBarAlignment.start}));
+      properties.add(new (T.EnumPropertyOfVerticalDirection()).new("overflowDirection", this.overflowDirection, {defaultValue: basic_types.VerticalDirection.down}));
+      properties.add(new (T.EnumPropertyOfTextDirection()).new("textDirection", this.textDirection, {defaultValue: null}));
+    }
+  };
+  (overflow_bar.OverflowBar.new = function(opts) {
+    let key = opts && 'key' in opts ? opts.key : null;
+    let spacing = opts && 'spacing' in opts ? opts.spacing : 0;
+    let overflowSpacing = opts && 'overflowSpacing' in opts ? opts.overflowSpacing : 0;
+    let overflowAlignment = opts && 'overflowAlignment' in opts ? opts.overflowAlignment : C[0] || CT.C0;
+    let overflowDirection = opts && 'overflowDirection' in opts ? opts.overflowDirection : C[4] || CT.C4;
+    let textDirection = opts && 'textDirection' in opts ? opts.textDirection : null;
+    let clipBehavior = opts && 'clipBehavior' in opts ? opts.clipBehavior : C[5] || CT.C5;
+    let children = opts && 'children' in opts ? opts.children : C[6] || CT.C6;
+    let $36creationLocationd_0dea112b090073317d4 = opts && '$creationLocationd_0dea112b090073317d4' in opts ? opts.$creationLocationd_0dea112b090073317d4 : null;
+    this[spacing$] = spacing;
+    this[overflowSpacing$] = overflowSpacing;
+    this[overflowAlignment$] = overflowAlignment;
+    this[overflowDirection$] = overflowDirection;
+    this[textDirection$] = textDirection;
+    this[clipBehavior$] = clipBehavior;
+    if (!(spacing !== null)) dart.assertFailed(null, I[1], 112, 15, "spacing != null");
+    if (!(overflowSpacing !== null)) dart.assertFailed(null, I[1], 113, 15, "overflowSpacing != null");
+    if (!(overflowAlignment !== null)) dart.assertFailed(null, I[1], 114, 15, "overflowAlignment != null");
+    if (!(overflowDirection !== null)) dart.assertFailed(null, I[1], 115, 15, "overflowDirection != null");
+    if (!(clipBehavior !== null)) dart.assertFailed(null, I[1], 116, 15, "clipBehavior != null");
+    overflow_bar.OverflowBar.__proto__.new.call(this, {key: key, children: children, $creationLocationd_0dea112b090073317d4: $36creationLocationd_0dea112b090073317d4});
+    ;
+  }).prototype = overflow_bar.OverflowBar.prototype;
+  dart.addTypeTests(overflow_bar.OverflowBar);
+  dart.addTypeCaches(overflow_bar.OverflowBar);
+  dart.setMethodSignature(overflow_bar.OverflowBar, () => ({
+    __proto__: dart.getMethods(overflow_bar.OverflowBar.__proto__),
+    createRenderObject: dart.fnType(overflow_bar._RenderOverflowBar, [framework.BuildContext])
+  }));
+  dart.setLibraryUri(overflow_bar.OverflowBar, I[0]);
+  dart.setFieldSignature(overflow_bar.OverflowBar, () => ({
+    __proto__: dart.getFields(overflow_bar.OverflowBar.__proto__),
+    spacing: dart.finalFieldType(core.double),
+    overflowSpacing: dart.finalFieldType(core.double),
+    overflowAlignment: dart.finalFieldType(overflow_bar.OverflowBarAlignment),
+    overflowDirection: dart.finalFieldType(basic_types.VerticalDirection),
+    textDirection: dart.finalFieldType(dart.nullable(ui.TextDirection)),
+    clipBehavior: dart.finalFieldType(ui.Clip)
+  }));
+  overflow_bar._OverflowBarParentData = class _OverflowBarParentData extends box.ContainerBoxParentData$(box.RenderBox) {};
+  (overflow_bar._OverflowBarParentData.new = function() {
+    overflow_bar._OverflowBarParentData.__proto__.new.call(this);
+    ;
+  }).prototype = overflow_bar._OverflowBarParentData.prototype;
+  dart.addTypeTests(overflow_bar._OverflowBarParentData);
+  dart.addTypeCaches(overflow_bar._OverflowBarParentData);
+  dart.setLibraryUri(overflow_bar._OverflowBarParentData, I[0]);
+  var _clipBehavior = dart.privateName(overflow_bar, "_clipBehavior");
+  var _spacing = dart.privateName(overflow_bar, "_spacing");
+  var _overflowSpacing = dart.privateName(overflow_bar, "_overflowSpacing");
+  var _overflowAlignment = dart.privateName(overflow_bar, "_overflowAlignment");
+  var _overflowDirection = dart.privateName(overflow_bar, "_overflowDirection");
+  var _textDirection = dart.privateName(overflow_bar, "_textDirection");
+  const RenderBox_ContainerRenderObjectMixin$36 = class RenderBox_ContainerRenderObjectMixin extends box.RenderBox {};
+  (RenderBox_ContainerRenderObjectMixin$36.new = function() {
+    object.ContainerRenderObjectMixin$(box.RenderBox, overflow_bar._OverflowBarParentData)[dart.mixinNew].call(this);
+    RenderBox_ContainerRenderObjectMixin$36.__proto__.new.call(this);
+  }).prototype = RenderBox_ContainerRenderObjectMixin$36.prototype;
+  dart.applyMixin(RenderBox_ContainerRenderObjectMixin$36, object.ContainerRenderObjectMixin$(box.RenderBox, overflow_bar._OverflowBarParentData));
+  const RenderBox_RenderBoxContainerDefaultsMixin$36 = class RenderBox_RenderBoxContainerDefaultsMixin extends RenderBox_ContainerRenderObjectMixin$36 {};
+  (RenderBox_RenderBoxContainerDefaultsMixin$36.new = function() {
+    RenderBox_RenderBoxContainerDefaultsMixin$36.__proto__.new.call(this);
+  }).prototype = RenderBox_RenderBoxContainerDefaultsMixin$36.prototype;
+  dart.applyMixin(RenderBox_RenderBoxContainerDefaultsMixin$36, box.RenderBoxContainerDefaultsMixin$(box.RenderBox, overflow_bar._OverflowBarParentData));
+  overflow_bar._RenderOverflowBar = class _RenderOverflowBar extends RenderBox_RenderBoxContainerDefaultsMixin$36 {
+    get spacing() {
+      return this[_spacing];
+    }
+    set spacing(value) {
+      if (!(value !== null)) dart.assertFailed(null, I[1], 284, 12, "value != null");
+      if (this[_spacing] === value) return;
+      this[_spacing] = value;
+      this.markNeedsLayout();
+    }
+    get overflowSpacing() {
+      return this[_overflowSpacing];
+    }
+    set overflowSpacing(value) {
+      if (!(value !== null)) dart.assertFailed(null, I[1], 294, 12, "value != null");
+      if (this[_overflowSpacing] === value) return;
+      this[_overflowSpacing] = value;
+      this.markNeedsLayout();
+    }
+    get overflowAlignment() {
+      return this[_overflowAlignment];
+    }
+    set overflowAlignment(value) {
+      if (!(value !== null)) dart.assertFailed(null, I[1], 304, 12, "value != null");
+      if (this[_overflowAlignment] === value) return;
+      this[_overflowAlignment] = value;
+      this.markNeedsLayout();
+    }
+    get overflowDirection() {
+      return this[_overflowDirection];
+    }
+    set overflowDirection(value) {
+      if (!(value !== null)) dart.assertFailed(null, I[1], 314, 12, "value != null");
+      if (this[_overflowDirection] === value) return;
+      this[_overflowDirection] = value;
+      this.markNeedsLayout();
+    }
+    get textDirection() {
+      return this[_textDirection];
+    }
+    set textDirection(value) {
+      if (this[_textDirection] === value) return;
+      this[_textDirection] = value;
+      this.markNeedsLayout();
+    }
+    get clipBehavior() {
+      return this[_clipBehavior];
+    }
+    set clipBehavior(value) {
+      if (!(value !== null)) dart.assertFailed(null, I[1], 333, 12, "value != null");
+      if (value === this[_clipBehavior]) return;
+      this[_clipBehavior] = value;
+      this.markNeedsPaint();
+      this.markNeedsSemanticsUpdate();
+    }
+    setupParentData(child) {
+      box.RenderBox.as(child);
+      if (!overflow_bar._OverflowBarParentData.is(child.parentData)) child.parentData = new overflow_bar._OverflowBarParentData.new();
+    }
+    computeMinIntrinsicHeight(width) {
+      let child = this.firstChild;
+      if (child == null) return 0.0;
+      let barWidth = 0.0;
+      while (child != null) {
+        barWidth = barWidth + child.getMinIntrinsicWidth(1 / 0);
+        child = this.childAfter(child);
+      }
+      barWidth = barWidth + this.spacing * (this.childCount - 1);
+      let height = 0.0;
+      if (barWidth > width) {
+        child = this.firstChild;
+        while (child != null) {
+          height = height + child.getMinIntrinsicHeight(width);
+          child = this.childAfter(child);
+        }
+        return height + this.overflowSpacing * (this.childCount - 1);
+      } else {
+        child = this.firstChild;
+        while (child != null) {
+          height = math.max(core.double, height, child.getMinIntrinsicHeight(width));
+          child = this.childAfter(child);
+        }
+        return height;
+      }
+    }
+    computeMaxIntrinsicHeight(width) {
+      let child = this.firstChild;
+      if (child == null) return 0.0;
+      let barWidth = 0.0;
+      while (child != null) {
+        barWidth = barWidth + child.getMinIntrinsicWidth(1 / 0);
+        child = this.childAfter(child);
+      }
+      barWidth = barWidth + this.spacing * (this.childCount - 1);
+      let height = 0.0;
+      if (barWidth > width) {
+        child = this.firstChild;
+        while (child != null) {
+          height = height + child.getMaxIntrinsicHeight(width);
+          child = this.childAfter(child);
+        }
+        return height + this.overflowSpacing * (this.childCount - 1);
+      } else {
+        child = this.firstChild;
+        while (child != null) {
+          height = math.max(core.double, height, child.getMaxIntrinsicHeight(width));
+          child = this.childAfter(child);
+        }
+        return height;
+      }
+    }
+    computeMinIntrinsicWidth(height) {
+      let child = this.firstChild;
+      if (child == null) return 0.0;
+      let width = 0.0;
+      while (child != null) {
+        width = width + child.getMinIntrinsicWidth(1 / 0);
+        child = this.childAfter(child);
+      }
+      return width + this.spacing * (this.childCount - 1);
+    }
+    computeMaxIntrinsicWidth(height) {
+      let child = this.firstChild;
+      if (child == null) return 0.0;
+      let width = 0.0;
+      while (child != null) {
+        width = width + child.getMaxIntrinsicWidth(1 / 0);
+        child = this.childAfter(child);
+      }
+      return width + this.spacing * (this.childCount - 1);
+    }
+    computeDistanceToActualBaseline(baseline) {
+      return this.defaultComputeDistanceToHighestActualBaseline(baseline);
+    }
+    computeDryLayout(constraints) {
+      let child = this.firstChild;
+      if (child == null) {
+        return constraints.smallest;
+      }
+      let childConstraints = constraints.loosen();
+      let childrenWidth = 0.0;
+      let maxChildHeight = 0.0;
+      let y = 0.0;
+      while (child != null) {
+        let childSize = child.getDryLayout(childConstraints);
+        childrenWidth = childrenWidth + childSize.width;
+        maxChildHeight = math.max(core.double, maxChildHeight, childSize.height);
+        y = y + (childSize.height + this.overflowSpacing);
+        child = this.childAfter(child);
+      }
+      let actualWidth = childrenWidth + this.spacing * (this.childCount - 1);
+      if (actualWidth > constraints.maxWidth) {
+        return constraints.constrain(new ui.Size.new(constraints.maxWidth, y - this.overflowSpacing));
+      } else {
+        return constraints.constrain(new ui.Size.new(actualWidth, maxChildHeight));
+      }
+    }
+    performLayout() {
+      let child = this.firstChild;
+      if (child == null) {
+        this.size = this.constraints.smallest;
+        return;
+      }
+      let childConstraints = this.constraints.loosen();
+      let childrenWidth = 0.0;
+      let maxChildHeight = 0.0;
+      let maxChildWidth = 0.0;
+      while (child != null) {
+        child.layout(childConstraints, {parentUsesSize: true});
+        childrenWidth = childrenWidth + child.size.width;
+        maxChildHeight = math.max(core.double, maxChildHeight, child.size.height);
+        maxChildWidth = math.max(core.double, maxChildWidth, child.size.width);
+        child = this.childAfter(child);
+      }
+      let rtl = this.textDirection === ui.TextDirection.rtl;
+      let actualWidth = childrenWidth + this.spacing * (this.childCount - 1);
+      if (actualWidth > this.constraints.maxWidth) {
+        child = this.overflowDirection === basic_types.VerticalDirection.down ? this.firstChild : this.lastChild;
+        const nextChild = () => {
+          return this.overflowDirection === basic_types.VerticalDirection.down ? this.childAfter(dart.nullCheck(child)) : this.childBefore(dart.nullCheck(child));
+        };
+        dart.fn(nextChild, T.VoidToRenderBoxN());
+        let y = 0.0;
+        while (child != null) {
+          let childParentData = overflow_bar._OverflowBarParentData.as(dart.nullCheck(child.parentData));
+          let x = 0.0;
+          switch (this.overflowAlignment) {
+            case C[0] || CT.C0:
+            {
+              x = rtl ? this.constraints.maxWidth - child.size.width : 0.0;
+              break;
+            }
+            case C[2] || CT.C2:
+            {
+              x = (this.constraints.maxWidth - child.size.width) / 2;
+              break;
+            }
+            case C[1] || CT.C1:
+            {
+              x = rtl ? 0.0 : this.constraints.maxWidth - child.size.width;
+              break;
+            }
+          }
+          if (!(x !== null)) dart.assertFailed(null, I[1], 506, 16, "x != null");
+          childParentData.offset = new ui.Offset.new(x, y);
+          y = y + (child.size.height + this.overflowSpacing);
+          child = nextChild();
+        }
+        this.size = this.constraints.constrain(new ui.Size.new(this.constraints.maxWidth, y - this.overflowSpacing));
+      } else {
+        child = rtl ? this.lastChild : this.firstChild;
+        const nextChild = () => {
+          return rtl ? this.childBefore(dart.nullCheck(child)) : this.childAfter(dart.nullCheck(child));
+        };
+        dart.fn(nextChild, T.VoidToRenderBoxN());
+        let x = 0.0;
+        while (child != null) {
+          let childParentData = overflow_bar._OverflowBarParentData.as(dart.nullCheck(child.parentData));
+          childParentData.offset = new ui.Offset.new(x, (maxChildHeight - child.size.height) / 2);
+          x = x + (child.size.width + this.spacing);
+          child = nextChild();
+        }
+        this.size = this.constraints.constrain(new ui.Size.new(actualWidth, maxChildHeight));
+      }
+    }
+    hitTestChildren(result, opts) {
+      let position = opts && 'position' in opts ? opts.position : null;
+      return this.defaultHitTestChildren(result, {position: position});
+    }
+    paint(context, offset) {
+      this.defaultPaint(context, offset);
+    }
+    debugFillProperties(properties) {
+      super.debugFillProperties(properties);
+      properties.add(new diagnostics.DoubleProperty.new("spacing", this.spacing, {defaultValue: 0}));
+      properties.add(new diagnostics.DoubleProperty.new("overflowSpacing", this.overflowSpacing, {defaultValue: 0}));
+      properties.add(new (T.EnumPropertyOfOverflowBarAlignment()).new("overflowAlignment", this.overflowAlignment, {defaultValue: overflow_bar.OverflowBarAlignment.start}));
+      properties.add(new (T.EnumPropertyOfVerticalDirection()).new("overflowDirection", this.overflowDirection, {defaultValue: basic_types.VerticalDirection.down}));
+      properties.add(new (T.EnumPropertyOfTextDirection()).new("textDirection", this.textDirection, {defaultValue: null}));
+    }
+  };
+  (overflow_bar._RenderOverflowBar.new = function(opts) {
+    let children = opts && 'children' in opts ? opts.children : null;
+    let spacing = opts && 'spacing' in opts ? opts.spacing : 0;
+    let overflowSpacing = opts && 'overflowSpacing' in opts ? opts.overflowSpacing : 0;
+    let overflowAlignment = opts && 'overflowAlignment' in opts ? opts.overflowAlignment : C[0] || CT.C0;
+    let overflowDirection = opts && 'overflowDirection' in opts ? opts.overflowDirection : C[4] || CT.C4;
+    let textDirection = opts && 'textDirection' in opts ? opts.textDirection : null;
+    let clipBehavior = opts && 'clipBehavior' in opts ? opts.clipBehavior : C[5] || CT.C5;
+    this[_clipBehavior] = ui.Clip.none;
+    if (!(spacing !== null)) dart.assertFailed(null, I[1], 267, 15, "spacing != null");
+    if (!(overflowSpacing !== null)) dart.assertFailed(null, I[1], 268, 15, "overflowSpacing != null");
+    if (!(overflowAlignment !== null)) dart.assertFailed(null, I[1], 269, 15, "overflowAlignment != null");
+    if (!(textDirection !== null)) dart.assertFailed(null, I[1], 270, 15, "textDirection != null");
+    if (!(clipBehavior !== null)) dart.assertFailed(null, I[1], 271, 15, "clipBehavior != null");
+    this[_spacing] = spacing;
+    this[_overflowSpacing] = overflowSpacing;
+    this[_overflowAlignment] = overflowAlignment;
+    this[_overflowDirection] = overflowDirection;
+    this[_textDirection] = textDirection;
+    this[_clipBehavior] = clipBehavior;
+    overflow_bar._RenderOverflowBar.__proto__.new.call(this);
+    this.addAll(children);
+  }).prototype = overflow_bar._RenderOverflowBar.prototype;
+  dart.addTypeTests(overflow_bar._RenderOverflowBar);
+  dart.addTypeCaches(overflow_bar._RenderOverflowBar);
+  dart.setGetterSignature(overflow_bar._RenderOverflowBar, () => ({
+    __proto__: dart.getGetters(overflow_bar._RenderOverflowBar.__proto__),
+    spacing: core.double,
+    overflowSpacing: core.double,
+    overflowAlignment: overflow_bar.OverflowBarAlignment,
+    overflowDirection: basic_types.VerticalDirection,
+    textDirection: ui.TextDirection,
+    clipBehavior: ui.Clip
+  }));
+  dart.setSetterSignature(overflow_bar._RenderOverflowBar, () => ({
+    __proto__: dart.getSetters(overflow_bar._RenderOverflowBar.__proto__),
+    spacing: core.double,
+    overflowSpacing: core.double,
+    overflowAlignment: overflow_bar.OverflowBarAlignment,
+    overflowDirection: basic_types.VerticalDirection,
+    textDirection: ui.TextDirection,
+    clipBehavior: ui.Clip
+  }));
+  dart.setLibraryUri(overflow_bar._RenderOverflowBar, I[0]);
+  dart.setFieldSignature(overflow_bar._RenderOverflowBar, () => ({
+    __proto__: dart.getFields(overflow_bar._RenderOverflowBar.__proto__),
+    [_spacing]: dart.fieldType(core.double),
+    [_overflowSpacing]: dart.fieldType(core.double),
+    [_overflowAlignment]: dart.fieldType(overflow_bar.OverflowBarAlignment),
+    [_overflowDirection]: dart.fieldType(basic_types.VerticalDirection),
+    [_textDirection]: dart.fieldType(ui.TextDirection),
+    [_clipBehavior]: dart.fieldType(ui.Clip)
+  }));
+  dart.trackLibraries("packages/flutter/src/widgets/overflow_bar.dart", {
+    "package:flutter/src/widgets/overflow_bar.dart": overflow_bar
+  }, {
+  }, '{"version":3,"sourceRoot":"","sources":["overflow_bar.dart"],"names":[],"mappings":"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","file":"../../../../../../../../../D:/packages/flutter/src/widgets/overflow_bar.dart.lib.js"}');
+  // Exports:
+  return {
+    src__widgets__overflow_bar: overflow_bar
+  };
+}));
+
+//# sourceMappingURL=overflow_bar.dart.lib.js.map

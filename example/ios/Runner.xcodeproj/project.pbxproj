@@ -402,7 +402,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.it-nomads.flutterSecureStorageExample";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.it_nomads.flutterSecureStorageExample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "5c1d3b2d-5885-4962-b917-47213391361a";
 				PROVISIONING_PROFILE_SPECIFIER = "App Wildcard";
@@ -427,7 +427,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.it-nomads.flutterSecureStorageExample";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.it_nomads.flutterSecureStorageExample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};

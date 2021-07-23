@@ -1,0 +1,659 @@
+define(['dart_sdk', 'packages/flutter/src/foundation/object.dart'], (function load__packages__flutter__src__painting__alignment_dart(dart_sdk, packages__flutter__src__foundation__object$46dart) {
+  'use strict';
+  const core = dart_sdk.core;
+  const ui = dart_sdk.ui;
+  const dart = dart_sdk.dart;
+  const dartx = dart_sdk.dartx;
+  const object = packages__flutter__src__foundation__object$46dart.src__foundation__object;
+  var alignment = Object.create(dart.library);
+  var $truncate = dartx.truncate;
+  var $toDouble = dartx.toDouble;
+  var $modulo = dartx['%'];
+  var $toStringAsFixed = dartx.toStringAsFixed;
+  var $runtimeType = dartx.runtimeType;
+  dart._checkModuleNullSafetyMode(true);
+  const CT = Object.create({
+    _: () => (C, CT)
+  });
+  dart.defineLazy(CT, {
+    get C0() {
+      return C[0] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: -1,
+        [x$]: -1
+      });
+    },
+    get C1() {
+      return C[1] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: -1,
+        [x$]: 0
+      });
+    },
+    get C2() {
+      return C[2] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: -1,
+        [x$]: 1
+      });
+    },
+    get C3() {
+      return C[3] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 0,
+        [x$]: -1
+      });
+    },
+    get C4() {
+      return C[4] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 0,
+        [x$]: 0
+      });
+    },
+    get C5() {
+      return C[5] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 0,
+        [x$]: 1
+      });
+    },
+    get C6() {
+      return C[6] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 1,
+        [x$]: -1
+      });
+    },
+    get C7() {
+      return C[7] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 1,
+        [x$]: 0
+      });
+    },
+    get C8() {
+      return C[8] = dart.const({
+        __proto__: alignment.Alignment.prototype,
+        [y$]: 1,
+        [x$]: 1
+      });
+    },
+    get C9() {
+      return C[9] = dart.const({
+        __proto__: ui.TextDirection.prototype,
+        [_name]: "TextDirection.rtl",
+        index: 0
+      });
+    },
+    get C10() {
+      return C[10] = dart.const({
+        __proto__: ui.TextDirection.prototype,
+        [_name]: "TextDirection.ltr",
+        index: 1
+      });
+    },
+    get C11() {
+      return C[11] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: -1,
+        [start$]: -1
+      });
+    },
+    get C12() {
+      return C[12] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: -1,
+        [start$]: 0
+      });
+    },
+    get C13() {
+      return C[13] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: -1,
+        [start$]: 1
+      });
+    },
+    get C14() {
+      return C[14] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 0,
+        [start$]: -1
+      });
+    },
+    get C15() {
+      return C[15] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 0,
+        [start$]: 0
+      });
+    },
+    get C16() {
+      return C[16] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 0,
+        [start$]: 1
+      });
+    },
+    get C17() {
+      return C[17] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 1,
+        [start$]: -1
+      });
+    },
+    get C18() {
+      return C[18] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 1,
+        [start$]: 0
+      });
+    },
+    get C19() {
+      return C[19] = dart.const({
+        __proto__: alignment.AlignmentDirectional.prototype,
+        [y$0]: 1,
+        [start$]: 1
+      });
+    },
+    get C20() {
+      return C[20] = dart.const({
+        __proto__: alignment.TextAlignVertical.prototype,
+        [y$1]: -1
+      });
+    },
+    get C21() {
+      return C[21] = dart.const({
+        __proto__: alignment.TextAlignVertical.prototype,
+        [y$1]: 0
+      });
+    },
+    get C22() {
+      return C[22] = dart.const({
+        __proto__: alignment.TextAlignVertical.prototype,
+        [y$1]: 1
+      });
+    }
+  }, false);
+  var C = Array(23).fill(void 0);
+  var I = [
+    "file:///C:/Users/jrlh/flutter/packages/flutter/lib/src/painting/alignment.dart",
+    "package:flutter/src/painting/alignment.dart"
+  ];
+  var _x = dart.privateName(alignment, "_x");
+  var _start = dart.privateName(alignment, "_start");
+  var _y = dart.privateName(alignment, "_y");
+  alignment.AlignmentGeometry = class AlignmentGeometry extends core.Object {
+    add(other) {
+      return new alignment._MixedAlignment.new(this[_x] + other[_x], this[_start] + other[_start], this[_y] + other[_y]);
+    }
+    static lerp(a, b, t) {
+      if (!(t !== null)) dart.assertFailed(null, I[0], 91, 12, "t != null");
+      if (a == null && b == null) return null;
+      if (a == null) return dart.nullCheck(b)['*'](t);
+      if (b == null) return a['*'](1.0 - t);
+      if (alignment.Alignment.is(a) && alignment.Alignment.is(b)) return alignment.Alignment.lerp(a, b, t);
+      if (alignment.AlignmentDirectional.is(a) && alignment.AlignmentDirectional.is(b)) return alignment.AlignmentDirectional.lerp(a, b, t);
+      return new alignment._MixedAlignment.new(dart.nullCheck(ui.lerpDouble(a[_x], b[_x], t)), dart.nullCheck(ui.lerpDouble(a[_start], b[_start], t)), dart.nullCheck(ui.lerpDouble(a[_y], b[_y], t)));
+    }
+    toString() {
+      if (this[_start] === 0.0) return alignment.Alignment._stringify(this[_x], this[_y]);
+      if (this[_x] === 0.0) return alignment.AlignmentDirectional._stringify(this[_start], this[_y]);
+      return alignment.Alignment._stringify(this[_x], this[_y]) + " + " + alignment.AlignmentDirectional._stringify(this[_start], 0.0);
+    }
+    _equals(other) {
+      if (other == null) return false;
+      return alignment.AlignmentGeometry.is(other) && other[_x] === this[_x] && other[_start] === this[_start] && other[_y] === this[_y];
+    }
+    get hashCode() {
+      return ui.hashValues(this[_x], this[_start], this[_y]);
+    }
+  };
+  (alignment.AlignmentGeometry.new = function() {
+    ;
+  }).prototype = alignment.AlignmentGeometry.prototype;
+  dart.addTypeTests(alignment.AlignmentGeometry);
+  dart.addTypeCaches(alignment.AlignmentGeometry);
+  dart.setMethodSignature(alignment.AlignmentGeometry, () => ({
+    __proto__: dart.getMethods(alignment.AlignmentGeometry.__proto__),
+    add: dart.fnType(alignment.AlignmentGeometry, [alignment.AlignmentGeometry])
+  }));
+  dart.setLibraryUri(alignment.AlignmentGeometry, I[1]);
+  dart.defineExtensionMethods(alignment.AlignmentGeometry, ['toString', '_equals']);
+  dart.defineExtensionAccessors(alignment.AlignmentGeometry, ['hashCode']);
+  var x$ = dart.privateName(alignment, "Alignment.x");
+  var y$ = dart.privateName(alignment, "Alignment.y");
+  alignment.Alignment = class Alignment extends alignment.AlignmentGeometry {
+    get x() {
+      return this[x$];
+    }
+    set x(value) {
+      super.x = value;
+    }
+    get y() {
+      return this[y$];
+    }
+    set y(value) {
+      super.y = value;
+    }
+    get [_x]() {
+      return this.x;
+    }
+    get [_start]() {
+      return 0.0;
+    }
+    get [_y]() {
+      return this.y;
+    }
+    add(other) {
+      if (alignment.Alignment.is(other)) return this['+'](other);
+      return super.add(other);
+    }
+    ['-'](other) {
+      return new alignment.Alignment.new(this.x - other.x, this.y - other.y);
+    }
+    ['+'](other) {
+      return new alignment.Alignment.new(this.x + other.x, this.y + other.y);
+    }
+    _negate() {
+      return new alignment.Alignment.new(-this.x, -this.y);
+    }
+    ['*'](other) {
+      return new alignment.Alignment.new(this.x * other, this.y * other);
+    }
+    ['/'](other) {
+      return new alignment.Alignment.new(this.x / other, this.y / other);
+    }
+    ['~/'](other) {
+      return new alignment.Alignment.new((this.x / other)[$truncate]()[$toDouble](), (this.y / other)[$truncate]()[$toDouble]());
+    }
+    ['%'](other) {
+      return new alignment.Alignment.new(this.x[$modulo](other), this.y[$modulo](other));
+    }
+    alongOffset(other) {
+      let centerX = other.dx / 2.0;
+      let centerY = other.dy / 2.0;
+      return new ui.Offset.new(centerX + this.x * centerX, centerY + this.y * centerY);
+    }
+    alongSize(other) {
+      let centerX = other.width / 2.0;
+      let centerY = other.height / 2.0;
+      return new ui.Offset.new(centerX + this.x * centerX, centerY + this.y * centerY);
+    }
+    withinRect(rect) {
+      let halfWidth = rect.width / 2.0;
+      let halfHeight = rect.height / 2.0;
+      return new ui.Offset.new(rect.left + halfWidth + this.x * halfWidth, rect.top + halfHeight + this.y * halfHeight);
+    }
+    inscribe(size, rect) {
+      let halfWidthDelta = (rect.width - size.width) / 2.0;
+      let halfHeightDelta = (rect.height - size.height) / 2.0;
+      return new ui.Rect.fromLTWH(rect.left + halfWidthDelta + this.x * halfWidthDelta, rect.top + halfHeightDelta + this.y * halfHeightDelta, size.width, size.height);
+    }
+    static lerp(a, b, t) {
+      if (!(t !== null)) dart.assertFailed(null, I[0], 336, 12, "t != null");
+      if (a == null && b == null) return null;
+      if (a == null) return new alignment.Alignment.new(dart.nullCheck(ui.lerpDouble(0.0, dart.nullCheck(b).x, t)), dart.nullCheck(ui.lerpDouble(0.0, b.y, t)));
+      if (b == null) return new alignment.Alignment.new(dart.nullCheck(ui.lerpDouble(a.x, 0.0, t)), dart.nullCheck(ui.lerpDouble(a.y, 0.0, t)));
+      return new alignment.Alignment.new(dart.nullCheck(ui.lerpDouble(a.x, b.x, t)), dart.nullCheck(ui.lerpDouble(a.y, b.y, t)));
+    }
+    resolve(direction) {
+      return this;
+    }
+    static _stringify(x, y) {
+      if (x === -1.0 && y === -1.0) return "Alignment.topLeft";
+      if (x === 0.0 && y === -1.0) return "Alignment.topCenter";
+      if (x === 1.0 && y === -1.0) return "Alignment.topRight";
+      if (x === -1.0 && y === 0.0) return "Alignment.centerLeft";
+      if (x === 0.0 && y === 0.0) return "Alignment.center";
+      if (x === 1.0 && y === 0.0) return "Alignment.centerRight";
+      if (x === -1.0 && y === 1.0) return "Alignment.bottomLeft";
+      if (x === 0.0 && y === 1.0) return "Alignment.bottomCenter";
+      if (x === 1.0 && y === 1.0) return "Alignment.bottomRight";
+      return "Alignment(" + x[$toStringAsFixed](1) + ", " + y[$toStringAsFixed](1) + ")";
+    }
+    toString() {
+      return alignment.Alignment._stringify(this.x, this.y);
+    }
+  };
+  (alignment.Alignment.new = function(x, y) {
+    this[x$] = x;
+    this[y$] = y;
+    if (!(x !== null)) dart.assertFailed(null, I[0], 186, 14, "x != null");
+    if (!(y !== null)) dart.assertFailed(null, I[0], 187, 14, "y != null");
+    alignment.Alignment.__proto__.new.call(this);
+    ;
+  }).prototype = alignment.Alignment.prototype;
+  dart.addTypeTests(alignment.Alignment);
+  dart.addTypeCaches(alignment.Alignment);
+  dart.setMethodSignature(alignment.Alignment, () => ({
+    __proto__: dart.getMethods(alignment.Alignment.__proto__),
+    '-': dart.fnType(alignment.Alignment, [alignment.Alignment]),
+    '+': dart.fnType(alignment.Alignment, [alignment.Alignment]),
+    _negate: dart.fnType(alignment.Alignment, []),
+    '*': dart.fnType(alignment.Alignment, [core.double]),
+    '/': dart.fnType(alignment.Alignment, [core.double]),
+    '~/': dart.fnType(alignment.Alignment, [core.double]),
+    '%': dart.fnType(alignment.Alignment, [core.double]),
+    alongOffset: dart.fnType(ui.Offset, [ui.Offset]),
+    alongSize: dart.fnType(ui.Offset, [ui.Size]),
+    withinRect: dart.fnType(ui.Offset, [ui.Rect]),
+    inscribe: dart.fnType(ui.Rect, [ui.Size, ui.Rect]),
+    resolve: dart.fnType(alignment.Alignment, [dart.nullable(ui.TextDirection)])
+  }));
+  dart.setGetterSignature(alignment.Alignment, () => ({
+    __proto__: dart.getGetters(alignment.Alignment.__proto__),
+    [_x]: core.double,
+    [_start]: core.double,
+    [_y]: core.double
+  }));
+  dart.setLibraryUri(alignment.Alignment, I[1]);
+  dart.setFieldSignature(alignment.Alignment, () => ({
+    __proto__: dart.getFields(alignment.Alignment.__proto__),
+    x: dart.finalFieldType(core.double),
+    y: dart.finalFieldType(core.double)
+  }));
+  dart.defineExtensionMethods(alignment.Alignment, ['toString']);
+  dart.defineLazy(alignment.Alignment, {
+    /*alignment.Alignment.topLeft*/get topLeft() {
+      return C[0] || CT.C0;
+    },
+    /*alignment.Alignment.topCenter*/get topCenter() {
+      return C[1] || CT.C1;
+    },
+    /*alignment.Alignment.topRight*/get topRight() {
+      return C[2] || CT.C2;
+    },
+    /*alignment.Alignment.centerLeft*/get centerLeft() {
+      return C[3] || CT.C3;
+    },
+    /*alignment.Alignment.center*/get center() {
+      return C[4] || CT.C4;
+    },
+    /*alignment.Alignment.centerRight*/get centerRight() {
+      return C[5] || CT.C5;
+    },
+    /*alignment.Alignment.bottomLeft*/get bottomLeft() {
+      return C[6] || CT.C6;
+    },
+    /*alignment.Alignment.bottomCenter*/get bottomCenter() {
+      return C[7] || CT.C7;
+    },
+    /*alignment.Alignment.bottomRight*/get bottomRight() {
+      return C[8] || CT.C8;
+    }
+  }, false);
+  var start$ = dart.privateName(alignment, "AlignmentDirectional.start");
+  var y$0 = dart.privateName(alignment, "AlignmentDirectional.y");
+  var _name = dart.privateName(ui, "_name");
+  alignment.AlignmentDirectional = class AlignmentDirectional extends alignment.AlignmentGeometry {
+    get start() {
+      return this[start$];
+    }
+    set start(value) {
+      super.start = value;
+    }
+    get y() {
+      return this[y$0];
+    }
+    set y(value) {
+      super.y = value;
+    }
+    get [_x]() {
+      return 0.0;
+    }
+    get [_start]() {
+      return this.start;
+    }
+    get [_y]() {
+      return this.y;
+    }
+    add(other) {
+      if (alignment.AlignmentDirectional.is(other)) return this['+'](other);
+      return super.add(other);
+    }
+    ['-'](other) {
+      return new alignment.AlignmentDirectional.new(this.start - other.start, this.y - other.y);
+    }
+    ['+'](other) {
+      return new alignment.AlignmentDirectional.new(this.start + other.start, this.y + other.y);
+    }
+    _negate() {
+      return new alignment.AlignmentDirectional.new(-this.start, -this.y);
+    }
+    ['*'](other) {
+      return new alignment.AlignmentDirectional.new(this.start * other, this.y * other);
+    }
+    ['/'](other) {
+      return new alignment.AlignmentDirectional.new(this.start / other, this.y / other);
+    }
+    ['~/'](other) {
+      return new alignment.AlignmentDirectional.new((this.start / other)[$truncate]()[$toDouble](), (this.y / other)[$truncate]()[$toDouble]());
+    }
+    ['%'](other) {
+      return new alignment.AlignmentDirectional.new(this.start[$modulo](other), this.y[$modulo](other));
+    }
+    static lerp(a, b, t) {
+      if (!(t !== null)) dart.assertFailed(null, I[0], 517, 12, "t != null");
+      if (a == null && b == null) return null;
+      if (a == null) return new alignment.AlignmentDirectional.new(dart.nullCheck(ui.lerpDouble(0.0, dart.nullCheck(b).start, t)), dart.nullCheck(ui.lerpDouble(0.0, b.y, t)));
+      if (b == null) return new alignment.AlignmentDirectional.new(dart.nullCheck(ui.lerpDouble(a.start, 0.0, t)), dart.nullCheck(ui.lerpDouble(a.y, 0.0, t)));
+      return new alignment.AlignmentDirectional.new(dart.nullCheck(ui.lerpDouble(a.start, b.start, t)), dart.nullCheck(ui.lerpDouble(a.y, b.y, t)));
+    }
+    resolve(direction) {
+      if (!(direction != null)) dart.assertFailed("Cannot resolve " + dart.str(this[$runtimeType]) + " without a TextDirection.", I[0], 529, 12, "direction != null");
+      switch (dart.nullCheck(direction)) {
+        case C[9] || CT.C9:
+        {
+          return new alignment.Alignment.new(-this.start, this.y);
+        }
+        case C[10] || CT.C10:
+        {
+          return new alignment.Alignment.new(this.start, this.y);
+        }
+      }
+    }
+    static _stringify(start, y) {
+      if (start === -1.0 && y === -1.0) return "AlignmentDirectional.topStart";
+      if (start === 0.0 && y === -1.0) return "AlignmentDirectional.topCenter";
+      if (start === 1.0 && y === -1.0) return "AlignmentDirectional.topEnd";
+      if (start === -1.0 && y === 0.0) return "AlignmentDirectional.centerStart";
+      if (start === 0.0 && y === 0.0) return "AlignmentDirectional.center";
+      if (start === 1.0 && y === 0.0) return "AlignmentDirectional.centerEnd";
+      if (start === -1.0 && y === 1.0) return "AlignmentDirectional.bottomStart";
+      if (start === 0.0 && y === 1.0) return "AlignmentDirectional.bottomCenter";
+      if (start === 1.0 && y === 1.0) return "AlignmentDirectional.bottomEnd";
+      return "AlignmentDirectional(" + start[$toStringAsFixed](1) + ", " + y[$toStringAsFixed](1) + ")";
+    }
+    toString() {
+      return alignment.AlignmentDirectional._stringify(this.start, this.y);
+    }
+  };
+  (alignment.AlignmentDirectional.new = function(start, y) {
+    this[start$] = start;
+    this[y$0] = y;
+    if (!(start !== null)) dart.assertFailed(null, I[0], 392, 14, "start != null");
+    if (!(y !== null)) dart.assertFailed(null, I[0], 393, 14, "y != null");
+    alignment.AlignmentDirectional.__proto__.new.call(this);
+    ;
+  }).prototype = alignment.AlignmentDirectional.prototype;
+  dart.addTypeTests(alignment.AlignmentDirectional);
+  dart.addTypeCaches(alignment.AlignmentDirectional);
+  dart.setMethodSignature(alignment.AlignmentDirectional, () => ({
+    __proto__: dart.getMethods(alignment.AlignmentDirectional.__proto__),
+    '-': dart.fnType(alignment.AlignmentDirectional, [alignment.AlignmentDirectional]),
+    '+': dart.fnType(alignment.AlignmentDirectional, [alignment.AlignmentDirectional]),
+    _negate: dart.fnType(alignment.AlignmentDirectional, []),
+    '*': dart.fnType(alignment.AlignmentDirectional, [core.double]),
+    '/': dart.fnType(alignment.AlignmentDirectional, [core.double]),
+    '~/': dart.fnType(alignment.AlignmentDirectional, [core.double]),
+    '%': dart.fnType(alignment.AlignmentDirectional, [core.double]),
+    resolve: dart.fnType(alignment.Alignment, [dart.nullable(ui.TextDirection)])
+  }));
+  dart.setGetterSignature(alignment.AlignmentDirectional, () => ({
+    __proto__: dart.getGetters(alignment.AlignmentDirectional.__proto__),
+    [_x]: core.double,
+    [_start]: core.double,
+    [_y]: core.double
+  }));
+  dart.setLibraryUri(alignment.AlignmentDirectional, I[1]);
+  dart.setFieldSignature(alignment.AlignmentDirectional, () => ({
+    __proto__: dart.getFields(alignment.AlignmentDirectional.__proto__),
+    start: dart.finalFieldType(core.double),
+    y: dart.finalFieldType(core.double)
+  }));
+  dart.defineExtensionMethods(alignment.AlignmentDirectional, ['toString']);
+  dart.defineLazy(alignment.AlignmentDirectional, {
+    /*alignment.AlignmentDirectional.topStart*/get topStart() {
+      return C[11] || CT.C11;
+    },
+    /*alignment.AlignmentDirectional.topCenter*/get topCenter() {
+      return C[12] || CT.C12;
+    },
+    /*alignment.AlignmentDirectional.topEnd*/get topEnd() {
+      return C[13] || CT.C13;
+    },
+    /*alignment.AlignmentDirectional.centerStart*/get centerStart() {
+      return C[14] || CT.C14;
+    },
+    /*alignment.AlignmentDirectional.center*/get center() {
+      return C[15] || CT.C15;
+    },
+    /*alignment.AlignmentDirectional.centerEnd*/get centerEnd() {
+      return C[16] || CT.C16;
+    },
+    /*alignment.AlignmentDirectional.bottomStart*/get bottomStart() {
+      return C[17] || CT.C17;
+    },
+    /*alignment.AlignmentDirectional.bottomCenter*/get bottomCenter() {
+      return C[18] || CT.C18;
+    },
+    /*alignment.AlignmentDirectional.bottomEnd*/get bottomEnd() {
+      return C[19] || CT.C19;
+    }
+  }, false);
+  var _x$ = dart.privateName(alignment, "_MixedAlignment._x");
+  var _start$ = dart.privateName(alignment, "_MixedAlignment._start");
+  var _y$ = dart.privateName(alignment, "_MixedAlignment._y");
+  alignment._MixedAlignment = class _MixedAlignment extends alignment.AlignmentGeometry {
+    get [_x]() {
+      return this[_x$];
+    }
+    set [_x](value) {
+      super[_x] = value;
+    }
+    get [_start]() {
+      return this[_start$];
+    }
+    set [_start](value) {
+      super[_start] = value;
+    }
+    get [_y]() {
+      return this[_y$];
+    }
+    set [_y](value) {
+      super[_y] = value;
+    }
+    _negate() {
+      return new alignment._MixedAlignment.new(-this[_x], -this[_start], -this[_y]);
+    }
+    ['*'](other) {
+      return new alignment._MixedAlignment.new(this[_x] * other, this[_start] * other, this[_y] * other);
+    }
+    ['/'](other) {
+      return new alignment._MixedAlignment.new(this[_x] / other, this[_start] / other, this[_y] / other);
+    }
+    ['~/'](other) {
+      return new alignment._MixedAlignment.new((this[_x] / other)[$truncate]()[$toDouble](), (this[_start] / other)[$truncate]()[$toDouble](), (this[_y] / other)[$truncate]()[$toDouble]());
+    }
+    ['%'](other) {
+      return new alignment._MixedAlignment.new(this[_x][$modulo](other), this[_start][$modulo](other), this[_y][$modulo](other));
+    }
+    resolve(direction) {
+      if (!(direction != null)) dart.assertFailed("Cannot resolve " + dart.str(this[$runtimeType]) + " without a TextDirection.", I[0], 624, 12, "direction != null");
+      switch (dart.nullCheck(direction)) {
+        case C[9] || CT.C9:
+        {
+          return new alignment.Alignment.new(this[_x] - this[_start], this[_y]);
+        }
+        case C[10] || CT.C10:
+        {
+          return new alignment.Alignment.new(this[_x] + this[_start], this[_y]);
+        }
+      }
+    }
+  };
+  (alignment._MixedAlignment.new = function(_x, _start, _y) {
+    this[_x$] = _x;
+    this[_start$] = _start;
+    this[_y$] = _y;
+    alignment._MixedAlignment.__proto__.new.call(this);
+    ;
+  }).prototype = alignment._MixedAlignment.prototype;
+  dart.addTypeTests(alignment._MixedAlignment);
+  dart.addTypeCaches(alignment._MixedAlignment);
+  dart.setMethodSignature(alignment._MixedAlignment, () => ({
+    __proto__: dart.getMethods(alignment._MixedAlignment.__proto__),
+    _negate: dart.fnType(alignment._MixedAlignment, []),
+    '*': dart.fnType(alignment._MixedAlignment, [core.double]),
+    '/': dart.fnType(alignment._MixedAlignment, [core.double]),
+    '~/': dart.fnType(alignment._MixedAlignment, [core.double]),
+    '%': dart.fnType(alignment._MixedAlignment, [core.double]),
+    resolve: dart.fnType(alignment.Alignment, [dart.nullable(ui.TextDirection)])
+  }));
+  dart.setLibraryUri(alignment._MixedAlignment, I[1]);
+  dart.setFieldSignature(alignment._MixedAlignment, () => ({
+    __proto__: dart.getFields(alignment._MixedAlignment.__proto__),
+    [_x]: dart.finalFieldType(core.double),
+    [_start]: dart.finalFieldType(core.double),
+    [_y]: dart.finalFieldType(core.double)
+  }));
+  var y$1 = dart.privateName(alignment, "TextAlignVertical.y");
+  alignment.TextAlignVertical = class TextAlignVertical extends core.Object {
+    get y() {
+      return this[y$1];
+    }
+    set y(value) {
+      super.y = value;
+    }
+    toString() {
+      return object.objectRuntimeType(this, "TextAlignVertical") + "(y: " + dart.str(this.y) + ")";
+    }
+  };
+  (alignment.TextAlignVertical.new = function(opts) {
+    let y = opts && 'y' in opts ? opts.y : null;
+    this[y$1] = y;
+    if (!(y !== null)) dart.assertFailed(null, I[0], 653, 15, "y != null");
+    if (!(y >= -1.0 && y <= 1.0)) dart.assertFailed(null, I[0], 654, 15, "y >= -1.0 && y <= 1.0");
+    ;
+  }).prototype = alignment.TextAlignVertical.prototype;
+  dart.addTypeTests(alignment.TextAlignVertical);
+  dart.addTypeCaches(alignment.TextAlignVertical);
+  dart.setLibraryUri(alignment.TextAlignVertical, I[1]);
+  dart.setFieldSignature(alignment.TextAlignVertical, () => ({
+    __proto__: dart.getFields(alignment.TextAlignVertical.__proto__),
+    y: dart.finalFieldType(core.double)
+  }));
+  dart.defineExtensionMethods(alignment.TextAlignVertical, ['toString']);
+  dart.defineLazy(alignment.TextAlignVertical, {
+    /*alignment.TextAlignVertical.top*/get top() {
+      return C[20] || CT.C20;
+    },
+    /*alignment.TextAlignVertical.center*/get center() {
+      return C[21] || CT.C21;
+    },
+    /*alignment.TextAlignVertical.bottom*/get bottom() {
+      return C[22] || CT.C22;
+    }
+  }, false);
+  dart.trackLibraries("packages/flutter/src/painting/alignment.dart", {
+    "package:flutter/src/painting/alignment.dart": alignment
+  }, {
+  }, '{"version":3,"sourceRoot":"","sources":["alignment.dart"],"names":[],"mappings":"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","file":"../../../../../../../../../D:/packages/flutter/src/painting/alignment.dart.lib.js"}');
+  // Exports:
+  return {
+    src__painting__alignment: alignment
+  };
+}));
+
+//# sourceMappingURL=alignment.dart.lib.js.map

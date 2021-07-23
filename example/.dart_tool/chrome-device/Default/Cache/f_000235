@@ -1,0 +1,289 @@
+define(['dart_sdk', 'packages/vector_math/vector_math_64.dart', 'packages/flutter/src/painting/basic_types.dart', 'packages/flutter/src/foundation/debug.dart'], (function load__packages__flutter__src__painting__matrix_utils_dart(dart_sdk, packages__vector_math__vector_math_64$46dart, packages__flutter__src__painting__basic_types$46dart, packages__flutter__src__foundation__debug$46dart) {
+  'use strict';
+  const core = dart_sdk.core;
+  const ui = dart_sdk.ui;
+  const _native_typed_data = dart_sdk._native_typed_data;
+  const _internal = dart_sdk._internal;
+  const _interceptors = dart_sdk._interceptors;
+  const dart = dart_sdk.dart;
+  const dartx = dart_sdk.dartx;
+  const vector_math_64 = packages__vector_math__vector_math_64$46dart.vector_math_64;
+  const basic_types = packages__flutter__src__painting__basic_types$46dart.src__painting__basic_types;
+  const diagnostics = packages__flutter__src__foundation__debug$46dart.src__foundation__diagnostics;
+  const debug = packages__flutter__src__foundation__debug$46dart.src__foundation__debug;
+  var matrix_utils = Object.create(dart.library);
+  var $_get = dartx._get;
+  var $_set = dartx._set;
+  var $isFinite = dartx.isFinite;
+  var $join = dartx.join;
+  dart._checkModuleNullSafetyMode(true);
+  var T = {
+    JSArrayOfString: () => (T.JSArrayOfString = dart.constFn(_interceptors.JSArray$(core.String)))()
+  };
+  const CT = Object.create({
+    _: () => (C, CT)
+  });
+  dart.defineLazy(CT, {
+    get C0() {
+      return C[0] = dart.const({
+        __proto__: basic_types.Axis.prototype,
+        [_name]: "Axis.vertical",
+        index: 1
+      });
+    },
+    get C1() {
+      return C[1] = dart.const({
+        __proto__: diagnostics._NoDefaultValue.prototype
+      });
+    },
+    get C2() {
+      return C[2] = dart.const({
+        __proto__: diagnostics.DiagnosticLevel.prototype,
+        [_name$]: "DiagnosticLevel.info",
+        index: 3
+      });
+    },
+    get C3() {
+      return C[3] = dart.constList(["null"], core.String);
+    }
+  }, false);
+  var C = Array(4).fill(void 0);
+  var I = [
+    "file:///C:/Users/jrlh/flutter/packages/flutter/lib/src/painting/matrix_utils.dart",
+    "package:flutter/src/painting/matrix_utils.dart"
+  ];
+  var _name = dart.privateName(basic_types, "_name");
+  matrix_utils.MatrixUtils = class MatrixUtils extends core.Object {
+    static getAsTranslation(transform) {
+      if (!(transform !== null)) dart.assertFailed(null, I[0], 24, 12, "transform != null");
+      let values = transform.storage;
+      if (values[$_get](0) === 1.0 && values[$_get](1) === 0.0 && values[$_get](2) === 0.0 && values[$_get](3) === 0.0 && values[$_get](4) === 0.0 && values[$_get](5) === 1.0 && values[$_get](6) === 0.0 && values[$_get](7) === 0.0 && values[$_get](8) === 0.0 && values[$_get](9) === 0.0 && values[$_get](10) === 1.0 && values[$_get](11) === 0.0 && values[$_get](14) === 0.0 && values[$_get](15) === 1.0) {
+        return new ui.Offset.new(values[$_get](12), values[$_get](13));
+      }
+      return null;
+    }
+    static getAsScale(transform) {
+      if (!(transform !== null)) dart.assertFailed(null, I[0], 51, 12, "transform != null");
+      let values = transform.storage;
+      if (values[$_get](1) === 0.0 && values[$_get](2) === 0.0 && values[$_get](3) === 0.0 && values[$_get](4) === 0.0 && values[$_get](6) === 0.0 && values[$_get](7) === 0.0 && values[$_get](8) === 0.0 && values[$_get](9) === 0.0 && values[$_get](10) === 1.0 && values[$_get](11) === 0.0 && values[$_get](12) === 0.0 && values[$_get](13) === 0.0 && values[$_get](14) === 0.0 && values[$_get](15) === 1.0 && values[$_get](0) === values[$_get](5)) {
+        return values[$_get](0);
+      }
+      return null;
+    }
+    static matrixEquals(a, b) {
+      if (a == b) return true;
+      if (!(a != null || b != null)) dart.assertFailed(null, I[0], 79, 12, "a != null || b != null");
+      if (a == null) return matrix_utils.MatrixUtils.isIdentity(dart.nullCheck(b));
+      if (b == null) return matrix_utils.MatrixUtils.isIdentity(a);
+      if (!(a != null && b != null)) dart.assertFailed(null, I[0], 84, 12, "a != null && b != null");
+      return a.storage[$_get](0) === b.storage[$_get](0) && a.storage[$_get](1) === b.storage[$_get](1) && a.storage[$_get](2) === b.storage[$_get](2) && a.storage[$_get](3) === b.storage[$_get](3) && a.storage[$_get](4) === b.storage[$_get](4) && a.storage[$_get](5) === b.storage[$_get](5) && a.storage[$_get](6) === b.storage[$_get](6) && a.storage[$_get](7) === b.storage[$_get](7) && a.storage[$_get](8) === b.storage[$_get](8) && a.storage[$_get](9) === b.storage[$_get](9) && a.storage[$_get](10) === b.storage[$_get](10) && a.storage[$_get](11) === b.storage[$_get](11) && a.storage[$_get](12) === b.storage[$_get](12) && a.storage[$_get](13) === b.storage[$_get](13) && a.storage[$_get](14) === b.storage[$_get](14) && a.storage[$_get](15) === b.storage[$_get](15);
+    }
+    static isIdentity(a) {
+      if (!(a !== null)) dart.assertFailed(null, I[0], 105, 12, "a != null");
+      return a.storage[$_get](0) === 1.0 && a.storage[$_get](1) === 0.0 && a.storage[$_get](2) === 0.0 && a.storage[$_get](3) === 0.0 && a.storage[$_get](4) === 0.0 && a.storage[$_get](5) === 1.0 && a.storage[$_get](6) === 0.0 && a.storage[$_get](7) === 0.0 && a.storage[$_get](8) === 0.0 && a.storage[$_get](9) === 0.0 && a.storage[$_get](10) === 1.0 && a.storage[$_get](11) === 0.0 && a.storage[$_get](12) === 0.0 && a.storage[$_get](13) === 0.0 && a.storage[$_get](14) === 0.0 && a.storage[$_get](15) === 1.0;
+    }
+    static transformPoint(transform, point) {
+      let storage = transform.storage;
+      let x = point.dx;
+      let y = point.dy;
+      let rx = storage[$_get](0) * x + storage[$_get](4) * y + storage[$_get](12);
+      let ry = storage[$_get](1) * x + storage[$_get](5) * y + storage[$_get](13);
+      let rw = storage[$_get](3) * x + storage[$_get](7) * y + storage[$_get](15);
+      if (rw === 1.0) {
+        return new ui.Offset.new(rx, ry);
+      } else {
+        return new ui.Offset.new(rx / rw, ry / rw);
+      }
+    }
+    static _safeTransformRect(transform, rect) {
+      let storage = transform.storage;
+      let isAffine = storage[$_get](3) === 0.0 && storage[$_get](7) === 0.0 && storage[$_get](15) === 1.0;
+      matrix_utils.MatrixUtils._accumulate(storage, rect.left, rect.top, true, isAffine);
+      matrix_utils.MatrixUtils._accumulate(storage, rect.right, rect.top, false, isAffine);
+      matrix_utils.MatrixUtils._accumulate(storage, rect.left, rect.bottom, false, isAffine);
+      matrix_utils.MatrixUtils._accumulate(storage, rect.right, rect.bottom, false, isAffine);
+      return new ui.Rect.fromLTRB(matrix_utils.MatrixUtils._minMax[$_get](0), matrix_utils.MatrixUtils._minMax[$_get](1), matrix_utils.MatrixUtils._minMax[$_get](2), matrix_utils.MatrixUtils._minMax[$_get](3));
+    }
+    static get _minMax() {
+      let t1, t0;
+      t0 = matrix_utils.MatrixUtils['_#_minMax'];
+      return t0 == null ? (t1 = _native_typed_data.NativeFloat64List.new(4), matrix_utils.MatrixUtils['_#_minMax'] == null ? matrix_utils.MatrixUtils['_#_minMax'] = t1 : dart.throw(new _internal.LateError.fieldADI("_minMax"))) : t0;
+    }
+    static _accumulate(m, x, y, first, isAffine) {
+      let t1, t0, t1$, t0$;
+      let w = isAffine ? 1.0 : 1.0 / (m[$_get](3) * x + m[$_get](7) * y + m[$_get](15));
+      let tx = (m[$_get](0) * x + m[$_get](4) * y + m[$_get](12)) * w;
+      let ty = (m[$_get](1) * x + m[$_get](5) * y + m[$_get](13)) * w;
+      if (first) {
+        matrix_utils.MatrixUtils._minMax[$_set](0, (t0 = matrix_utils.MatrixUtils._minMax, t1 = 2, t0[$_set](t1, tx), tx));
+        matrix_utils.MatrixUtils._minMax[$_set](1, (t0$ = matrix_utils.MatrixUtils._minMax, t1$ = 3, t0$[$_set](t1$, ty), ty));
+      } else {
+        if (tx < matrix_utils.MatrixUtils._minMax[$_get](0)) {
+          matrix_utils.MatrixUtils._minMax[$_set](0, tx);
+        }
+        if (ty < matrix_utils.MatrixUtils._minMax[$_get](1)) {
+          matrix_utils.MatrixUtils._minMax[$_set](1, ty);
+        }
+        if (tx > matrix_utils.MatrixUtils._minMax[$_get](2)) {
+          matrix_utils.MatrixUtils._minMax[$_set](2, tx);
+        }
+        if (ty > matrix_utils.MatrixUtils._minMax[$_get](3)) {
+          matrix_utils.MatrixUtils._minMax[$_set](3, ty);
+        }
+      }
+    }
+    static transformRect(transform, rect) {
+      let storage = transform.storage;
+      let x = rect.left;
+      let y = rect.top;
+      let w = rect.right - x;
+      let h = rect.bottom - y;
+      if (!w[$isFinite] || !h[$isFinite]) {
+        return matrix_utils.MatrixUtils._safeTransformRect(transform, rect);
+      }
+      let wx = storage[$_get](0) * w;
+      let hx = storage[$_get](4) * h;
+      let rx = storage[$_get](0) * x + storage[$_get](4) * y + storage[$_get](12);
+      let wy = storage[$_get](1) * w;
+      let hy = storage[$_get](5) * h;
+      let ry = storage[$_get](1) * x + storage[$_get](5) * y + storage[$_get](13);
+      if (storage[$_get](3) === 0.0 && storage[$_get](7) === 0.0 && storage[$_get](15) === 1.0) {
+        let left = rx;
+        let right = rx;
+        if (wx < 0) {
+          left = left + wx;
+        } else {
+          right = right + wx;
+        }
+        if (hx < 0) {
+          left = left + hx;
+        } else {
+          right = right + hx;
+        }
+        let top = ry;
+        let bottom = ry;
+        if (wy < 0) {
+          top = top + wy;
+        } else {
+          bottom = bottom + wy;
+        }
+        if (hy < 0) {
+          top = top + hy;
+        } else {
+          bottom = bottom + hy;
+        }
+        return new ui.Rect.fromLTRB(left, top, right, bottom);
+      } else {
+        let ww = storage[$_get](3) * w;
+        let hw = storage[$_get](7) * h;
+        let rw = storage[$_get](3) * x + storage[$_get](7) * y + storage[$_get](15);
+        let ulx = rx / rw;
+        let uly = ry / rw;
+        let urx = (rx + wx) / (rw + ww);
+        let ury = (ry + wy) / (rw + ww);
+        let llx = (rx + hx) / (rw + hw);
+        let lly = (ry + hy) / (rw + hw);
+        let lrx = (rx + wx + hx) / (rw + ww + hw);
+        let lry = (ry + wy + hy) / (rw + ww + hw);
+        return new ui.Rect.fromLTRB(matrix_utils.MatrixUtils._min4(ulx, urx, llx, lrx), matrix_utils.MatrixUtils._min4(uly, ury, lly, lry), matrix_utils.MatrixUtils._max4(ulx, urx, llx, lrx), matrix_utils.MatrixUtils._max4(uly, ury, lly, lry));
+      }
+    }
+    static _min4(a, b, c, d) {
+      let e = a < b ? a : b;
+      let f = c < d ? c : d;
+      return e < f ? e : f;
+    }
+    static _max4(a, b, c, d) {
+      let e = a > b ? a : b;
+      let f = c > d ? c : d;
+      return e > f ? e : f;
+    }
+    static inverseTransformRect(transform, rect) {
+      let t0;
+      if (!(rect !== null)) dart.assertFailed(null, I[0], 440, 12, "rect != null");
+      if (matrix_utils.MatrixUtils.isIdentity(transform)) return rect;
+      transform = (t0 = vector_math_64.Matrix4.copy(transform), (() => {
+        t0.invert();
+        return t0;
+      })());
+      return matrix_utils.MatrixUtils.transformRect(transform, rect);
+    }
+    static createCylindricalProjectionTransform(opts) {
+      let t0;
+      let radius = opts && 'radius' in opts ? opts.radius : null;
+      let angle = opts && 'angle' in opts ? opts.angle : null;
+      let perspective = opts && 'perspective' in opts ? opts.perspective : 0.001;
+      let orientation = opts && 'orientation' in opts ? opts.orientation : C[0] || CT.C0;
+      if (!(radius !== null)) dart.assertFailed(null, I[0], 489, 12, "radius != null");
+      if (!(angle !== null)) dart.assertFailed(null, I[0], 490, 12, "angle != null");
+      if (!(perspective >= 0 && perspective <= 1.0)) dart.assertFailed(null, I[0], 491, 12, "perspective >= 0 && perspective <= 1.0");
+      if (!(orientation !== null)) dart.assertFailed(null, I[0], 492, 12, "orientation != null");
+      let result = (t0 = vector_math_64.Matrix4.identity(), (() => {
+        t0.setEntry(3, 2, -perspective);
+        t0.setEntry(2, 3, -radius);
+        t0.setEntry(3, 3, perspective * radius + 1.0);
+        return t0;
+      })());
+      result = vector_math_64.Matrix4.as(result['*']((orientation === basic_types.Axis.horizontal ? vector_math_64.Matrix4.rotationY(angle) : vector_math_64.Matrix4.rotationX(angle))['*'](vector_math_64.Matrix4.translationValues(0.0, 0.0, radius))));
+      return result;
+    }
+    static forceToPoint(offset) {
+      let t0;
+      t0 = vector_math_64.Matrix4.identity();
+      return (() => {
+        t0.setRow(0, vector_math_64.Vector4.new(0.0, 0.0, 0.0, offset.dx));
+        t0.setRow(1, vector_math_64.Vector4.new(0.0, 0.0, 0.0, offset.dy));
+        return t0;
+      })();
+    }
+  };
+  (matrix_utils.MatrixUtils.__ = function() {
+    ;
+  }).prototype = matrix_utils.MatrixUtils.prototype;
+  dart.addTypeTests(matrix_utils.MatrixUtils);
+  dart.addTypeCaches(matrix_utils.MatrixUtils);
+  dart.setLibraryUri(matrix_utils.MatrixUtils, I[1]);
+  dart.defineLazy(matrix_utils.MatrixUtils, {
+    /*matrix_utils.MatrixUtils['_#_minMax']*/get ['_#_minMax']() {
+      return null;
+    },
+    set ['_#_minMax'](_) {}
+  }, false);
+  var _name$ = dart.privateName(diagnostics, "_name");
+  matrix_utils.TransformProperty = class TransformProperty extends diagnostics.DiagnosticsProperty$(vector_math_64.Matrix4) {
+    valueToString(opts) {
+      let parentConfiguration = opts && 'parentConfiguration' in opts ? opts.parentConfiguration : null;
+      if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+        let values = T.JSArrayOfString().of([debug.debugFormatDouble(dart.nullCheck(this.value).entry(0, 0)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(0, 1)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(0, 2)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(0, 3)), debug.debugFormatDouble(dart.nullCheck(this.value).entry(1, 0)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(1, 1)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(1, 2)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(1, 3)), debug.debugFormatDouble(dart.nullCheck(this.value).entry(2, 0)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(2, 1)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(2, 2)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(2, 3)), debug.debugFormatDouble(dart.nullCheck(this.value).entry(3, 0)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(3, 1)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(3, 2)) + "," + debug.debugFormatDouble(dart.nullCheck(this.value).entry(3, 3))]);
+        return "[" + values[$join]("; ") + "]";
+      }
+      return matrix_utils.debugDescribeTransform(this.value)[$join]("\n");
+    }
+  };
+  (matrix_utils.TransformProperty.new = function(name, value, opts) {
+    let showName = opts && 'showName' in opts ? opts.showName : true;
+    let defaultValue = opts && 'defaultValue' in opts ? opts.defaultValue : C[1] || CT.C1;
+    let level = opts && 'level' in opts ? opts.level : C[2] || CT.C2;
+    if (!(showName !== null)) dart.assertFailed(null, I[0], 562, 15, "showName != null");
+    if (!(level !== null)) dart.assertFailed(null, I[0], 563, 15, "level != null");
+    matrix_utils.TransformProperty.__proto__.new.call(this, name, value, {showName: showName, defaultValue: defaultValue, level: level});
+    ;
+  }).prototype = matrix_utils.TransformProperty.prototype;
+  dart.addTypeTests(matrix_utils.TransformProperty);
+  dart.addTypeCaches(matrix_utils.TransformProperty);
+  dart.setLibraryUri(matrix_utils.TransformProperty, I[1]);
+  matrix_utils.debugDescribeTransform = function debugDescribeTransform(transform) {
+    if (transform == null) return C[3] || CT.C3;
+    return T.JSArrayOfString().of(["[0] " + debug.debugFormatDouble(transform.entry(0, 0)) + "," + debug.debugFormatDouble(transform.entry(0, 1)) + "," + debug.debugFormatDouble(transform.entry(0, 2)) + "," + debug.debugFormatDouble(transform.entry(0, 3)), "[1] " + debug.debugFormatDouble(transform.entry(1, 0)) + "," + debug.debugFormatDouble(transform.entry(1, 1)) + "," + debug.debugFormatDouble(transform.entry(1, 2)) + "," + debug.debugFormatDouble(transform.entry(1, 3)), "[2] " + debug.debugFormatDouble(transform.entry(2, 0)) + "," + debug.debugFormatDouble(transform.entry(2, 1)) + "," + debug.debugFormatDouble(transform.entry(2, 2)) + "," + debug.debugFormatDouble(transform.entry(2, 3)), "[3] " + debug.debugFormatDouble(transform.entry(3, 0)) + "," + debug.debugFormatDouble(transform.entry(3, 1)) + "," + debug.debugFormatDouble(transform.entry(3, 2)) + "," + debug.debugFormatDouble(transform.entry(3, 3))]);
+  };
+  dart.trackLibraries("packages/flutter/src/painting/matrix_utils.dart", {
+    "package:flutter/src/painting/matrix_utils.dart": matrix_utils
+  }, {
+  }, '{"version":3,"sourceRoot":"","sources":["matrix_utils.dart"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4BAsB0C;AACtC,YAAO,AAAU,SAAD;AACE,mBAAS,AAAU,SAAD;AAEpC,UAAI,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO;AAChB,cAAO,mBAAO,AAAM,MAAA,QAAC,KAAK,AAAM,MAAA,QAAC;;AAEnC,YAAO;IACT;sBAMkC;AAChC,YAAO,AAAU,SAAD;AACE,mBAAS,AAAU,SAAD;AAEpC,UAAI,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAI,MAAJ,QAAC,OAAM,OACb,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAK,MAAL,QAAC,QAAO,OACd,AAAM,AAAI,MAAJ,QAAC,OAAM,AAAM,MAAA,QAAC;AACtB,cAAO,AAAM,OAAA,QAAC;;AAEhB,YAAO;IACT;wBAIkC,GAAY;AAC5C,UAAI,AAAU,CAAC,IAAE,CAAC,EAChB,MAAO;AACT,YAAO,AAAU,CAAT,YAAY,CAAC;AACrB,UAAI,AAAE,CAAD,UACH,MAAO,qCAAY,eAAD,CAAC;AACrB,UAAI,AAAE,CAAD,UACH,MAAO,qCAAW,CAAC;AACrB,YAAO,AAAU,CAAT,YAAY,CAAC;AACrB,YAAO,AAAE,AAAO,AAAI,AAehB,EAfI,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,AAAE,AAAO,CAAR,gBAAS,MAC1B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS,OAC3B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS,OAC3B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS,OAC3B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS,OAC3B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS,OAC3B,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,AAAE,AAAO,CAAR,gBAAS;IACpC;sBAG+B;AAC7B,YAAO,AAAE,CAAD;AACR,YAAO,AAAE,AAAO,AAAI,AAehB,EAfI,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAI,CAAZ,gBAAS,OAAM,OAChB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,OACjB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,OACjB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,OACjB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,OACjB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO,OACjB,AAAE,AAAO,AAAK,CAAb,gBAAS,QAAO;IAC1B;0BAaqC,WAAkB;AACnC,oBAAU,AAAU,SAAD;AACxB,cAAI,AAAM,KAAD;AACT,cAAI,AAAM,KAAD;AAMT,eAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAC/C,eAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAC/C,eAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAC5D,UAAI,AAAG,EAAD,KAAI;AACR,cAAO,mBAAO,EAAE,EAAE,EAAE;;AAEpB,cAAO,mBAAO,AAAG,EAAD,GAAG,EAAE,EAAE,AAAG,EAAD,GAAG,EAAE;;IAElC;8BAQuC,WAAgB;AACnC,oBAAU,AAAU,SAAD;AAC1B,qBAAW,AAAO,AAAI,AACX,OADO,QAAC,OAAM,OAChC,AAAO,AAAI,OAAJ,QAAC,OAAM,OACd,AAAO,AAAK,OAAL,QAAC,QAAO;AAE2C,MAA9D,qCAAY,OAAO,EAAE,AAAK,IAAD,OAAQ,AAAK,IAAD,MAAS,MAAO,QAAQ;AACC,MAA9D,qCAAY,OAAO,EAAE,AAAK,IAAD,QAAQ,AAAK,IAAD,MAAS,OAAO,QAAQ;AACC,MAA9D,qCAAY,OAAO,EAAE,AAAK,IAAD,OAAQ,AAAK,IAAD,SAAS,OAAO,QAAQ;AACC,MAA9D,qCAAY,OAAO,EAAE,AAAK,IAAD,QAAQ,AAAK,IAAD,SAAS,OAAO,QAAQ;AAE7D,YAAY,sBAAS,AAAO,wCAAC,IAAI,AAAO,wCAAC,IAAI,AAAO,wCAAC,IAAI,AAAO,wCAAC;IACnE;;;AAE8B;gCAAU,yCAAY,6IAAtB;IAAwB;uBAClB,GAAU,GAAU,GAAQ,OAAY;;AAC7D,cAAI,QAAQ,GAAG,MAAM,AAAI,OAAG,AAAC,AAAI,AAAI,AAAW,CAAnB,QAAC,KAAK,CAAC,GAAG,AAAC,AAAI,CAAJ,QAAC,KAAK,CAAC,GAAG,AAAC,CAAA,QAAC;AACpD,eAAmC,CAA7B,AAAC,AAAI,AAAI,AAAW,CAAnB,QAAC,KAAK,CAAC,GAAG,AAAC,AAAI,CAAJ,QAAC,KAAK,CAAC,GAAG,AAAC,CAAA,QAAC,OAAO,CAAC;AACtC,eAAmC,CAA7B,AAAC,AAAI,AAAI,AAAW,CAAnB,QAAC,KAAK,CAAC,GAAG,AAAC,AAAI,CAAJ,QAAC,KAAK,CAAC,GAAG,AAAC,CAAA,QAAC,OAAO,CAAC;AACnD,UAAI,KAAK;AACqB,QAA5B,AAAO,wCAAC,IAAY,KAAP,uCAAQ,GAAD,cAAM,EAAE,GAAF,EAAE;AACA,QAA5B,AAAO,wCAAC,IAAY,MAAP,wCAAQ,GAAD,gBAAM,EAAE,GAAF,EAAE;;AAE5B,YAAI,AAAG,EAAD,GAAG,AAAO,wCAAC;AACA,UAAf,AAAO,wCAAC,GAAK,EAAE;;AAEjB,YAAI,AAAG,EAAD,GAAG,AAAO,wCAAC;AACA,UAAf,AAAO,wCAAC,GAAK,EAAE;;AAEjB,YAAI,AAAG,EAAD,GAAG,AAAO,wCAAC;AACA,UAAf,AAAO,wCAAC,GAAK,EAAE;;AAEjB,YAAI,AAAG,EAAD,GAAG,AAAO,wCAAC;AACA,UAAf,AAAO,wCAAC,GAAK,EAAE;;;IAGrB;yBAQkC,WAAgB;AAC9B,oBAAU,AAAU,SAAD;AACxB,cAAI,AAAK,IAAD;AACR,cAAI,AAAK,IAAD;AACR,cAAI,AAAK,AAAM,IAAP,SAAS,CAAC;AAClB,cAAI,AAAK,AAAO,IAAR,UAAU,CAAC;AAGhC,WAAK,AAAE,CAAD,gBAAc,AAAE,CAAD;AACnB,cAAO,6CAAmB,SAAS,EAAE,IAAI;;AAsJ9B,eAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,eAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,eAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAE/C,eAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,eAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,eAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAE5D,UAAI,AAAO,AAAI,OAAJ,QAAC,OAAM,OAAO,AAAO,AAAI,OAAJ,QAAC,OAAM,OAAO,AAAO,AAAK,OAAL,QAAC,QAAO;AACpD,mBAAQ,EAAE;AACV,oBAAQ,EAAE;AACjB,YAAI,AAAG,EAAD,GAAG;AACI,UAAX,OAAA,AAAM,IAAF,GAAK,EAAE;;AAEA,UAAX,QAAA,AAAM,KAAD,GAAI,EAAE;;AAEb,YAAI,AAAG,EAAD,GAAG;AACI,UAAX,OAAA,AAAM,IAAF,GAAK,EAAE;;AAEA,UAAX,QAAA,AAAM,KAAD,GAAI,EAAE;;AAGN,kBAAS,EAAE;AACX,qBAAS,EAAE;AAClB,YAAI,AAAG,EAAD,GAAG;AACK,UAAZ,MAAA,AAAO,GAAJ,GAAO,EAAE;;AAEA,UAAZ,SAAA,AAAO,MAAD,GAAI,EAAE;;AAEd,YAAI,AAAG,EAAD,GAAG;AACK,UAAZ,MAAA,AAAO,GAAJ,GAAO,EAAE;;AAEA,UAAZ,SAAA,AAAO,MAAD,GAAI,EAAE;;AAGd,cAAY,sBAAS,IAAI,EAAE,GAAG,EAAE,KAAK,EAAE,MAAM;;AAEhC,iBAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,iBAAK,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC;AACnB,iBAAK,AAAO,AAAI,AAAI,AAAiB,OAAzB,QAAC,KAAK,CAAC,GAAG,AAAO,AAAI,OAAJ,QAAC,KAAK,CAAC,GAAG,AAAO,OAAA,QAAC;AAE/C,kBAAO,AAAc,EAAZ,GAAe,EAAE;AAC1B,kBAAO,AAAc,EAAZ,GAAe,EAAE;AAC1B,kBAAqB,CAAd,AAAG,EAAD,GAAG,EAAE,KAAU,AAAG,EAAD,GAAG,EAAE;AAC/B,kBAAqB,CAAd,AAAG,EAAD,GAAG,EAAE,KAAU,AAAG,EAAD,GAAG,EAAE;AAC/B,kBAAqB,CAAd,AAAQ,EAAN,GAAQ,EAAE,KAAK,AAAQ,EAAN,GAAQ,EAAE;AACpC,kBAAqB,CAAd,AAAQ,EAAN,GAAQ,EAAE,KAAK,AAAQ,EAAN,GAAQ,EAAE;AACpC,kBAAqB,CAAd,AAAG,AAAK,EAAN,GAAG,EAAE,GAAG,EAAE,KAAK,AAAG,AAAK,EAAN,GAAG,EAAE,GAAG,EAAE;AACpC,kBAAqB,CAAd,AAAG,AAAK,EAAN,GAAG,EAAE,GAAG,EAAE,KAAK,AAAG,AAAK,EAAN,GAAG,EAAE,GAAG,EAAE;AAEjD,cAAY,sBACV,+BAAM,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,GACxB,+BAAM,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,GACxB,+BAAM,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,GACxB,+BAAM,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG;;IAG9B;iBAE2B,GAAU,GAAU,GAAU;AAC1C,cAAK,AAAE,CAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;AACnB,cAAK,AAAE,CAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;AAChC,YAAQ,AAAE,EAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;IACxB;iBAC2B,GAAU,GAAU,GAAU;AAC1C,cAAK,AAAE,CAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;AACnB,cAAK,AAAE,CAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;AAChC,YAAQ,AAAE,EAAD,GAAG,CAAC,GAAI,CAAC,GAAG,CAAC;IACxB;gCAQyC,WAAgB;;AACvD,YAAO,AAAK,IAAD;AAKX,UAAI,oCAAW,SAAS,GACtB,MAAO,KAAI;AACgC,MAA7C,kBAAoB,4BAAK,SAAS,GAAd;AAAiB;;;AACrC,YAAO,wCAAc,SAAS,EAAE,IAAI;IACtC;;;UAmCkB;UACA;UACT;UACF;AAEL,YAAO,AAAO,MAAD;AACb,YAAO,AAAM,KAAD;AACZ,YAAO,AAAY,AAAK,WAAN,IAAI,KAAK,AAAY,WAAD,IAAI;AAC1C,YAAO,AAAY,WAAD;AAmBV,4DAAiB;AACnB,oBAAS,GAAG,GAAG,CAAC,WAAW;AAC3B,oBAAS,GAAG,GAAG,CAAC,MAAM;AACtB,oBAAS,GAAG,GAAG,AAAY,AAAS,WAAV,GAAG,MAAM,GAAG;;;AAQe,MAJ3D,SAIiD,0BAJxC,AAAO,MAAD,MAIb,CAHE,AAAY,WAAD,KAAS,8BACN,iCAAU,KAAK,IACf,iCAAU,KAAK,QACrB,yCAAkB,KAAK,KAAK,MAAM;AAG9C,YAAO,OAAM;IACf;wBAGmC;;AACjC,WAAe;;AACX,kBAAO,GAAG,2BAAQ,KAAG,KAAG,KAAG,AAAO,MAAD;AACjC,kBAAO,GAAG,2BAAQ,KAAG,KAAG,KAAG,AAAO,MAAD;;;IACvC;;;;EApgBe;;;;;MA6Je,qCAAS;YAAT;;;;;;;UA+YgB;AAC5C,UAAI,mBAAmB,aAAa,AAAoB,mBAAD;AAGlC,qBAAiB,wBAC/B,AAAkK,wBAA3I,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,KAC7J,AAAkK,wBAA3I,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,KAC7J,AAAkK,wBAA3I,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,KAC7J,AAAkK,wBAA3I,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG,MAAI,MAAG,wBAAuB,AAAE,eAAP,kBAAa,GAAG;AAElK,cAAO,AAAwB,OAApB,AAAO,MAAD,QAAM,QAAM;;AAE/B,YAAO,AAA8B,qCAAP,mBAAY;IAC5C;;iDA7BS,MACE;QACJ;QACG;QACQ;UACN,AAAS,QAAD;UACR,AAAM,KAAD;AACZ,4DACE,IAAI,EACJ,KAAK,aACK,QAAQ,gBACJ,YAAY,SACnB,KAAK;;EACb;;;;wEA9BqC;AAC3C,QAAI,AAAU,SAAD,UACX;AACF,UAAe,yBACb,AAAqL,SAA9K,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,KAChL,AAAqL,SAA9K,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,KAChL,AAAqL,SAA9K,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,KAChL,AAAqL,SAA9K,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG,MAAI,MAAG,wBAAkB,AAAU,SAAD,OAAO,GAAG;EAEpL","file":"../../../../../../../../../D:/packages/flutter/src/painting/matrix_utils.dart.lib.js"}');
+  // Exports:
+  return {
+    src__painting__matrix_utils: matrix_utils
+  };
+}));
+
+//# sourceMappingURL=matrix_utils.dart.lib.js.map

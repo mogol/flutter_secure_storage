@@ -1,0 +1,334 @@
+define(['dart_sdk'], (function load__packages__flutter__src__foundation__licenses_dart(dart_sdk) {
+  'use strict';
+  const core = dart_sdk.core;
+  const _interceptors = dart_sdk._interceptors;
+  const _js_helper = dart_sdk._js_helper;
+  const async = dart_sdk.async;
+  const dart = dart_sdk.dart;
+  const dartx = dart_sdk.dartx;
+  var licenses = Object.create(dart.library);
+  var $substring = dartx.substring;
+  var $add = dartx.add;
+  var $isNotEmpty = dartx.isNotEmpty;
+  var $join = dartx.join;
+  var $trimLeft = dartx.trimLeft;
+  var $clear = dartx.clear;
+  var $_get = dartx._get;
+  var $truncate = dartx.truncate;
+  dart._checkModuleNullSafetyMode(true);
+  var T = {
+    JSArrayOfString: () => (T.JSArrayOfString = dart.constFn(_interceptors.JSArray$(core.String)))(),
+    VoidTovoid: () => (T.VoidTovoid = dart.constFn(dart.fnType(dart.void, [])))(),
+    VoidToLicenseParagraph: () => (T.VoidToLicenseParagraph = dart.constFn(dart.fnType(licenses.LicenseParagraph, [])))(),
+    SyncIterableOfLicenseParagraph: () => (T.SyncIterableOfLicenseParagraph = dart.constFn(_js_helper.SyncIterable$(licenses.LicenseParagraph)))(),
+    StreamOfLicenseEntry: () => (T.StreamOfLicenseEntry = dart.constFn(async.Stream$(licenses.LicenseEntry)))(),
+    VoidToStreamOfLicenseEntry: () => (T.VoidToStreamOfLicenseEntry = dart.constFn(dart.fnType(T.StreamOfLicenseEntry(), [])))(),
+    JSArrayOfVoidToStreamOfLicenseEntry: () => (T.JSArrayOfVoidToStreamOfLicenseEntry = dart.constFn(_interceptors.JSArray$(T.VoidToStreamOfLicenseEntry())))(),
+    _AsyncStarImplOfLicenseEntry: () => (T._AsyncStarImplOfLicenseEntry = dart.constFn(async._AsyncStarImpl$(licenses.LicenseEntry)))()
+  };
+  const CT = Object.create({
+    _: () => (C, CT)
+  });
+  dart.defineLazy(CT, {
+    get C0() {
+      return C[0] = dart.const({
+        __proto__: licenses._LicenseEntryWithLineBreaksParserState.prototype,
+        [_name$]: "_LicenseEntryWithLineBreaksParserState.beforeParagraph",
+        index: 0
+      });
+    },
+    get C1() {
+      return C[1] = dart.const({
+        __proto__: licenses._LicenseEntryWithLineBreaksParserState.prototype,
+        [_name$]: "_LicenseEntryWithLineBreaksParserState.inParagraph",
+        index: 1
+      });
+    },
+    get C2() {
+      return C[2] = dart.constList([C[0] || CT.C0, C[1] || CT.C1], licenses._LicenseEntryWithLineBreaksParserState);
+    }
+  }, false);
+  var C = Array(3).fill(void 0);
+  var I = [
+    "package:flutter/src/foundation/licenses.dart",
+    "file:///C:/Users/jrlh/flutter/packages/flutter/lib/src/foundation/licenses.dart"
+  ];
+  var text$ = dart.privateName(licenses, "LicenseParagraph.text");
+  var indent$ = dart.privateName(licenses, "LicenseParagraph.indent");
+  licenses.LicenseParagraph = class LicenseParagraph extends core.Object {
+    get text() {
+      return this[text$];
+    }
+    set text(value) {
+      super.text = value;
+    }
+    get indent() {
+      return this[indent$];
+    }
+    set indent(value) {
+      super.indent = value;
+    }
+  };
+  (licenses.LicenseParagraph.new = function(text, indent) {
+    this[text$] = text;
+    this[indent$] = indent;
+    ;
+  }).prototype = licenses.LicenseParagraph.prototype;
+  dart.addTypeTests(licenses.LicenseParagraph);
+  dart.addTypeCaches(licenses.LicenseParagraph);
+  dart.setLibraryUri(licenses.LicenseParagraph, I[0]);
+  dart.setFieldSignature(licenses.LicenseParagraph, () => ({
+    __proto__: dart.getFields(licenses.LicenseParagraph.__proto__),
+    text: dart.finalFieldType(core.String),
+    indent: dart.finalFieldType(core.int)
+  }));
+  dart.defineLazy(licenses.LicenseParagraph, {
+    /*licenses.LicenseParagraph.centeredIndent*/get centeredIndent() {
+      return -1;
+    }
+  }, false);
+  licenses.LicenseEntry = class LicenseEntry extends core.Object {};
+  (licenses.LicenseEntry.new = function() {
+    ;
+  }).prototype = licenses.LicenseEntry.prototype;
+  dart.addTypeTests(licenses.LicenseEntry);
+  dart.addTypeCaches(licenses.LicenseEntry);
+  dart.setLibraryUri(licenses.LicenseEntry, I[0]);
+  var _name$ = dart.privateName(licenses, "_name");
+  licenses._LicenseEntryWithLineBreaksParserState = class _LicenseEntryWithLineBreaksParserState extends core.Object {
+    toString() {
+      return this[_name$];
+    }
+  };
+  (licenses._LicenseEntryWithLineBreaksParserState.new = function(index, _name) {
+    this.index = index;
+    this[_name$] = _name;
+    ;
+  }).prototype = licenses._LicenseEntryWithLineBreaksParserState.prototype;
+  dart.addTypeTests(licenses._LicenseEntryWithLineBreaksParserState);
+  dart.addTypeCaches(licenses._LicenseEntryWithLineBreaksParserState);
+  dart.setLibraryUri(licenses._LicenseEntryWithLineBreaksParserState, I[0]);
+  dart.setFieldSignature(licenses._LicenseEntryWithLineBreaksParserState, () => ({
+    __proto__: dart.getFields(licenses._LicenseEntryWithLineBreaksParserState.__proto__),
+    index: dart.finalFieldType(core.int),
+    [_name$]: dart.finalFieldType(core.String)
+  }));
+  dart.defineExtensionMethods(licenses._LicenseEntryWithLineBreaksParserState, ['toString']);
+  licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph = C[0] || CT.C0;
+  licenses._LicenseEntryWithLineBreaksParserState.inParagraph = C[1] || CT.C1;
+  licenses._LicenseEntryWithLineBreaksParserState.values = C[2] || CT.C2;
+  var packages$ = dart.privateName(licenses, "LicenseEntryWithLineBreaks.packages");
+  var text$0 = dart.privateName(licenses, "LicenseEntryWithLineBreaks.text");
+  licenses.LicenseEntryWithLineBreaks = class LicenseEntryWithLineBreaks extends licenses.LicenseEntry {
+    get packages() {
+      return this[packages$];
+    }
+    set packages(value) {
+      super.packages = value;
+    }
+    get text() {
+      return this[text$0];
+    }
+    set text(value) {
+      super.text = value;
+    }
+    get paragraphs() {
+      return new (T.SyncIterableOfLicenseParagraph()).new((function* paragraphs() {
+        let lineStart = 0;
+        let currentPosition = 0;
+        let lastLineIndent = 0;
+        let currentLineIndent = 0;
+        let currentParagraphIndentation = null;
+        let state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+        let lines = T.JSArrayOfString().of([]);
+        const addLine = () => {
+          if (!(lineStart < currentPosition)) dart.assertFailed(null, I[1], 152, 14, "lineStart < currentPosition");
+          lines[$add](this.text[$substring](lineStart, currentPosition));
+        };
+        dart.fn(addLine, T.VoidTovoid());
+        function getParagraph() {
+          if (!lines[$isNotEmpty]) dart.assertFailed(null, I[1], 157, 14, "lines.isNotEmpty");
+          if (!(currentParagraphIndentation != null)) dart.assertFailed(null, I[1], 158, 14, "currentParagraphIndentation != null");
+          let result = new licenses.LicenseParagraph.new(lines[$join](" "), dart.nullCheck(currentParagraphIndentation));
+          if (!(result.text[$trimLeft]() === result.text)) dart.assertFailed(null, I[1], 160, 14, "result.text.trimLeft() == result.text");
+          if (!result.text[$isNotEmpty]) dart.assertFailed(null, I[1], 161, 14, "result.text.isNotEmpty");
+          lines[$clear]();
+          return result;
+        }
+        dart.fn(getParagraph, T.VoidToLicenseParagraph());
+        while (currentPosition < this.text.length) {
+          switch (state) {
+            case C[0] || CT.C0:
+            {
+              if (!(lineStart === currentPosition)) dart.assertFailed(null, I[1], 169, 18, "lineStart == currentPosition");
+              let labelState = this.text[$_get](currentPosition);
+              SL0:
+                while (true) {
+                  switch (labelState) {
+                    case " ":
+                    {
+                      lineStart = currentPosition + 1;
+                      currentLineIndent = currentLineIndent + 1;
+                      state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+                      break SL0;
+                    }
+                    case "\t":
+                    {
+                      lineStart = currentPosition + 1;
+                      currentLineIndent = currentLineIndent + 8;
+                      state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+                      break SL0;
+                    }
+                    case "\r":
+                    case "\n":
+                    case "\f":
+                    {
+                      if (lines[$isNotEmpty]) {
+                        yield getParagraph();
+                      }
+                      if (this.text[$_get](currentPosition) === "\r" && currentPosition < this.text.length - 1 && this.text[$_get](currentPosition + 1) === "\n") {
+                        currentPosition = currentPosition + 1;
+                      }
+                      lastLineIndent = 0;
+                      currentLineIndent = 0;
+                      currentParagraphIndentation = null;
+                      lineStart = currentPosition + 1;
+                      state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+                      break SL0;
+                    }
+                    case "[":
+                    {
+                      currentLineIndent = currentLineIndent + 1;
+                      labelState = Symbol('_default');
+                      continue SL0;
+                    }
+                    default:
+                    {
+                      if (lines[$isNotEmpty] && currentLineIndent > lastLineIndent) {
+                        yield getParagraph();
+                        currentParagraphIndentation = null;
+                      }
+                      if (currentParagraphIndentation == null) {
+                        if (currentLineIndent > 10)
+                          currentParagraphIndentation = -1;
+                        else
+                          currentParagraphIndentation = (currentLineIndent / 3)[$truncate]();
+                      }
+                      state = licenses._LicenseEntryWithLineBreaksParserState.inParagraph;
+                      break SL0;
+                    }
+                  }
+                  break;
+                }
+              break;
+            }
+            case C[1] || CT.C1:
+            {
+              switch (this.text[$_get](currentPosition)) {
+                case "\n":
+                {
+                  addLine();
+                  lastLineIndent = currentLineIndent;
+                  currentLineIndent = 0;
+                  lineStart = currentPosition + 1;
+                  state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+                  break;
+                }
+                case "\f":
+                {
+                  addLine();
+                  yield getParagraph();
+                  lastLineIndent = 0;
+                  currentLineIndent = 0;
+                  currentParagraphIndentation = null;
+                  lineStart = currentPosition + 1;
+                  state = licenses._LicenseEntryWithLineBreaksParserState.beforeParagraph;
+                  break;
+                }
+                default:
+                {
+                  state = licenses._LicenseEntryWithLineBreaksParserState.inParagraph;
+                }
+              }
+              break;
+            }
+          }
+          currentPosition = currentPosition + 1;
+        }
+        switch (state) {
+          case C[0] || CT.C0:
+          {
+            if (lines[$isNotEmpty]) {
+              yield getParagraph();
+            }
+            break;
+          }
+          case C[1] || CT.C1:
+          {
+            addLine();
+            yield getParagraph();
+            break;
+          }
+        }
+      }).bind(this));
+    }
+  };
+  (licenses.LicenseEntryWithLineBreaks.new = function(packages, text) {
+    this[packages$] = packages;
+    this[text$0] = text;
+    licenses.LicenseEntryWithLineBreaks.__proto__.new.call(this);
+    ;
+  }).prototype = licenses.LicenseEntryWithLineBreaks.prototype;
+  dart.addTypeTests(licenses.LicenseEntryWithLineBreaks);
+  dart.addTypeCaches(licenses.LicenseEntryWithLineBreaks);
+  dart.setGetterSignature(licenses.LicenseEntryWithLineBreaks, () => ({
+    __proto__: dart.getGetters(licenses.LicenseEntryWithLineBreaks.__proto__),
+    paragraphs: core.Iterable$(licenses.LicenseParagraph)
+  }));
+  dart.setLibraryUri(licenses.LicenseEntryWithLineBreaks, I[0]);
+  dart.setFieldSignature(licenses.LicenseEntryWithLineBreaks, () => ({
+    __proto__: dart.getFields(licenses.LicenseEntryWithLineBreaks.__proto__),
+    packages: dart.finalFieldType(core.List$(core.String)),
+    text: dart.finalFieldType(core.String)
+  }));
+  licenses.LicenseRegistry = class LicenseRegistry extends core.Object {
+    static addLicense(collector) {
+      licenses.LicenseRegistry._collectors == null ? licenses.LicenseRegistry._collectors = T.JSArrayOfVoidToStreamOfLicenseEntry().of([]) : null;
+      dart.nullCheck(licenses.LicenseRegistry._collectors)[$add](collector);
+    }
+    static get licenses() {
+      return new (T._AsyncStarImplOfLicenseEntry()).new(function* licenses$(stream) {
+        if (licenses.LicenseRegistry._collectors == null) return;
+        for (let collector of dart.nullCheck(licenses.LicenseRegistry._collectors)) {
+          if (stream.addStream(collector())) return;
+          yield;
+        }
+      }).stream;
+    }
+    static reset() {
+      licenses.LicenseRegistry._collectors = null;
+    }
+  };
+  (licenses.LicenseRegistry.__ = function() {
+    ;
+  }).prototype = licenses.LicenseRegistry.prototype;
+  dart.addTypeTests(licenses.LicenseRegistry);
+  dart.addTypeCaches(licenses.LicenseRegistry);
+  dart.setLibraryUri(licenses.LicenseRegistry, I[0]);
+  dart.defineLazy(licenses.LicenseRegistry, {
+    /*licenses.LicenseRegistry._collectors*/get _collectors() {
+      return null;
+    },
+    set _collectors(_) {}
+  }, false);
+  dart.trackLibraries("packages/flutter/src/foundation/licenses.dart", {
+    "package:flutter/src/foundation/licenses.dart": licenses
+  }, {
+  }, '{"version":3,"sourceRoot":"","sources":["licenses.dart"],"names":[],"mappings":"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","file":"../../../../../../../../../D:/packages/flutter/src/foundation/licenses.dart.lib.js"}');
+  // Exports:
+  return {
+    src__foundation__licenses: licenses
+  };
+}));
+
+//# sourceMappingURL=licenses.dart.lib.js.map

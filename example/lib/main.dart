@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -99,7 +100,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         ),
         body: Column(
           children: [
-            if (Platform.isIOS)
+            if (!kIsWeb && Platform.isIOS)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextFormField(
