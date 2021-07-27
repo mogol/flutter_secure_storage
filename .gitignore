@@ -8,6 +8,7 @@ ios/.generated/
 packages
 pubspec.lock
 .flutter-plugins
+.flutter-plugins-dependencies
 
 ios/Podfile.lock
 
@@ -86,3 +87,4 @@ build/
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
+example/.flutter-plugins-dependencies

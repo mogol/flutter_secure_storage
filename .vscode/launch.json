@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Dart: Run all Platform Tests",
+      "type": "dart",
+      "request": "launch",
+      "program": "./flutter_secure_storage_platform_interface/test/",
+      "flutterMode": "debug"
+    },
+    {
       "name": "example",
       "cwd": "example",
       "request": "launch",
