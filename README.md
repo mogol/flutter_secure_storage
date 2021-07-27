@@ -31,6 +31,13 @@ await storage.write(key: key, value: value);
 
 ```
 
+This allows us to be able to fetch secure values while the app is backgrounded, by specifying first_unlock or first_unlock_this_device. The default if not specified is unlocked.
+An example:
+```dart
+final options = IOSOptions(accessibility: IOSAccessibility.first_unlock);
+await storage.write(key: key, value: value, iOptions: options);
+```
+
 ### Configure Android version 
 In `[project]/android/app/build.gradle` set `minSdkVersion` to >= 18.
 ```
