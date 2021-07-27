@@ -189,7 +189,9 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     
     OSStatus status;
     status = SecItemDelete((__bridge CFDictionaryRef)search);
-    NSLog(@"SecItemDelete status = %d", (int) status);
+    if (status != noErr){
+        NSLog(@"SecItemDelete status = %d", (int) status);
+    }
 }
 
 - (void)deleteAll:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
@@ -207,7 +209,9 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
     OSStatus status;
     status = SecItemDelete((__bridge CFDictionaryRef)search);
-    NSLog(@"SecItemDeleteAll status = %d", (int) status);
+    if (status != noErr){
+        NSLog(@"SecItemDeleteAll status = %d", (int) status);
+    }
 }
 
 - (NSDictionary *)readAll:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
