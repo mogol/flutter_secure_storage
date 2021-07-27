@@ -35,10 +35,11 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     NSDictionary *options = [arguments[@"options"] isKindOfClass:[NSDictionary class]] ? arguments[@"options"] : nil;
     NSString *accountName = options[@"accountName"];
     NSString *groupId = options[@"groupId"];
-    
+    NSString *synchronizable = options[@"synchronizable"];
+
     if ([@"read" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
-        NSString *value = [self read:key forGroup:groupId forAccountName:accountName];
+        NSString *value = [self read:key forGroup:groupId forAccountName:accountName forSynchronizable:synchronizable];
         
         result(value);
     } else
@@ -46,27 +47,27 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         NSString *accessibility = options[@"accessibility"];
-        
+
         if (![value isKindOfClass:[NSString class]]){
             result(InvalidParameters);
             return;
         }
         
-        [self write:value forKey:key forGroup:groupId accessibilityAttr:accessibility forAccountName:accountName];
+        [self write:value forKey:key forGroup:groupId accessibilityAttr:accessibility forAccountName:accountName forSynchronizable:synchronizable];
         
         result(nil);
     } else if ([@"delete" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         
-        [self delete:key forGroup:groupId forAccountName:accountName];
+        [self delete:key forGroup:groupId forAccountName:accountName forSynchronizable:synchronizable];
         
         result(nil);
     } else if ([@"deleteAll" isEqualToString:call.method]) {
-        [self deleteAll: groupId forAccountName:accountName];
+        [self deleteAll: groupId forAccountName:accountName forSynchronizable:synchronizable];
         
         result(nil);
     } else if ([@"readAll" isEqualToString:call.method]) {
-        NSDictionary *value = [self readAll: groupId forAccountName:accountName];
+        NSDictionary *value = [self readAll: groupId forAccountName:accountName forSynchronizable:synchronizable];
 
         result(value);
     }else {
@@ -74,7 +75,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility forAccountName:(NSString *)accountName {
+- (void)write:(NSString *)value forKey:(NSString *)key forGroup:(NSString *)groupId accessibilityAttr:(NSString *)accessibility forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     
     if(groupId != nil) {
@@ -87,7 +88,15 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
-    
+
+    CFBooleanRef attrSynchronizable = kCFBooleanFalse;
+    if ([synchronizable isEqualToString:@"true"]) {
+        attrSynchronizable = kCFBooleanTrue;
+    } else {
+        attrSynchronizable = kCFBooleanFalse;
+    }
+    search[(__bridge id)kSecAttrSynchronizable] = (__bridge id) attrSynchronizable;
+
     // The default setting is kSecAttrAccessibleWhenUnlocked
     CFStringRef attrAccessible = kSecAttrAccessibleWhenUnlocked;
     if (accessibility != nil) {
@@ -112,6 +121,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSDictionary *update = @{
             (__bridge id)kSecValueData: [value dataUsingEncoding:NSUTF8StringEncoding],
             (__bridge id)kSecAttrAccessible: (__bridge id) attrAccessible,
+            (__bridge id)kSecAttrSynchronizable: (__bridge id) attrSynchronizable,
         };
         
         status = SecItemUpdate((__bridge CFDictionaryRef)search, (__bridge CFDictionaryRef)update);
@@ -130,7 +140,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
 }
 
-- (NSString *)read:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName {
+- (NSString *)read:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     if(groupId != nil) {
      search[(__bridge id)kSecAttrAccessGroup] = groupId;
@@ -140,7 +150,13 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
-    
+
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+
     CFDataRef resultData = NULL;
     
     OSStatus status;
@@ -154,7 +170,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     return value;
 }
 
-- (void)delete:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName {
+- (void)delete:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     if(groupId != nil) {
         search[(__bridge id)kSecAttrAccessGroup] = groupId;
@@ -165,10 +181,20 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     search[(__bridge id)kSecAttrAccount] = key;
     search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
     
-    SecItemDelete((__bridge CFDictionaryRef)search);
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+    
+    OSStatus status;
+    status = SecItemDelete((__bridge CFDictionaryRef)search);
+    if (status != noErr){
+        NSLog(@"SecItemDelete status = %d", (int) status);
+    }
 }
 
-- (void)deleteAll:(NSString *)groupId forAccountName:(NSString *)accountName {
+- (void)deleteAll:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     if(groupId != nil) {
         search[(__bridge id)kSecAttrAccessGroup] = groupId;
@@ -176,10 +202,19 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if(accountName != nil) {
         search[(__bridge id)kSecAttrService] = accountName;
     }
-    SecItemDelete((__bridge CFDictionaryRef)search);
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+    OSStatus status;
+    status = SecItemDelete((__bridge CFDictionaryRef)search);
+    if (status != noErr){
+        NSLog(@"SecItemDeleteAll status = %d", (int) status);
+    }
 }
 
-- (NSDictionary *)readAll:(NSString *)groupId forAccountName:(NSString *)accountName {
+- (NSDictionary *)readAll:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
     NSMutableDictionary *search = [self.query mutableCopy];
     if(groupId != nil) {
         search[(__bridge id)kSecAttrAccessGroup] = groupId;
@@ -192,6 +227,12 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
 
     search[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitAll;
     search[(__bridge id)kSecReturnAttributes] = (__bridge id)kCFBooleanTrue;
+
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
 
     CFArrayRef resultData = NULL;
     
