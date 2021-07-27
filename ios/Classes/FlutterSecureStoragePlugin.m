@@ -125,8 +125,8 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         };
         
         status = SecItemUpdate((__bridge CFDictionaryRef)search, (__bridge CFDictionaryRef)update);
-            NSLog(@"SecItemUpdate status = %d", (int) status);
         if (status != noErr){
+            NSLog(@"SecItemUpdate status = %d", (int) status);
         }
     }else{
         search[(__bridge id)kSecValueData] = [value dataUsingEncoding:NSUTF8StringEncoding];
@@ -134,8 +134,8 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         search[(__bridge id)kSecAttrAccessible] = (__bridge id) attrAccessible;
                
         status = SecItemAdd((__bridge CFDictionaryRef)search, NULL);
-        NSLog(@"SecItemAdd status = %d", (int) status);
         if (status != noErr){
+            NSLog(@"SecItemAdd status = %d", (int) status);
         }
     }
 }
