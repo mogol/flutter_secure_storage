@@ -6,7 +6,7 @@ publish_to: none
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.26.0-17.6.pre"
+  flutter: ">=2.2.3"
 
 flutter:
   plugin:
@@ -18,8 +18,13 @@ flutter:
         pluginClass: FlutterSecureStoragePlugin
 
 dependencies:
-  meta: "^1.3.0"
+  meta: ^1.3.0
   flutter:
     sdk: flutter
   flutter_secure_storage_platform_interface:
     path: ../flutter_secure_storage_platform_interface
+
+dev_dependencies:
+  effective_dart: ^1.3.2
+  flutter_test:
+    sdk: flutter

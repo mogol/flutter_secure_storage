@@ -22,6 +22,7 @@ dependencies:
     path: ../flutter_secure_storage_linux
 
 dev_dependencies:
+  effective_dart: ^1.3.2
   flutter_test:
     sdk: flutter
   flutter_driver:
