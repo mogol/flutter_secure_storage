@@ -195,7 +195,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     private void delete(String key) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(key);
-        editor.apply();
+        editor.commit();
     }
 
     private String addPrefixToKey(String key) {
