@@ -2,7 +2,9 @@
 
 Demonstrates how to use the flutter_secure_storage plugin.
 
-## Getting Started
+## Integration Tests
+Run the following command
 
-For help getting started with Flutter, view our online
-[documentation](http://flutter.io/).
+```
+flutter drive --target=test_driver/app.dart
+```
