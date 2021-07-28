@@ -35,6 +35,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Future<Null> _readAll() async {
     final all = await _storage.readAll(
       iOptions: _getIOSOptions(),
+      aOptions: _getAndroidOptions()
     );
     setState(() {
       _items = all.entries
@@ -46,6 +47,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   void _deleteAll() async {
     await _storage.deleteAll(
       iOptions: _getIOSOptions(),
+      aOptions: _getAndroidOptions()
     );
     _readAll();
   }
@@ -58,6 +60,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: key,
       value: value,
       iOptions: _getIOSOptions(),
+      aOptions: _getAndroidOptions()
     );
     _readAll();
   }
@@ -65,6 +68,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   IOSOptions _getIOSOptions() => IOSOptions(
         accountName: _getAccountName(),
       );
+
+  AndroidOptions _getAndroidOptions() => AndroidOptions(
+    encryptedSharedPreferences: true,
+  );
 
   String? _getAccountName() =>
       _accountNameController.text.isEmpty ? null : _accountNameController.text;
@@ -153,6 +160,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         await _storage.delete(
           key: item.key,
           iOptions: _getIOSOptions(),
+          aOptions: _getAndroidOptions()
         );
         _readAll();
 
@@ -166,6 +174,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
             key: item.key,
             value: result,
             iOptions: _getIOSOptions(),
+              aOptions: _getAndroidOptions()
           );
           _readAll();
         }
