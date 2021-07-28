@@ -6,7 +6,7 @@ jobs:
       matrix:
         device:
         - "iPhone 8 (13.1)"
-        - "iPhone 11 Pro Max (13.1)"
+        - "iPad Air (4th generation)"
       # When set to true, GitHub cancels all in-progress jobs if any        
       # matrix job fails.
       fail-fast: false
