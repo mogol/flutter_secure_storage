@@ -209,8 +209,23 @@ class IOSOptions extends Options {
 }
 
 class AndroidOptions extends Options {
+  AndroidOptions({bool encryptedSharedPreferences = false})
+      : _encryptedSharedPreferences = encryptedSharedPreferences;
+
+  final bool _encryptedSharedPreferences;
+
   @override
-  Map<String, String> _toMap() => <String, String>{};
+  Map<String, String> _toMap() => <String, String>{
+        'encryptedSharedPreferences': '$_encryptedSharedPreferences'
+      };
+
+  AndroidOptions copyWith({
+    bool? encryptedSharedPreferences,
+  }) =>
+      AndroidOptions(
+        encryptedSharedPreferences:
+            encryptedSharedPreferences ?? _encryptedSharedPreferences,
+      );
 }
 
 class LinuxOptions extends Options {
