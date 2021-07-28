@@ -1,3 +1,7 @@
+## [4.2.1]
+* Added kSecAttrSynchronizable support by setting IOSOptions.synchronizable  [#51](https://github.com/mogol/flutter_secure_storage/issues/51)
+* Changed deprecated jcenter to mavenCentral [#246](https://github.com/mogol/flutter_secure_storage/pull/246)
+
 ## [4.2.0]
 * Remove Strongbox for Android [225](https://github.com/mogol/flutter_secure_storage/pull/225). Thanks [JordyLangen](https://github.com/JordyLangen).
 	
