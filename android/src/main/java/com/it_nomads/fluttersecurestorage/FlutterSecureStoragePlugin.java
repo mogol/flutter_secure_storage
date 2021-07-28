@@ -147,7 +147,6 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     private Map<String, String> readAll(boolean useEncryptedSharedPreference) throws Exception {
-        @SuppressWarnings("unchecked")
         Map<String, String> raw = (Map<String, String>) preferences.getAll();
 
         Map<String, String> all = new HashMap<>();
@@ -195,14 +194,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private void delete(String key) {
         SharedPreferences.Editor editor = preferences.edit();
-
-//        if (useEncryptedSharedPreference) {
-            editor.remove(key);
-//        } else {
-//            editor.remove(key);
-//        }
-
-
+        editor.remove(key);
         editor.apply();
     }
 
