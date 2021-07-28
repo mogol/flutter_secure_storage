@@ -150,17 +150,18 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         @SuppressWarnings("unchecked")
         Map<String, String> raw = (Map<String, String>) preferences.getAll();
 
-        if(useEncryptedSharedPreference){
-            return raw;
-        }
-
         Map<String, String> all = new HashMap<>();
         for (Map.Entry<String, String> entry : raw.entrySet()) {
             String key = entry.getKey().replaceFirst(ELEMENT_PREFERENCES_KEY_PREFIX + '_', "");
-            String rawValue = entry.getValue();
-            String value = decodeRawValue(rawValue);
 
-            all.put(key, value);
+            if (useEncryptedSharedPreference) {
+                all.put(key, entry.getValue());
+            } else {
+                String rawValue = entry.getValue();
+                String value = decodeRawValue(rawValue);
+
+                all.put(key, value);
+            }
         }
         return all;
     }
