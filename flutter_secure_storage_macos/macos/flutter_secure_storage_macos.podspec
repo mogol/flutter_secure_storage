@@ -4,12 +4,12 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_secure_storage_macos'
-  s.version          = '0.0.1'
-  s.summary          = 'A new flutter plugin project.'
+  s.version          = '3.3.1'
+  s.summary          = 'Flutter Secure Storage'
   s.description      = <<-DESC
-A new flutter plugin project.
+Flutter Secure Storage Plugin for MacOs
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/mogol/flutter_secure_storage'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'German Saprykin' => 'saprykin.h@gmail.com' }
   s.source           = { :path => '.' }
