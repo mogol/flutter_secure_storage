@@ -212,6 +212,7 @@ class AndroidOptions extends Options {
   AndroidOptions({bool encryptedSharedPreferences = false})
       : _encryptedSharedPreferences = encryptedSharedPreferences;
 
+  /// EncryptedSharedPrefences are only available on API 23 and greater
   final bool _encryptedSharedPreferences;
 
   @override
