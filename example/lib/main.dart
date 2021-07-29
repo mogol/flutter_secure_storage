@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -34,9 +35,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   Future<Null> _readAll() async {
     final all = await _storage.readAll(
-      iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions()
-    );
+        iOptions: _getIOSOptions(), aOptions: _getAndroidOptions());
     setState(() {
       _items = all.entries
           .map((entry) => _SecItem(entry.key, entry.value))
@@ -46,9 +45,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   void _deleteAll() async {
     await _storage.deleteAll(
-      iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions()
-    );
+        iOptions: _getIOSOptions(), aOptions: _getAndroidOptions());
     _readAll();
   }
 
@@ -57,11 +54,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     final String value = _randomValue();
 
     await _storage.write(
-      key: key,
-      value: value,
-      iOptions: _getIOSOptions(),
-      aOptions: _getAndroidOptions()
-    );
+        key: key,
+        value: value,
+        iOptions: _getIOSOptions(),
+        aOptions: _getAndroidOptions());
     _readAll();
   }
 
@@ -70,8 +66,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       );
 
   AndroidOptions _getAndroidOptions() => AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+        encryptedSharedPreferences: true,
+      );
 
   String? _getAccountName() =>
       _accountNameController.text.isEmpty ? null : _accountNameController.text;
@@ -106,7 +102,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         ),
         body: Column(
           children: [
-            if (Platform.isIOS)
+            if (!kIsWeb && Platform.isIOS)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextFormField(
@@ -158,10 +154,9 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     switch (action) {
       case _ItemActions.delete:
         await _storage.delete(
-          key: item.key,
-          iOptions: _getIOSOptions(),
-          aOptions: _getAndroidOptions()
-        );
+            key: item.key,
+            iOptions: _getIOSOptions(),
+            aOptions: _getAndroidOptions());
         _readAll();
 
         break;
@@ -171,11 +166,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
             builder: (context) => _EditItemWidget(item.value));
         if (result != null) {
           await _storage.write(
-            key: item.key,
-            value: result,
-            iOptions: _getIOSOptions(),
-              aOptions: _getAndroidOptions()
-          );
+              key: item.key,
+              value: result,
+              iOptions: _getIOSOptions(),
+              aOptions: _getAndroidOptions());
           _readAll();
         }
         break;
