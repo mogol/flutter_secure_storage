@@ -107,6 +107,8 @@ To use Flutter Secure Storage on Windows ensure that you add flutter_secure_stor
 
 To use Flutter Secure Storage on MacOS ensure that you add flutter_secure_storage_macos to your pubspec.yaml file per the instructions on pub.dev.
 
+You also need to add Keychain Sharing as capability to your macOS runner.
+
 ## Integration Tests
 
 Run the following command from `example` directory
