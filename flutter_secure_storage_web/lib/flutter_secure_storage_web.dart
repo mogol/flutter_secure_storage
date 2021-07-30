@@ -5,7 +5,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:js_util' as js_util;
 
-import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform.dart';
+import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import './src/subtle.dart' as crypto;
