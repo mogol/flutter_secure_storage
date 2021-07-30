@@ -1,3 +1,10 @@
+## [5.0.0-beta.1]
+Initial BETA support for macOS, web & Windows. Development is still ongoing so expect some functions to not work correctly!
+Please read the readme.md for information about every platform.
+
+* Migrated to a federated project structure. [#254](https://github.com/mogol/flutter_secure_storage/pull/257). Thanks [jhancock4d](https://github.com/jhancock4d)
+* Added support for encrypted shared preferences on Android. [#259](https://github.com/mogol/flutter_secure_storage/pull/259)
+
 ## [4.2.1]
 * Added kSecAttrSynchronizable support by setting IOSOptions.synchronizable  [#51](https://github.com/mogol/flutter_secure_storage/issues/51)
 * Changed deprecated jcenter to mavenCentral [#246](https://github.com/mogol/flutter_secure_storage/pull/246)
