@@ -1,7 +1,7 @@
 name: flutter_secure_storage_windows
 description: Windows implementation of flutter_secure_storage
-version: 1.0.0
 homepage: https://github.com/mogol/flutter_secure_storage
+version: 1.0.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,8 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_secure_storage_platform_interface:
-    path: ../flutter_secure_storage_platform_interface
+  flutter_secure_storage_platform_interface: ^1.0.0
 
 dev_dependencies:
   flutter_test:
