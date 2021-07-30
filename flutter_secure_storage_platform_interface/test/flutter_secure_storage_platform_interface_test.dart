@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform.dart';
+import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'flutter_secure_storage_platform_interface_mock.dart';
