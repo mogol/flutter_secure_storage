@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
-- Initial MacOs Implementation
+- Initial macOS implementation
+- Removed unused Flutter test and effective_dart dependency

@@ -7,7 +7,7 @@ class AndroidOptions extends Options {
   /// EncryptedSharedPrefences are only available on API 23 and greater
   final bool _encryptedSharedPreferences;
 
-  static const AndroidOptions defaultOptions = const AndroidOptions();
+  static const AndroidOptions defaultOptions = AndroidOptions();
 
   @override
   Map<String, String> toMap() => <String, String>{

@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
 - Initial Release of Web Implementation
+- Migrated to flutter_lints

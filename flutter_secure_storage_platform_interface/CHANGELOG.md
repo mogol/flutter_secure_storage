@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
-- Initial Release
+- Initial release. Contains the interface and an implementation based on method channels.
+- Changed effective_dart to flutter_lints
