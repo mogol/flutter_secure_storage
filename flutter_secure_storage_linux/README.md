@@ -1,15 +1,11 @@
 # flutter_secure_storage_linux
 
-A new flutter plugin project.
+The linux implementation of [`flutter_secure_storage`][1].
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+This package is [endorsed][2], which means you can simply use `flutter_secure_storage`
+normally. This package will be automatically included in your app when you do.
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
+[1]: https://pub.dev/packages/flutter_secure_storage
+[2]: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#endorsed-federated-plugin

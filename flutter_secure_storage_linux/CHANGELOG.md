@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+- Initial Linux implementation
+- Removed unused Flutter test and effective_dart dependency
