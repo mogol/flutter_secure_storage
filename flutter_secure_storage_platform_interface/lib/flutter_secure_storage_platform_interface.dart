@@ -7,6 +7,13 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 part './src/method_channel_flutter_secure_storage.dart';
 part './src/options.dart';
 
+/// The interface that implementations of flutter_secure_storage must implement.
+///
+/// Platform implementations should extend this class rather than implement it as `flutter_secure_storage`
+/// does not consider newly added methods to be breaking changes. Extending this class
+/// (using `extends`) ensures that the subclass will get the default implementation, while
+/// platform implementations that `implements` this interface will be broken by newly added
+/// [FlutterSecureStoragePlatform] methods.
 abstract class FlutterSecureStoragePlatform extends PlatformInterface {
   FlutterSecureStoragePlatform() : super(token: _token);
 
