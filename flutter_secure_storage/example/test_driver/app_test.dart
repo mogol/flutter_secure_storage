@@ -3,7 +3,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('Secure Storage Example', () {
-
     late HomePageObject pageObject;
     late FlutterDriver driver;
 

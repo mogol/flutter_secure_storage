@@ -109,7 +109,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextFormField(
                   controller: _accountNameController,
-                  decoration: const InputDecoration(labelText: 'kSecAttrService'),
+                  decoration:
+                      const InputDecoration(labelText: 'kSecAttrService'),
                 ),
               ),
             Expanded(
