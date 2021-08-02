@@ -8,11 +8,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
 
 rootProject.allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
     repositories {
         google()
         mavenCentral()
@@ -23,7 +26,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 18
