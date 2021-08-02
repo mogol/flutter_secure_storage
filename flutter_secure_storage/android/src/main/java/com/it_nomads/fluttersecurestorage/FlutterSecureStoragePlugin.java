@@ -72,8 +72,10 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     @SuppressWarnings("unchecked")
     private void ensureInitialized(Map<String, Object> arguments) {
         Map<String, Object> options = (Map<String, Object>) arguments.get("options");
+        boolean useEncryptedSharedPreferences = false;
         if (options != null) {
-            if(useEncryptedSharedPreferences(options) &&
+            useEncryptedSharedPreferences = useEncryptedSharedPreferences(options);
+            if(useEncryptedSharedPreferences &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 if(!(preferences instanceof  EncryptedSharedPreferences)){
                     try {
@@ -85,7 +87,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
             }
         }
 
-        if (storageCipher == null) {
+        if (storageCipher == null && !useEncryptedSharedPreferences) {
             try {
                 storageCipher = new StorageCipher18Implementation(applicationContext);
             } catch (Exception e) {
@@ -170,12 +172,12 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     private void write(String key, String value, boolean useEncryptedSharedPreference) throws Exception {
-        byte[] result = storageCipher.encrypt(value.getBytes(charset));
         SharedPreferences.Editor editor = preferences.edit();
 
         if(useEncryptedSharedPreference){
             editor.putString(key, value);
         } else {
+            byte[] result = storageCipher.encrypt(value.getBytes(charset));
             editor.putString(key, Base64.encodeToString(result, 0));
         }
         editor.apply();

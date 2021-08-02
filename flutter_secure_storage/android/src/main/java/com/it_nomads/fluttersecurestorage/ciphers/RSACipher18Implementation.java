@@ -1,15 +1,11 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.StrongBoxUnavailableException;
-import android.util.Log;
 
 import java.math.BigInteger;
 import java.security.Key;
@@ -163,7 +159,6 @@ class RSACipher18Implementation {
                 .build();
     }
 
-    @SuppressLint("NewApi")
     private void createKeys(Context context) throws Exception {
         final Locale localeBeforeFakingEnglishLocale = Locale.getDefault();
         try {
