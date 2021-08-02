@@ -22,7 +22,8 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     required String key,
     required Map<String, String> options,
   }) =>
-      Future.value(html.window.localStorage.containsKey(key));
+      Future.value(html.window.localStorage
+          .containsKey(options[_PUBLIC_KEY]! + "." + key));
 
   @override
   Future<void> delete({
