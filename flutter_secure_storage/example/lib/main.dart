@@ -18,7 +18,7 @@ class ItemsWidget extends StatefulWidget {
 }
 
 enum _Actions { deleteAll }
-enum _ItemActions { delete, edit }
+enum _ItemActions { delete, edit, containsKey }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
   final _storage = const FlutterSecureStorage();
@@ -137,6 +137,13 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                                 key: Key('edit_row_$index'),
                               ),
                             ),
+                            PopupMenuItem(
+                              value: _ItemActions.containsKey,
+                              child: Text(
+                                'Contains Key',
+                                key: Key('edit_row_$index'),
+                              ),
+                            ),
                           ]),
                   title: Text(
                     _items[index].value,
@@ -175,6 +182,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
               aOptions: _getAndroidOptions());
           _readAll();
         }
+        break;
+      case _ItemActions.containsKey:
+        final result = await _storage.containsKey(key: item.key);
+        print(result);
         break;
     }
   }
