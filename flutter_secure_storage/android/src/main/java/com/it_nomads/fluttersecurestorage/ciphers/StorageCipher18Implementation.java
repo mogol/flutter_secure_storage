@@ -1,6 +1,5 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
@@ -13,7 +12,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-@SuppressLint("ApplySharedPref")
 public class StorageCipher18Implementation implements StorageCipher {
 
     private static final int ivSize = 16;
@@ -45,7 +43,6 @@ public class StorageCipher18Implementation implements StorageCipher {
                 return;
             } catch (Exception e) {
                 Log.e("StorageCipher18Impl", "unwrap key failed", e);
-                encrypted = new byte[0];
             }
         }
 
@@ -55,7 +52,7 @@ public class StorageCipher18Implementation implements StorageCipher {
 
         byte[] encryptedKey = rsaCipher.wrap(secretKey);
         editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
-        editor.commit();
+        editor.apply();
     }
 
     @Override
@@ -100,12 +97,12 @@ public class StorageCipher18Implementation implements StorageCipher {
 
         SharedPreferences.Editor oldEditor = oldPreferences.edit();
         oldEditor.remove(AES_PREFERENCES_KEY);
-        oldEditor.commit();
+        oldEditor.apply();
 
         SharedPreferences newPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor newEditor = newPreferences.edit();
         newEditor.putString(AES_PREFERENCES_KEY, existedSecretKey);
-        newEditor.commit();
+        newEditor.apply();
     }
 
 }
