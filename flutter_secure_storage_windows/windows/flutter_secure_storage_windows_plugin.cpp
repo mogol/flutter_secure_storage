@@ -314,6 +314,8 @@ namespace
         throw GetLastError();
       }
     }
+
+    CredFree(pcreds);
   }
 } // namespace
 
