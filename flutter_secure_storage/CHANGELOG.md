@@ -1,3 +1,8 @@
+## [5.0.0-beta.2]
+* [Android] Improved EncryptedSharedPreferences by not loading unused Cipher.
+* [Android] Removed deprecated classes
+* [Web] Improved containsKey function
+
 ## [5.0.0-beta.1]
 Initial BETA support for macOS, web & Windows. Development is still ongoing so expect some functions to not work correctly!
 Please read the readme.md for information about every platform.
