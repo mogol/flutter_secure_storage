@@ -24,5 +24,9 @@ dev_dependencies:
     sdk: flutter
   test: any
 
+dependency_overrides:
+  flutter_secure_storage_windows:
+    path: ../../flutter_secure_storage_windows
+
 flutter:
   uses-material-design: true
