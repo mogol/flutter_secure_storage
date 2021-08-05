@@ -282,6 +282,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         result.success(value);
                         break;
                     }
+                    case "containsKey": {
+                        String key = getKeyFromCall(call);
+
+                        boolean containsKey = preferences.contains(key);
+                        result.success(containsKey);
+                        break;
+                    }
                     case "delete": {
                         String key = getKeyFromCall(call);
 
