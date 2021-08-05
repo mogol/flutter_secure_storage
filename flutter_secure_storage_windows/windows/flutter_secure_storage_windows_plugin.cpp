@@ -157,9 +157,12 @@ namespace
       {
         auto key = this->GetValueKey(args);
         auto val = this->GetStringArg("value", args);
-        if (key.has_value() && val.has_value())
+        if (key.has_value())
         {
-          this->Write(key.value(), val.value());
+          if (val.has_value())
+            this->Write(key.value(), val.value());
+          else
+            this->Delete(key.value());
           result->Success();
         }
         else
