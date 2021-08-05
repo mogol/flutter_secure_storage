@@ -35,7 +35,7 @@ dependencies:
   flutter_secure_storage_linux: ^1.0.0
   flutter_secure_storage_macos: ^1.0.0
   flutter_secure_storage_platform_interface: ^1.0.0
-  flutter_secure_storage_web: ^1.0.0
+  flutter_secure_storage_web: ^1.0.1
   flutter_secure_storage_windows: ^1.0.0
 
 dev_dependencies:
