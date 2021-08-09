@@ -1,3 +1,6 @@
+## [5.0.0-beta.3]
+* [Android] Add possibility to reset data when an error occurs.
+
 ## [5.0.0-beta.2]
 * [Android] Improved EncryptedSharedPreferences by not loading unused Cipher.
 * [Android] Removed deprecated classes
