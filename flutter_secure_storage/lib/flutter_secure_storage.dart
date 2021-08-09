@@ -14,7 +14,21 @@ part './options/windows_options.dart';
 part './options/macos_options.dart';
 
 class FlutterSecureStorage {
-  const FlutterSecureStorage();
+  final IOSOptions iOptions;
+  final AndroidOptions aOptions;
+  final LinuxOptions lOptions;
+  final WindowsOptions wOptions;
+  final WebOptions webOptions;
+  final MacOsOptions mOptions;
+
+  const FlutterSecureStorage({
+    this.iOptions = IOSOptions.defaultOptions,
+    this.aOptions = AndroidOptions.defaultOptions,
+    this.lOptions = LinuxOptions.defaultOptions,
+    this.wOptions = WindowsOptions.defaultOptions,
+    this.webOptions = WebOptions.defaultOptions,
+    this.mOptions = MacOsOptions.defaultOptions,
+  });
 
   static const UNSUPPORTED_PLATFORM = 'unsupported_platform';
   static final _platform = FlutterSecureStoragePlatform.instance;
@@ -35,12 +49,12 @@ class FlutterSecureStorage {
   Future<void> write({
     required String key,
     required String? value,
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       value == null
           ? _platform.delete(
@@ -67,12 +81,12 @@ class FlutterSecureStorage {
   /// Can throw a [PlatformException].
   Future<String?> read({
     required String key,
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       _platform.read(
         key: key,
@@ -92,12 +106,12 @@ class FlutterSecureStorage {
   /// Can throw a [PlatformException].
   Future<bool> containsKey({
     required String key,
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       _platform.containsKey(
         key: key,
@@ -117,12 +131,12 @@ class FlutterSecureStorage {
   /// Can throw a [PlatformException].
   Future<void> delete({
     required String key,
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       _platform.delete(
         key: key,
@@ -140,12 +154,12 @@ class FlutterSecureStorage {
   /// [wOptions] optional Windows options
   /// Can throw a [PlatformException].
   Future<Map<String, String>> readAll({
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       _platform.readAll(
         options: _selectOptions(
@@ -162,12 +176,12 @@ class FlutterSecureStorage {
   /// [wOptions] optional Windows options
   /// Can throw a [PlatformException].
   Future<void> deleteAll({
-    IOSOptions iOptions = IOSOptions.defaultOptions,
-    AndroidOptions aOptions = AndroidOptions.defaultOptions,
-    LinuxOptions lOptions = LinuxOptions.defaultOptions,
-    WebOptions webOptions = WebOptions.defaultOptions,
-    MacOsOptions mOptions = MacOsOptions.defaultOptions,
-    WindowsOptions wOptions = WindowsOptions.defaultOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   }) =>
       _platform.deleteAll(
         options: _selectOptions(
@@ -176,25 +190,25 @@ class FlutterSecureStorage {
 
   /// Select correct options based on current platform
   Map<String, String> _selectOptions(
-    IOSOptions iOptions,
-    AndroidOptions aOptions,
-    LinuxOptions lOptions,
-    WebOptions webOptions,
-    MacOsOptions mOptions,
-    WindowsOptions wOptions,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
   ) {
     if (kIsWeb) {
-      return webOptions.params;
+      return webOptions?.params ?? this.webOptions.params;
     } else if (Platform.isLinux) {
-      return lOptions.params;
+      return lOptions?.params ?? this.lOptions.params;
     } else if (Platform.isIOS) {
-      return iOptions.params;
+      return iOptions?.params ?? this.iOptions.params;
     } else if (Platform.isAndroid) {
-      return aOptions.params;
+      return aOptions?.params ?? this.aOptions.params;
     } else if (Platform.isWindows) {
-      return wOptions.params;
+      return wOptions?.params ?? this.wOptions.params;
     } else if (Platform.isMacOS) {
-      return mOptions.params;
+      return mOptions?.params ?? this.mOptions.params;
     } else {
       throw UnsupportedError(UNSUPPORTED_PLATFORM);
     }
