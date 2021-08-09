@@ -42,18 +42,35 @@ namespace
     // Derive the key for a value given a method argument map.
     std::optional<std::string> FlutterSecureStorageWindowsPlugin::GetValueKey(const flutter::EncodableMap *args);
 
+    // Removes prefix of the given storage key.
+    // 
+    // The prefix (defined by ELEMENT_PREFERENCES_KEY_PREFIX) is added automatically when writing to storage,
+    // to distinguish values that are written by this plugin from values that are not.
+    std::string RemoveKeyPrefix(const std::string &key);
+
     // Gets the string name for the given int error code
-    std::string GetErrorString(int &error_code);
+    std::string GetErrorString(const DWORD &error_code);
 
     // Stores the given value under the given key.
     void Write(const std::string &key, const std::string &val);
 
     std::optional<std::string> Read(const std::string &key);
 
+    flutter::EncodableMap ReadAll();
+
     void Delete(const std::string &key);
+
+    void DeleteAll();
+
+    bool ContainsKey(const std::string &key);
   };
 
-  const std::string ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
+  const std::string ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg_";
+  const int ELEMENT_PREFERENCES_KEY_PREFIX_LENGTH = 55;
+
+  // this string is used to filter the credential storage so that only the values written
+  // by this plugin shows up.
+  const CA2W CREDENTIAL_FILTER((ELEMENT_PREFERENCES_KEY_PREFIX + '*').c_str());
 
   // static
   void FlutterSecureStorageWindowsPlugin::RegisterWithRegistrar(
@@ -83,8 +100,13 @@ namespace
   {
     auto key = this->GetStringArg("key", args);
     if (key.has_value())
-      return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key.value();
+      return ELEMENT_PREFERENCES_KEY_PREFIX + key.value();
     return std::nullopt;
+  }
+
+  std::string FlutterSecureStorageWindowsPlugin::RemoveKeyPrefix(const std::string& key)
+  {
+    return key.substr(ELEMENT_PREFERENCES_KEY_PREFIX_LENGTH);
   }
 
   std::optional<std::string> FlutterSecureStorageWindowsPlugin::GetStringArg(
@@ -97,7 +119,7 @@ namespace
     return std::get<std::string>(p->second);
   }
 
-  std::string FlutterSecureStorageWindowsPlugin::GetErrorString(int &error_code)
+  std::string FlutterSecureStorageWindowsPlugin::GetErrorString(const DWORD &error_code)
   {
     switch (error_code)
     {
@@ -118,7 +140,7 @@ namespace
     case ERROR_INVALID_PARAMETER:
       return "ERROR_INVALID_PARAMETER";
     default:
-      return "";
+      return "UNKNOWN_ERROR";
     }
   }
 
@@ -135,9 +157,12 @@ namespace
       {
         auto key = this->GetValueKey(args);
         auto val = this->GetStringArg("value", args);
-        if (key.has_value() && val.has_value())
+        if (key.has_value())
         {
-          this->Write(key.value(), val.value());
+          if (val.has_value())
+            this->Write(key.value(), val.value());
+          else
+            this->Delete(key.value());
           result->Success();
         }
         else
@@ -158,6 +183,11 @@ namespace
           result->Error("Exception occurred", "read");
         }
       }
+      else if (method == "readAll")
+      {
+        auto creds = this->ReadAll();
+        result->Success(flutter::EncodableValue(creds));
+      }
       else if (method == "delete")
       {
         auto key = this->GetValueKey(args);
@@ -171,12 +201,30 @@ namespace
           result->Error("Exception occurred", "delete");
         }
       }
+      else if (method == "deleteAll")
+      {
+        this->DeleteAll();
+        result->Success();
+      }
+      else if (method == "containsKey")
+      {
+        auto key = this->GetValueKey(args);
+        if (key.has_value())
+        {
+          auto contains_key = this->ContainsKey(key.value());
+          result->Success(flutter::EncodableValue(contains_key));
+        }
+        else
+        {
+          result->Error("Exception occurred", "containsKey");
+        }
+      }
       else
       {
         result->NotImplemented();
       }
     }
-    catch (int e)
+    catch (DWORD e)
     {
       auto str_code = this->GetErrorString(e);
       result->Error("Exception encountered: " + str_code, method);
@@ -216,13 +264,40 @@ namespace
     }
 
     auto error = GetLastError();
-
     if (error == ERROR_NOT_FOUND)
-    {
       return std::nullopt;
+    throw error;
+  }
+
+  flutter::EncodableMap FlutterSecureStorageWindowsPlugin::ReadAll()
+  {
+    PCREDENTIALW* pcreds;
+    DWORD cred_count = 0;
+
+    bool ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
+    if (!ok)
+    {
+      auto error = GetLastError();
+      if (error == ERROR_NOT_FOUND)
+        return flutter::EncodableMap();
+      throw error;
     }
 
-    throw error;
+    flutter::EncodableMap creds;
+
+    for (DWORD i = 0; i < cred_count; i++)
+    {
+      auto pcred = pcreds[i];
+      std::string target_name = CW2A(pcred->TargetName);
+      auto val = std::string((char*)pcred->CredentialBlob);
+      auto key = this->RemoveKeyPrefix(target_name);
+
+      creds[key] = val;
+    }
+
+    CredFree(pcreds);
+
+    return creds;
   }
 
   void FlutterSecureStorageWindowsPlugin::Delete(const std::string &key)
@@ -235,6 +310,45 @@ namespace
     }
   }
 
+  void FlutterSecureStorageWindowsPlugin::DeleteAll()
+  {
+    PCREDENTIALW* pcreds;
+    DWORD cred_count = 0;
+    
+    bool read_ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
+    if (!read_ok)
+    {
+      throw GetLastError();
+    }
+
+    for (DWORD i = 0; i < cred_count; i++)
+    {
+      auto pcred = pcreds[i];
+      auto target_name = pcred->TargetName;
+      
+      bool delete_ok = CredDeleteW(target_name, CRED_TYPE_GENERIC, 0);
+      if (!delete_ok)
+      {
+        throw GetLastError();
+      }
+    }
+
+    CredFree(pcreds);
+  }
+
+  bool FlutterSecureStorageWindowsPlugin::ContainsKey(const std::string &key)
+  {
+    PCREDENTIALW pcred;
+    CA2W target_name(key.c_str());
+
+    bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
+    if (ok) return true;
+
+    auto error = GetLastError();
+    if (error == ERROR_NOT_FOUND)
+      return false;
+    throw error;
+  }
 } // namespace
 
 void FlutterSecureStorageWindowsPluginRegisterWithRegistrar(

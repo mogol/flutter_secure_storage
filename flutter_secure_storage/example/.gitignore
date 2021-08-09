@@ -22,6 +22,9 @@
 .settings/
 .vscode/
 
+# Visual studio related
+.vs/
+
 # packages file containing multi-root paths
 .packages.generated
 
