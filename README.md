@@ -112,10 +112,6 @@ parts:
       - libjsoncpp1-dev
 ```
 
-## Configure Windows Version
-
-**Note** The current implementation does not support readAll and deleteAll and is subject to change.
-
 ## Configure MacOS Version
 
 You also need to add Keychain Sharing as capability to your macOS runner.
