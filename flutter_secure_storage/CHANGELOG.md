@@ -1,5 +1,7 @@
 ## [5.0.0-beta.3]
 * [Android] Add possibility to reset data when an error occurs.
+* [Windows] Add readAll, deleteAll and containsKey functions.
+* [All] Refactor option defaults.
 
 ## [5.0.0-beta.2]
 * [Android] Improved EncryptedSharedPreferences by not loading unused Cipher.
