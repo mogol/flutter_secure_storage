@@ -176,7 +176,10 @@ namespace
         if (key.has_value())
         {
           auto val = this->Read(key.value());
-          result->Success(flutter::EncodableValue(val.value()));
+          if (val.has_value())
+            result->Success(flutter::EncodableValue(val.value()));
+          else
+            result->Success();
         }
         else
         {
