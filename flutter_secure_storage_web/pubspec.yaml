@@ -1,7 +1,7 @@
 name: flutter_secure_storage_web
 description: Web implementation of flutter_secure_storage
 homepage: https://github.com/mogol/flutter_secure_storage
-version: 1.0.1
+version: 1.0.2
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
