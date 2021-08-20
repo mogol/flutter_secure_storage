@@ -1,3 +1,7 @@
+## [5.0.0-beta.4]
+* [Windows] Fixed application crashing when key doesn't exists.
+* [Web] Added prefix to local storage key when deleting, fixing items that wouldn't delete.
+
 ## [5.0.0-beta.3]
 * [Android] Add possibility to reset data when an error occurs.
 * [Windows] Add readAll, deleteAll and containsKey functions.
