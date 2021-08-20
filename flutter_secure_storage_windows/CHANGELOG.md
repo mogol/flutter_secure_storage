@@ -1,3 +1,6 @@
+## 1.1.1
+- Fix application crash when key doesn't exists.
+
 ## 1.1.0
 Features
 - Add readAll, deleteAll and containsKey functions.
