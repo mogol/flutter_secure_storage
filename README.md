@@ -109,7 +109,7 @@ parts:
       - libjsoncpp-dev
     stage-packages:
       - libsecret-1-dev
-      - libjsoncpp1-dev
+      - libjsoncpp-dev
 ```
 
 ## Configure MacOS Version
