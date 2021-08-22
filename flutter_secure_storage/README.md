@@ -15,18 +15,6 @@ A Flutter plugin to store data in secure storage:
 
 _Note_ KeyStore was introduced in Android 4.3 (API level 18). The plugin wouldn't work for earlier versions.
 
-## Platform Implementation
-Please note that this table represents the functions implemented in this repository and it is possible that changes haven't yet been released on pub.dev
-
-|         | read               | write              | delete             | containsKey        | readAll            | deleteAll          |
-|---------|--------------------|--------------------|--------------------|--------------------|--------------------|--------------------|
-| Android | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| iOS     | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
-| Windows | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Linux   | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
-| macOS   | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
-| Web     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-
 ## Getting Started
 
 ```dart
@@ -111,6 +99,10 @@ parts:
       - libsecret-1-dev
       - libjsoncpp1-dev
 ```
+
+## Configure Windows Version
+
+**Note** The current implementation does not support readAll and deleteAll and is subject to change.
 
 ## Configure MacOS Version
 
