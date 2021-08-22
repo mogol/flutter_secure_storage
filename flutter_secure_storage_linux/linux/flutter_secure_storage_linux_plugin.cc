@@ -10,20 +10,19 @@
 
 #define flutter_secure_storage_linux_plugin(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_secure_storage_linux_plugin_get_type(), \
-                              FlutterSecureStoragePlugin))
+                              FlutterSecureStorageLinuxPlugin))
 
-struct _FlutterSecureStoragePlugin
+struct _FlutterSecureStorageLinuxPlugin
 {
   GObject parent_instance;
 };
 
-G_DEFINE_TYPE(FlutterSecureStoragePlugin, flutter_secure_storage_linux_plugin,
+G_DEFINE_TYPE(FlutterSecureStorageLinuxPlugin, flutter_secure_storage_linux_plugin,
               g_object_get_type())
 
 static SecretStorage keyring;
 void deleteIt(const gchar *key) { keyring.deleteItem(key); }
 void deleteAll() { keyring.deleteKeyring(); }
-
 void write(const gchar *key, const gchar *value)
 {
   keyring.addItem(key, value);
@@ -51,9 +50,14 @@ FlValue *readAll()
   return result;
 }
 
+FlValue* containsKey(const gchar* key) {
+  Json::Value data = keyring.readFromKeyring();
+  return fl_value_new_bool(data.isMember(key));
+}
+
 // Called when a method call is received from Flutter.
 static void flutter_secure_storage_linux_plugin_handle_method_call(
-    FlutterSecureStoragePlugin *self, FlMethodCall *method_call)
+    FlutterSecureStorageLinuxPlugin *self, FlMethodCall *method_call)
 {
   g_autoptr(FlMethodResponse) response = nullptr;
 
@@ -126,6 +130,15 @@ static void flutter_secure_storage_linux_plugin_handle_method_call(
       {
         deleteAll();
         response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+      } 
+      else if (strcmp(method, "containsKey") == 0) {
+        if (!keyString) {
+           response = FL_METHOD_RESPONSE(fl_method_error_response_new(
+              "Bad arguments", "Key is null", nullptr));
+        } else {
+          g_autoptr(FlValue) result = containsKey(keyString);
+          response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+        }
       }
       else
       {
@@ -148,25 +161,25 @@ static void flutter_secure_storage_linux_plugin_dispose(GObject *object)
 }
 
 static void flutter_secure_storage_linux_plugin_class_init(
-    FlutterSecureStoragePluginClass *klass)
+    FlutterSecureStorageLinuxPluginClass *klass)
 {
   G_OBJECT_CLASS(klass)->dispose = flutter_secure_storage_linux_plugin_dispose;
 }
 
 static void
-flutter_secure_storage_linux_plugin_init(FlutterSecureStoragePlugin *self) {}
+flutter_secure_storage_linux_plugin_init(FlutterSecureStorageLinuxPlugin *self) {}
 
 static void method_call_cb(FlMethodChannel *channel, FlMethodCall *method_call,
                            gpointer user_data)
 {
-  FlutterSecureStoragePlugin *plugin = flutter_secure_storage_linux_plugin(user_data);
+  FlutterSecureStorageLinuxPlugin *plugin = flutter_secure_storage_linux_plugin(user_data);
   flutter_secure_storage_linux_plugin_handle_method_call(plugin, method_call);
 }
 
 void flutter_secure_storage_linux_plugin_register_with_registrar(
     FlPluginRegistrar *registrar)
 {
-  FlutterSecureStoragePlugin *plugin = flutter_secure_storage_linux_plugin(
+  FlutterSecureStorageLinuxPlugin *plugin = flutter_secure_storage_linux_plugin(
       g_object_new(flutter_secure_storage_linux_plugin_get_type(), nullptr));
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();

@@ -17,9 +17,9 @@ typedef struct
   GObjectClass parent_class;
 } FlutterSecureStorageLinuxPluginClass;
 
-FLUTTER_PLUGIN_EXPORT GType flutter_secure_storage_plugin_get_type();
+FLUTTER_PLUGIN_EXPORT GType flutter_secure_storage_linux_plugin_get_type();
 
-FLUTTER_PLUGIN_EXPORT void flutter_secure_storage_plugin_register_with_registrar(
+FLUTTER_PLUGIN_EXPORT void flutter_secure_storage_linux_plugin_register_with_registrar(
     FlPluginRegistrar *registrar);
 
 G_END_DECLS
