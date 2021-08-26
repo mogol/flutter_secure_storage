@@ -120,7 +120,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
                   trailing: PopupMenuButton(
                       key: Key('popup_row_$index'),
                       onSelected: (_ItemActions action) =>
-                          _performAction(action, _items[index]),
+                          _performAction(action, _items[index], context),
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuEntry<_ItemActions>>[
                             PopupMenuItem(
@@ -160,7 +160,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         ),
       );
 
-  Future<void> _performAction(_ItemActions action, _SecItem item) async {
+  Future<void> _performAction(_ItemActions action, _SecItem item, BuildContext context) async {
     switch (action) {
       case _ItemActions.delete:
         await _storage.delete(
@@ -185,6 +185,11 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         break;
       case _ItemActions.containsKey:
         final result = await _storage.containsKey(key: item.key);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Contains Key: $result'),
+          // backgroundColor: Colors.green,
+          duration: const Duration(seconds: 4),
+        ));
         print(result);
         break;
     }
