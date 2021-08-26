@@ -23,7 +23,7 @@ Please note that this table represents the functions implemented in this reposit
 | Android | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | iOS     | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
 | Windows | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Linux   | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
+| Linux   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:| :white_check_mark: | :white_check_mark: |
 | macOS   | :white_check_mark: | :white_check_mark: | :white_check_mark: |         :x:        | :white_check_mark: | :white_check_mark: |
 | Web     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 
@@ -109,7 +109,7 @@ parts:
       - libjsoncpp-dev
     stage-packages:
       - libsecret-1-dev
-      - libjsoncpp1-dev
+      - libjsoncpp-dev
 ```
 
 ## Configure MacOS Version
