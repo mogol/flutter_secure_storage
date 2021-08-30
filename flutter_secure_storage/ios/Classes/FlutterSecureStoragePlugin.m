@@ -42,8 +42,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSString *value = [self read:key forGroup:groupId forAccountName:accountName forSynchronizable:synchronizable];
         
         result(value);
-    } else
-    if ([@"write" isEqualToString:call.method]) {
+    } else if ([@"write" isEqualToString:call.method]) {
         NSString *key = arguments[@"key"];
         NSString *value = arguments[@"value"];
         NSString *accessibility = options[@"accessibility"];
@@ -70,7 +69,12 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSDictionary *value = [self readAll: groupId forAccountName:accountName forSynchronizable:synchronizable];
 
         result(value);
-    }else {
+    } else if ([@"containsKey" isEqualToString:call.method]) {
+        NSString *key = arguments[@"key"];
+        NSNumber *containsKey = [self containsKey:key forGroup:groupId forAccountName:accountName forSynchronizable:synchronizable];
+        
+        result(containsKey);
+    } else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -251,6 +255,30 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     }
     
     return @{};
+}
+
+- (NSNumber *)containsKey:(NSString *)key forGroup:(NSString *)groupId forAccountName:(NSString *)accountName forSynchronizable:(NSString *)synchronizable {
+    NSMutableDictionary *search = [self.query mutableCopy];
+    if(groupId != nil) {
+        search[(__bridge id)kSecAttrAccessGroup] = groupId;
+    }
+    if(accountName != nil) {
+        search[(__bridge id)kSecAttrService] = accountName;
+    }
+    search[(__bridge id)kSecAttrAccount] = key;
+    search[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
+    
+    if ([synchronizable isEqualToString:@"true"]) {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanTrue;
+    } else {
+        search[(__bridge id)kSecAttrSynchronizable] = (__bridge id)kCFBooleanFalse;
+    }
+    
+    if ([search objectForKey:(__bridge id)(kSecAttrAccount)]) {
+        return @YES;
+    } else {
+        return @NO;
+    }
 }
 
 @end

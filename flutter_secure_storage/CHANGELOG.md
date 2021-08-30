@@ -1,3 +1,7 @@
+## [5.0.0-beta.5]
+* [Linux, iOS & macOS] Add containsKey function.
+* [Linux] Fix for use of undeclared identifier 'flutter_secure_storage_linux_plugin_register_with_registrar'
+
 ## [5.0.0-beta.4]
 * [Windows] Fixed application crashing when key doesn't exists.
 * [Web] Added prefix to local storage key when deleting, fixing items that wouldn't delete.
