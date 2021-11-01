@@ -126,7 +126,7 @@ class RSACipher18Implementation {
         Configuration config = context.getResources().getConfiguration();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             setSystemLocale(config, locale);
-            context = context.createConfigurationContext(config);
+            context.createConfigurationContext(config);
         } else {
             setSystemLocaleLegacy(config, locale);
             setContextConfigurationLegacy(context, config);
