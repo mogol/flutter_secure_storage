@@ -309,7 +309,13 @@ namespace
     bool ok = CredDeleteW(wstr.c_str(), CRED_TYPE_GENERIC, 0);
     if (!ok)
     {
-      throw GetLastError();
+      auto error = GetLastError();
+
+      // Silently ignore if we try to delete a key that doesn't exist
+      if (error == ERROR_NOT_FOUND)
+        return;
+
+      throw error;
     }
   }
 
@@ -321,7 +327,11 @@ namespace
     bool read_ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
     if (!read_ok)
     {
-      throw GetLastError();
+      auto error = GetLastError();
+      if (error == ERROR_NOT_FOUND)
+        // No credentials to delete
+        return;
+      throw error;
     }
 
     for (DWORD i = 0; i < cred_count; i++)
