@@ -22,3 +22,5 @@ set(flutter_secure_storage_bundled_libraries
   ""
   PARENT_SCOPE
 )
+
+add_compile_definitions(SECURE_STORAGE_KEY="${BINARY_NAME}")
