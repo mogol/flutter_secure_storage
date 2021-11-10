@@ -65,8 +65,8 @@ namespace
     bool ContainsKey(const std::string &key);
   };
 
-  const std::string ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg_";
-  const int ELEMENT_PREFERENCES_KEY_PREFIX_LENGTH = 55;
+  const std::string ELEMENT_PREFERENCES_KEY_PREFIX = SECURE_STORAGE_KEY_PREFIX;
+  const int ELEMENT_PREFERENCES_KEY_PREFIX_LENGTH = (sizeof SECURE_STORAGE_KEY_PREFIX) - 1;
 
   // this string is used to filter the credential storage so that only the values written
   // by this plugin shows up.
