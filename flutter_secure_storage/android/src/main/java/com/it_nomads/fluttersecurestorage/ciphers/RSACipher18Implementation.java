@@ -23,10 +23,10 @@ import javax.security.auth.x500.X500Principal;
 
 class RSACipher18Implementation {
 
-    private final String KEY_ALIAS;
     private static final String KEYSTORE_PROVIDER_ANDROID = "AndroidKeyStore";
     private static final String TYPE_RSA = "RSA";
-    private Context context;
+    private final String KEY_ALIAS;
+    private final Context context;
 
 
     public RSACipher18Implementation(Context context) throws Exception {

@@ -19,10 +19,9 @@ public class StorageCipher18Implementation implements StorageCipher {
     private static final String KEY_ALGORITHM = "AES";
     private static final String AES_PREFERENCES_KEY = "VGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureKeyStorage";
-
-    private Key secretKey;
     private final Cipher cipher;
     private final SecureRandom secureRandom;
+    private Key secretKey;
 
     public StorageCipher18Implementation(Context context) throws Exception {
         secureRandom = new SecureRandom();
@@ -53,6 +52,22 @@ public class StorageCipher18Implementation implements StorageCipher {
         byte[] encryptedKey = rsaCipher.wrap(secretKey);
         editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
         editor.apply();
+    }
+
+    public static void moveSecretFromPreferencesIfNeeded(SharedPreferences oldPreferences, Context context) {
+        String existedSecretKey = oldPreferences.getString(AES_PREFERENCES_KEY, null);
+        if (existedSecretKey == null) {
+            return;
+        }
+
+        SharedPreferences.Editor oldEditor = oldPreferences.edit();
+        oldEditor.remove(AES_PREFERENCES_KEY);
+        oldEditor.apply();
+
+        SharedPreferences newPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor newEditor = newPreferences.edit();
+        newEditor.putString(AES_PREFERENCES_KEY, existedSecretKey);
+        newEditor.apply();
     }
 
     @Override
@@ -86,23 +101,6 @@ public class StorageCipher18Implementation implements StorageCipher {
         cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
 
         return cipher.doFinal(payload);
-    }
-
-
-    public static void moveSecretFromPreferencesIfNeeded(SharedPreferences oldPreferences, Context context) {
-        String existedSecretKey = oldPreferences.getString(AES_PREFERENCES_KEY, null);
-        if (existedSecretKey == null) {
-            return;
-        }
-
-        SharedPreferences.Editor oldEditor = oldPreferences.edit();
-        oldEditor.remove(AES_PREFERENCES_KEY);
-        oldEditor.apply();
-
-        SharedPreferences newPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor newEditor = newPreferences.edit();
-        newEditor.putString(AES_PREFERENCES_KEY, existedSecretKey);
-        newEditor.apply();
     }
 
 }
