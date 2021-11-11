@@ -10,6 +10,9 @@ jobs:
       steps:
         - uses: actions/checkout@v2
         - uses: subosito/flutter-action@v1
+        - uses: actions/setup-java@v2
+          with:
+            java-version: '11'
         - name: "Run Flutter Driver tests"
           uses: reactivecircus/android-emulator-runner@v2
           with:
