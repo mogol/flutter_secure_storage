@@ -17,9 +17,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
         working-directory: ./flutter_secure_storage
-      - name: Linter
+      - name: Linter - Android & iOS
         run: flutter analyze
         working-directory: ./flutter_secure_storage
+      - name: Linter - Platform Interface
+        run: flutter analyze
+        working-directory: ./flutter_secure_storage_platform_interface
   formatting:
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +32,9 @@ jobs:
           java-version: '12.x'
       # Use the community Action to install Flutter
       - uses: subosito/flutter-action@v1
-      - name: Format
+      - name: Format - Android & iOS
         run: flutter format -n --set-exit-if-changed .
         working-directory: ./flutter_secure_storage
+      - name: Format - Platform Interface
+        run: flutter format -n --set-exit-if-changed .
+        working-directory: ./flutter_secure_storage_platform_interface
