@@ -1,4 +1,4 @@
-name: code analysis
+name: code analysis & formatting
 
 on: [push, pull_request]
 
