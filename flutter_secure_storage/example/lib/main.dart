@@ -160,7 +160,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         ),
       );
 
-  Future<void> _performAction(_ItemActions action, _SecItem item, BuildContext context) async {
+  Future<void> _performAction(
+      _ItemActions action, _SecItem item, BuildContext context) async {
     switch (action) {
       case _ItemActions.delete:
         await _storage.delete(
@@ -190,7 +191,6 @@ class _ItemsWidgetState extends State<ItemsWidget> {
           // backgroundColor: Colors.green,
           duration: const Duration(seconds: 4),
         ));
-        print(result);
         break;
     }
   }
