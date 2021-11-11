@@ -16,8 +16,10 @@ jobs:
         run: flutter doctor -v
       - name: Install dependencies
         run: flutter pub get
+        working-directory: ./flutter_secure_storage
       - name: Linter
         run: flutter analyze
+        working-directory: ./flutter_secure_storage
   formatting:
     runs-on: ubuntu-latest
     steps:
@@ -29,3 +31,4 @@ jobs:
       - uses: subosito/flutter-action@v1
       - name: Format
         run: flutter format -n --set-exit-if-changed .
+        working-directory: ./flutter_secure_storage
