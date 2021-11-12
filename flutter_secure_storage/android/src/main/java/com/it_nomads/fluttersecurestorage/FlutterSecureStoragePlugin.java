@@ -119,6 +119,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     private boolean useEncryptedSharedPreferences(Map<String, Object> arguments) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false;
         return arguments.containsKey("encryptedSharedPreferences") && arguments.get("encryptedSharedPreferences").equals("true");
     }
 
