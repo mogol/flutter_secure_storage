@@ -31,11 +31,17 @@ void main() {
       await pageObject.editRow('Row 0', 0);
       await pageObject.editRow('Row 1', 1);
 
+      await Future.delayed(const Duration(seconds: 3));
+
       await pageObject.rowHasTitle('Row 0', 0);
       await pageObject.rowHasTitle('Row 1', 1);
 
+      await Future.delayed(const Duration(seconds: 3));
+
       await pageObject.deleteRow(1);
       await pageObject.hasNoRow(1);
+
+      await Future.delayed(const Duration(seconds: 3));
 
       await pageObject.rowHasTitle('Row 0', 0);
       await pageObject.deleteRow(0);
