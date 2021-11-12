@@ -1,3 +1,10 @@
+## 5.0.0
+First stable release of flutter_secure_storage for multi-platform!
+Please see all beta release notes for changes.
+
+This first release also fixes several stability issues on Android regarding encrypted shared 
+preferences.
+
 ## [5.0.0-beta.5]
 * [Linux, iOS & macOS] Add containsKey function.
 * [Linux] Fix for use of undeclared identifier 'flutter_secure_storage_linux_plugin_register_with_registrar'

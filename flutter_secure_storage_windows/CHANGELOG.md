@@ -1,3 +1,6 @@
+## 1.1.2
+- Silently ignore errors when deleting keys that don't exist
+
 ## 1.1.1
 - Fix application crash when key doesn't exists.
 

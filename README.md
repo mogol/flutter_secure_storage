@@ -1,10 +1,17 @@
 # flutter_secure_storage
 
+### Important notice for Android and v5.0.0
+When upgrading from 4.2.1 to 5.0.0 you can migrate to EncryptedSharedPreferences by
+setting the encryptedSharedPreference parameter to true as explained below. This will automatically
+migrate all preferences. This however can't be undone. If you try to disable encryptedSharedPreference
+after this, you won't be able to read the values. You can only read those with encryptedSharedPreference
+enabled.
+
 A Flutter plugin to store data in secure storage:
 
 - [Keychain](https://developer.apple.com/library/content/documentation/Security/Conceptual/keychainServConcepts/01introduction/introduction.html#//apple_ref/doc/uid/TP30000897-CH203-TP1) is used for iOS
 - AES encryption is used for Android. AES secret key is encrypted with RSA and RSA key is stored in [KeyStore](https://developer.android.com/training/articles/keystore.html)
-- With V5.0.0 we can use [EncryptedSharedPreferences](https://developer.android.com/topic/security/data) on Android by enabling it in the Android Options like so:
+- With v5.0.0 we can use [EncryptedSharedPreferences](https://developer.android.com/topic/security/data) on Android by enabling it in the Android Options like so:
 ```dart
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
         encryptedSharedPreferences: true,
