@@ -1,3 +1,6 @@
+## 5.0.2
+* [Android] Fixed bug where sharedPreference object was not yet initialized.
+
 ## 5.0.1
 * [Android] Added java 8 requirement for gradle build.
 
