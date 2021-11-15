@@ -1,3 +1,6 @@
+## 5.0.1
+* [Android] Added java 8 requirement for gradle build.
+
 ## 5.0.0
 First stable release of flutter_secure_storage for multi-platform!
 Please see all beta release notes for changes.
