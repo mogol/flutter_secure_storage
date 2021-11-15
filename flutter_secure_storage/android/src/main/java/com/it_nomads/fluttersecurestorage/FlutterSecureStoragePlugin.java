@@ -282,7 +282,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         String key = getKeyFromCall(call);
                         Map<String, Object> arguments = (Map<String, Object>) call.arguments;
                         ensureInitialized(arguments);
+
                         String value = (String) arguments.get("value");
+
                         if (value != null) {
                             write(key, value, useEncryptedSharedPreferences);
                             result.success(null);
@@ -294,9 +296,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                     case "read": {
                         String key = getKeyFromCall(call);
                         Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+                        ensureInitialized(arguments);
 
                         if (preferences.contains(key)) {
-                            ensureInitialized(arguments);
                             String value = read(key, useEncryptedSharedPreferences);
                             result.success(value);
                         } else {
@@ -314,6 +316,8 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                     }
                     case "containsKey": {
                         String key = getKeyFromCall(call);
+                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+                        ensureInitialized(arguments);
 
                         boolean containsKey = preferences.contains(key);
                         result.success(containsKey);
@@ -321,12 +325,17 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                     }
                     case "delete": {
                         String key = getKeyFromCall(call);
+                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+                        ensureInitialized(arguments);
 
                         delete(key);
                         result.success(null);
                         break;
                     }
                     case "deleteAll": {
+                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+                        ensureInitialized(arguments);
+
                         deleteAll();
                         result.success(null);
                         break;
