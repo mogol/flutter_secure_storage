@@ -7,6 +7,10 @@ migrate all preferences. This however can't be undone. If you try to disable enc
 after this, you won't be able to read the values. You can only read those with encryptedSharedPreference
 enabled.
 
+### Important notice for Web
+flutter_secure_storage only works on HTTPS or localhost environments. [Please see this issue for more information.](https://github.com/mogol/flutter_secure_storage/issues/320#issuecomment-976308930)
+
+
 A Flutter plugin to store data in secure storage:
 
 - [Keychain](https://developer.apple.com/library/content/documentation/Security/Conceptual/keychainServConcepts/01introduction/introduction.html#//apple_ref/doc/uid/TP30000897-CH203-TP1) is used for iOS
