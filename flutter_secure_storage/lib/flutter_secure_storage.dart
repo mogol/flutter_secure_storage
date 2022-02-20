@@ -121,6 +121,8 @@ class FlutterSecureStorage {
 
   /// Deletes associated value for the given [key].
   ///
+  /// If the given [key] does not exist, nothing will happen.
+  /// 
   /// [key] shouldn't be null.
   /// [iOptions] optional iOS options
   /// [aOptions] optional Android options
