@@ -127,7 +127,12 @@ parts:
 
 ### Configure MacOS Version
 
-You also need to add Keychain Sharing as capability to your macOS runner.
+You also need to add Keychain Sharing as capability to your macOS runner. To achieve this, please add the following in *both* your `macos/Runner/DebugProfile.entitlements` *and* `macos/Runner/Release.entitlements` (you need to change both files).
+
+```
+<key>keychain-access-groups</key>
+<array/>
+```
 
 ## Integration Tests
 
