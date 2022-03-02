@@ -96,7 +96,7 @@ You need to
 - [disable autobackup](https://developer.android.com/guide/topics/data/autobackup#EnablingAutoBackup), [details](https://github.com/mogol/flutter_secure_storage/issues/13#issuecomment-421083742)
 - [exclude sharedprefs](https://developer.android.com/guide/topics/data/autobackup#IncludingFiles) `FlutterSecureStorage` used by the plugin, [details](https://github.com/mogol/flutter_secure_storage/issues/43#issuecomment-471642126)
 
-## Configure Web Version
+### Configure Web Version
 
 Flutter Secure Storage uses an experimental implementation using WebCrypto. Use at your own risk at this time. Feedback welcome to improve it. The intent is that the browser is creating the private key, and as a result, the encrypted strings in local_storage are not portable to other browsers or other machines and will only work on the same domain.
 
@@ -107,7 +107,7 @@ Please see:
 - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
 - https://www.netsparker.com/blog/web-security/http-security-headers/
 
-## Configure Linux Version
+### Configure Linux Version
 
 You need `libsecret-1-dev` and `libjsoncpp-dev` on your machine to build the project, and `libsecret-1-0` and `libjsoncpp1` to run the application (add it as a dependency after packaging your app). If you using snapcraft to build the project use the following
 
@@ -125,9 +125,14 @@ parts:
       - libjsoncpp-dev
 ```
 
-## Configure MacOS Version
+### Configure MacOS Version
 
-You also need to add Keychain Sharing as capability to your macOS runner.
+You also need to add Keychain Sharing as capability to your macOS runner. To achieve this, please add the following in *both* your `macos/Runner/DebugProfile.entitlements` *and* `macos/Runner/Release.entitlements` (you need to change both files).
+
+```
+<key>keychain-access-groups</key>
+<array/>
+```
 
 ## Integration Tests
 
