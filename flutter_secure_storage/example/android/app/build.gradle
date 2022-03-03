@@ -16,7 +16,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     lintOptions {
         disable 'InvalidPackage'
@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId "com.it_nomads.fluttersecurestorageexample"
         minSdkVersion 18
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
     }
