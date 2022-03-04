@@ -23,13 +23,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private static final String TAG = "FlutterSecureStoragePl";
     private MethodChannel channel;
-    private SecureStorageAndroid secureStorage;
+    private FlutterSecureStorage secureStorage;
     private HandlerThread workerThread;
     private Handler workerThreadHandler;
 
     public void initInstance(BinaryMessenger messenger, Context context) {
         try {
-            secureStorage = new SecureStorageAndroid(context);
+            secureStorage = new FlutterSecureStorage(context);
 
             workerThread = new HandlerThread("com.it_nomads.fluttersecurestorage.worker");
             workerThread.start();

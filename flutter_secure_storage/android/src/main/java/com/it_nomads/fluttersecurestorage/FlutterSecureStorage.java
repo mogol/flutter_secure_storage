@@ -22,7 +22,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SecureStorageAndroid {
+public class FlutterSecureStorage {
 
     private static final String TAG = "SecureStorageAndroid";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
@@ -36,7 +36,7 @@ public class SecureStorageAndroid {
     private StorageCipher storageCipher;
     private boolean useEncryptedSharedPreferences = false;
 
-    public SecureStorageAndroid(Context context) {
+    public FlutterSecureStorage(Context context) {
         applicationContext = context.getApplicationContext();
         nonEncryptedPreferences = context.getSharedPreferences(
                 SHARED_PREFERENCES_NAME,
