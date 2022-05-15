@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 23
         targetSdkVersion 31
         versionCode 6
         versionName "3.3.1"

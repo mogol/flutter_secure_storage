@@ -18,13 +18,10 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion 32
 
-    lintOptions {
-        disable 'InvalidPackage'
-    }
 
     defaultConfig {
         applicationId "com.it_nomads.fluttersecurestorageexample"
-        minSdkVersion 18
+        minSdkVersion 23
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
@@ -39,6 +36,10 @@ android {
             matchingFallbacks = ['debug', 'release']
         }
     }
+    lint {
+        disable 'InvalidPackage'
+    }
+    namespace 'com.it_nomads.fluttersecurestorageexample'
 }
 
 flutter {
