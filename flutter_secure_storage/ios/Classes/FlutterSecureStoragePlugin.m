@@ -170,7 +170,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         NSData *data = (__bridge NSData*)resultData;
         value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     }
-    
+    CFRelease(resultData);
     return value;
 }
 
@@ -253,7 +253,7 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
         }
         return [results copy];
     }
-    
+    CFRelease(resultData);
     return @{};
 }
 
