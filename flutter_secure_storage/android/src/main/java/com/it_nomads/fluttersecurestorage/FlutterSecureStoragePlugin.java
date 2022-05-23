@@ -113,7 +113,6 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private void reEncryptPreferences(StorageCipherFactory storageCipherFactory, SharedPreferences source) throws Exception {
         try {
-            Log.i(TAG, "re-encrypting");
             storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
             final Map<String, String> cache = new HashMap<>();
             for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {

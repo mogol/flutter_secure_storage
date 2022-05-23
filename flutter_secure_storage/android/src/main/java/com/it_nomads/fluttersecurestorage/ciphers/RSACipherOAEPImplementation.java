@@ -44,7 +44,7 @@ public class RSACipherOAEPImplementation extends RSACipher18Implementation {
 
     @Override
     protected Cipher getRSACipher() throws Exception {
-        return Cipher.getInstance("RSA/ECB/OAEPPadding", "AndroidKeyStoreBCWorkaround"); // error in android 5: NoSuchProviderException: Provider not available: AndroidKeyStoreBCWorkaround
+        return Cipher.getInstance("RSA/ECB/OAEPPadding", "AndroidKeyStoreBCWorkaround");
     }
 
     protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
