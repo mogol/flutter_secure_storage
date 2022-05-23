@@ -41,18 +41,20 @@ class RSACipher18Implementation implements KeyCipher{
         return context.getPackageName() + ".FlutterSecureStoragePluginKey";
     }
 
+    @Override
     public byte[] wrap(Key key) throws Exception {
         PublicKey publicKey = getPublicKey();
         Cipher cipher = getRSACipher();
-        cipher.init(Cipher.WRAP_MODE, publicKey);
+        cipher.init(Cipher.WRAP_MODE, publicKey, getAlgorithmParameterSpec());
 
         return cipher.wrap(key);
     }
 
+    @Override
     public Key unwrap(byte[] wrappedKey, String algorithm) throws Exception {
         PrivateKey privateKey = getPrivateKey();
         Cipher cipher = getRSACipher();
-        cipher.init(Cipher.UNWRAP_MODE, privateKey);
+        cipher.init(Cipher.UNWRAP_MODE, privateKey, getAlgorithmParameterSpec());
 
         return cipher.unwrap(wrappedKey, algorithm, Cipher.SECRET_KEY);
     }
@@ -96,6 +98,10 @@ class RSACipher18Implementation implements KeyCipher{
         } else {
             return Cipher.getInstance("RSA/ECB/PKCS1Padding", "AndroidKeyStoreBCWorkaround"); // error in android 5: NoSuchProviderException: Provider not available: AndroidKeyStoreBCWorkaround
         }
+    }
+
+    protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
+        return null;
     }
 
     private void createRSAKeysIfNeeded(Context context) throws Exception {
