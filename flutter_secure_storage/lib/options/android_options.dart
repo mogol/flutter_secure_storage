@@ -14,8 +14,10 @@ class AndroidOptions extends Options {
   const AndroidOptions({
     bool encryptedSharedPreferences = false,
     bool resetOnError = false,
-    KeyCipherAlgorithm keyCipherAlgorithm = KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
-    StorageCipherAlgorithm storageCipherAlgorithm = StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
+    KeyCipherAlgorithm keyCipherAlgorithm =
+        KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
+    StorageCipherAlgorithm storageCipherAlgorithm =
+        StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
   })  : _encryptedSharedPreferences = encryptedSharedPreferences,
         _resetOnError = resetOnError,
         _keyCipherAlgorithm = keyCipherAlgorithm,
@@ -62,9 +64,11 @@ class AndroidOptions extends Options {
     StorageCipherAlgorithm? storageCipherAlgorithm,
   }) =>
       AndroidOptions(
-        encryptedSharedPreferences: encryptedSharedPreferences ?? _encryptedSharedPreferences,
+        encryptedSharedPreferences:
+            encryptedSharedPreferences ?? _encryptedSharedPreferences,
         resetOnError: resetOnError ?? _resetOnError,
         keyCipherAlgorithm: keyCipherAlgorithm ?? _keyCipherAlgorithm,
-        storageCipherAlgorithm: storageCipherAlgorithm ?? _storageCipherAlgorithm,
+        storageCipherAlgorithm:
+            storageCipherAlgorithm ?? _storageCipherAlgorithm,
       );
 }
