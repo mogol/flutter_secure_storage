@@ -88,4 +88,9 @@ public class StorageCipherFactory {
         editor.putString(ELEMENT_PREFERENCES_ALGORITHM_KEY, currentKeyAlgorithm.name());
         editor.putString(ELEMENT_PREFERENCES_ALGORITHM_STORAGE, currentStorageAlgorithm.name());
     }
+
+    public void removeCurrentAlgorithms(SharedPreferences.Editor editor) {
+        editor.remove(ELEMENT_PREFERENCES_ALGORITHM_KEY);
+        editor.remove(ELEMENT_PREFERENCES_ALGORITHM_STORAGE);
+    }
 }

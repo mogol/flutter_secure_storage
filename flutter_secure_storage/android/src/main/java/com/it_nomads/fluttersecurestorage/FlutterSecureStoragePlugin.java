@@ -86,8 +86,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                 }
             }
 
-            if (useEncryptedSharedPreferences &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (useEncryptedSharedPreferences) {
 
                 try {
                     preferences = initializeEncryptedSharedPreferencesManager(applicationContext);
@@ -104,7 +103,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private void initStorageCipher(SharedPreferences source, Map<String, Object> options) throws Exception {
         storageCipherFactory = new StorageCipherFactory(source, options);
-        if (storageCipherFactory.requiresReEncryption()) {
+        if (useEncryptedSharedPreferences) {
+            storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
+        } else if (storageCipherFactory.requiresReEncryption()) {
             reEncryptPreferences(storageCipherFactory, source);
         } else {
             storageCipher = storageCipherFactory.getCurrentStorageCipher(applicationContext);
@@ -138,17 +139,21 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
     }
 
     private void checkAndMigrateToEncrypted(SharedPreferences source, SharedPreferences target) {
-        for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {
-            Object v = entry.getValue();
-            String key = entry.getKey();
-            if (v instanceof String && key.contains(ELEMENT_PREFERENCES_KEY_PREFIX))
-                try {
+        try {
+            for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {
+                Object v = entry.getValue();
+                String key = entry.getKey();
+                if (v instanceof String && key.contains(ELEMENT_PREFERENCES_KEY_PREFIX)) {
                     final String decodedValue = decodeRawValue((String) v);
                     target.edit().putString(key, (decodedValue)).apply();
                     source.edit().remove(key).apply();
-                } catch (Exception e) {
-                    Log.e(TAG, "Data migration failed", e);
                 }
+            }
+            final SharedPreferences.Editor sourceEditor = source.edit();
+            storageCipherFactory.removeCurrentAlgorithms(sourceEditor);
+            sourceEditor.apply();
+        } catch (Exception e) {
+            Log.e(TAG, "Data migration failed", e);
         }
     }
 
