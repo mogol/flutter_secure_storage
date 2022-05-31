@@ -12,7 +12,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       # Use the community Action to install Flutter
-      - uses: subosito/flutter-action@v2.3.0
+      - uses: subosito/flutter-action@v2.4.0
       - name: Version
         run: flutter doctor -v
       - name: Install dependencies
@@ -33,7 +33,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       # Use the community Action to install Flutter
-      - uses: subosito/flutter-action@v2.3.0
+      - uses: subosito/flutter-action@v2.4.0
       - name: Format - Android & iOS
         run: flutter format -n --set-exit-if-changed .
         working-directory: ./flutter_secure_storage
