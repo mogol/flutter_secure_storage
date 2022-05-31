@@ -18,6 +18,7 @@ class ItemsWidget extends StatefulWidget {
 }
 
 enum _Actions { deleteAll }
+
 enum _ItemActions { delete, edit, containsKey }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
