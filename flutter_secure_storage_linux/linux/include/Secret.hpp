@@ -61,8 +61,8 @@ public:
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
         output.c_str(), nullptr, &errPtr);
 
-    if (err) {
-      throw err->message;
+    if (errPtr) {
+      throw errPtr->message;
     }
 
     return result;
@@ -78,8 +78,8 @@ public:
     const gchar *result = secret_password_lookupv_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, &errPtr);
 
-    if (err) {
-      throw err->message;
+    if (errPtr) {
+      throw errPtr->message;
     }
 
     if (result != nullptr && strcmp(result, "") != 0 &&
