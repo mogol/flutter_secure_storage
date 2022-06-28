@@ -134,6 +134,10 @@ You also need to add Keychain Sharing as capability to your macOS runner. To ach
 <array/>
 ```
 
+### Configure Windows Version
+
+You need the C++ ATL libraries installed along with the rest of Visual Studio Build Tools. Download them from [here](https://visualstudio.microsoft.com/downloads/?q=build+tools) and make sure the C++ ATL under optional is installed as well.
+
 ## Integration Tests
 
 Run the following command from `example` directory
