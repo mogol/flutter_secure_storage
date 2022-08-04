@@ -1,3 +1,11 @@
+## 5.1.0
+* [Android] You can now select your own key prefix or database name.
+* [Android] Upgraded to Android SDK 33.
+* [Android] You can now select the keyCipherAlgorithm and storageCipherAlgorithm.
+* [Linux] Fixed an issue where no error was being reported if there was something wrong accessing the secret service.
+* [macOS] Fixed an memory-leak.
+* [macOS] You can now select the same options as for iOS.
+
 ## 5.0.2
 * [Android] Fixed bug where sharedPreference object was not yet initialized.
 
