@@ -18,6 +18,8 @@ class AndroidOptions extends Options {
         KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
     StorageCipherAlgorithm storageCipherAlgorithm =
         StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
+    this.sharedPreferencesName,
+    this.preferencesKeyPrefix,
   })  : _encryptedSharedPreferences = encryptedSharedPreferences,
         _resetOnError = resetOnError,
         _keyCipherAlgorithm = keyCipherAlgorithm,
@@ -47,6 +49,20 @@ class AndroidOptions extends Options {
   /// Plugin will fall back to default algorithm in previous system versions.
   final StorageCipherAlgorithm _storageCipherAlgorithm;
 
+  /// The name of the sharedPreference database to use.
+  /// You can select your own name if you want. A default name will
+  /// be used if nothing is provided here.
+  ///
+  /// WARNING: If you change this you can't retrieve already saved preferences.
+  final String? sharedPreferencesName;
+
+  /// The prefix for a shared preference key. The prefix is used to make sure
+  /// the key is unique to your application. If not provided, a default prefix
+  /// will be used.
+  ///
+  /// WARNING: If you change this you can't retrieve already saved preferences.
+  final String? preferencesKeyPrefix;
+
   static const AndroidOptions defaultOptions = AndroidOptions();
 
   @override
@@ -55,14 +71,17 @@ class AndroidOptions extends Options {
         'resetOnError': '$_resetOnError',
         'keyCipherAlgorithm': describeEnum(_keyCipherAlgorithm),
         'storageCipherAlgorithm': describeEnum(_storageCipherAlgorithm),
+        'sharedPreferencesName': sharedPreferencesName ?? '',
+        'preferencesKeyPrefix': preferencesKeyPrefix ?? '',
       };
 
-  AndroidOptions copyWith({
-    bool? encryptedSharedPreferences,
-    bool? resetOnError,
-    KeyCipherAlgorithm? keyCipherAlgorithm,
-    StorageCipherAlgorithm? storageCipherAlgorithm,
-  }) =>
+  AndroidOptions copyWith(
+          {bool? encryptedSharedPreferences,
+          bool? resetOnError,
+          KeyCipherAlgorithm? keyCipherAlgorithm,
+          StorageCipherAlgorithm? storageCipherAlgorithm,
+          String? preferencesKeyPrefix,
+          String? sharedPreferencesName,}) =>
       AndroidOptions(
         encryptedSharedPreferences:
             encryptedSharedPreferences ?? _encryptedSharedPreferences,
@@ -70,5 +89,7 @@ class AndroidOptions extends Options {
         keyCipherAlgorithm: keyCipherAlgorithm ?? _keyCipherAlgorithm,
         storageCipherAlgorithm:
             storageCipherAlgorithm ?? _storageCipherAlgorithm,
+        sharedPreferencesName: sharedPreferencesName,
+        preferencesKeyPrefix: preferencesKeyPrefix,
       );
 }

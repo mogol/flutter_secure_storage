@@ -23,7 +23,7 @@ import java.util.Locale;
 import javax.crypto.Cipher;
 import javax.security.auth.x500.X500Principal;
 
-class RSACipher18Implementation implements KeyCipher{
+class RSACipher18Implementation implements KeyCipher {
 
     private static final String KEYSTORE_PROVIDER_ANDROID = "AndroidKeyStore";
     private static final String TYPE_RSA = "RSA";
@@ -129,12 +129,10 @@ class RSACipher18Implementation implements KeyCipher{
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void setContextConfigurationLegacy(Context context, Configuration config) {
         context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
     }
 
-    @SuppressWarnings("deprecation")
     private void setSystemLocaleLegacy(Configuration config, Locale locale) {
         config.locale = locale;
     }
@@ -169,7 +167,6 @@ class RSACipher18Implementation implements KeyCipher{
         }
     }
 
-    @SuppressWarnings("deprecation")
     private AlgorithmParameterSpec makeAlgorithmParameterSpecLegacy(Context context, Calendar start, Calendar end) {
         return new android.security.KeyPairGeneratorSpec.Builder(context)
                 .setAlias(keyAlias)

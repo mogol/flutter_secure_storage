@@ -9,7 +9,6 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
 
 public class StorageCipherGCMImplementation extends StorageCipher18Implementation {
 

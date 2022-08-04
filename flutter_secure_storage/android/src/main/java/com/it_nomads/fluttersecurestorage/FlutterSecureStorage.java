@@ -13,7 +13,7 @@ import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
-import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher18Implementation;
+import com.it_nomads.fluttersecurestorage.ciphers.StorageCipherFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -24,24 +24,19 @@ import java.util.Map;
 
 public class FlutterSecureStorage {
 
-    private static final String TAG = "SecureStorageAndroid";
-    private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
-    private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
-
+    private final String TAG = "SecureStorageAndroid";
     private final Charset charset;
-
     private final Context applicationContext;
-    private final SharedPreferences nonEncryptedPreferences;
+    protected String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
+    protected Map<String, Object> options;
+    private String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
-    private boolean useEncryptedSharedPreferences = false;
+    private StorageCipherFactory storageCipherFactory;
 
     public FlutterSecureStorage(Context context) {
         applicationContext = context.getApplicationContext();
-        nonEncryptedPreferences = context.getSharedPreferences(
-                SHARED_PREFERENCES_NAME,
-                Context.MODE_PRIVATE
-        );
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             charset = StandardCharsets.UTF_8;
         } else {
@@ -50,27 +45,29 @@ public class FlutterSecureStorage {
         }
     }
 
-    public boolean containsKey(String key, boolean tryUseEncryptedSharedPreferences) {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
-        String actualKey = addPrefixToKey(key);
-
-        return preferences.contains(actualKey);
+    @SuppressWarnings({"ConstantConditions"})
+    private boolean getUseEncryptedSharedPreferences() {
+        return options.containsKey("encryptedSharedPreferences") && options.get("encryptedSharedPreferences").equals("true") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
-    public String read(String key, boolean tryUseEncryptedSharedPreferences) throws Exception {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
-        String actualKey = addPrefixToKey(key);
+    boolean containsKey(String key) {
+        ensureInitialized();
+        return preferences.contains(key);
+    }
 
-        String rawValue = preferences.getString(actualKey, null);
-        if (useEncryptedSharedPreferences) {
+    String read(String key) throws Exception {
+        ensureInitialized();
+
+        String rawValue = preferences.getString(key, null);
+        if (getUseEncryptedSharedPreferences()) {
             return rawValue;
         }
         return decodeRawValue(rawValue);
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, String> readAll(boolean tryUseEncryptedSharedPreferences) throws Exception {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
+    public Map<String, String> readAll() throws Exception {
+        ensureInitialized();
 
         Map<String, String> raw = (Map<String, String>) preferences.getAll();
 
@@ -79,7 +76,7 @@ public class FlutterSecureStorage {
             String keyWithPrefix = entry.getKey();
             if (keyWithPrefix.contains(ELEMENT_PREFERENCES_KEY_PREFIX)) {
                 String key = entry.getKey().replaceFirst(ELEMENT_PREFERENCES_KEY_PREFIX + '_', "");
-                if (useEncryptedSharedPreferences) {
+                if (getUseEncryptedSharedPreferences()) {
                     all.put(key, entry.getValue());
                 } else {
                     String rawValue = entry.getValue();
@@ -92,47 +89,62 @@ public class FlutterSecureStorage {
         return all;
     }
 
-    public void write(String key, String value, boolean tryUseEncryptedSharedPreferences) throws Exception {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
-        String actualKey = addPrefixToKey(key);
+    void write(String key, String value) throws Exception {
+        ensureInitialized();
 
         SharedPreferences.Editor editor = preferences.edit();
 
-        if (useEncryptedSharedPreferences) {
-            editor.putString(actualKey, value);
+        if (getUseEncryptedSharedPreferences()) {
+            editor.putString(key, value);
         } else {
             byte[] result = storageCipher.encrypt(value.getBytes(charset));
-            editor.putString(actualKey, Base64.encodeToString(result, 0));
+            editor.putString(key, Base64.encodeToString(result, 0));
         }
         editor.apply();
     }
 
-    public void delete(String key, boolean tryUseEncryptedSharedPreferences) {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
-        String actualKey = addPrefixToKey(key);
+    public void delete(String key) {
+        ensureInitialized();
 
         SharedPreferences.Editor editor = preferences.edit();
-        editor.remove(actualKey);
+        editor.remove(key);
         editor.apply();
     }
 
-    public void deleteAll(boolean tryUseEncryptedSharedPreferences) {
-        ensureInitialized(tryUseEncryptedSharedPreferences);
+    void deleteAll() {
+        ensureInitialized();
 
-        preferences.edit().clear().apply();
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        if (!getUseEncryptedSharedPreferences()) {
+            storageCipherFactory.storeCurrentAlgorithms(editor);
+        }
+        editor.apply();
     }
 
-    private void ensureInitialized(boolean tryUseEncryptedSharedPreferences) {
-        useEncryptedSharedPreferences = useEncryptedSharedPreferences(tryUseEncryptedSharedPreferences);
+    @SuppressWarnings({"ConstantConditions"})
+    private void ensureInitialized() {
+        if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
+            SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
+        }
+
+        if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
+            ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
+        }
+
+        SharedPreferences nonEncryptedPreferences = applicationContext.getSharedPreferences(
+                SHARED_PREFERENCES_NAME,
+                Context.MODE_PRIVATE
+        );
         if (storageCipher == null) {
             try {
-                storageCipher = new StorageCipher18Implementation(applicationContext);
+                initStorageCipher(nonEncryptedPreferences);
+
             } catch (Exception e) {
                 Log.e(TAG, "StorageCipher initialization failed", e);
             }
         }
-        if (useEncryptedSharedPreferences &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (getUseEncryptedSharedPreferences()) {
             try {
                 preferences = initializeEncryptedSharedPreferencesManager(applicationContext);
             } catch (Exception e) {
@@ -145,8 +157,60 @@ public class FlutterSecureStorage {
         }
     }
 
-    private boolean useEncryptedSharedPreferences(boolean tryUseEncryptedSharedPreferences) {
-        return tryUseEncryptedSharedPreferences && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    private void initStorageCipher(SharedPreferences source) throws Exception {
+        storageCipherFactory = new StorageCipherFactory(source, options);
+        if (getUseEncryptedSharedPreferences()) {
+            storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
+        } else if (storageCipherFactory.requiresReEncryption()) {
+            reEncryptPreferences(storageCipherFactory, source);
+        } else {
+            storageCipher = storageCipherFactory.getCurrentStorageCipher(applicationContext);
+        }
+    }
+
+    private void reEncryptPreferences(StorageCipherFactory storageCipherFactory, SharedPreferences source) throws Exception {
+        try {
+            storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
+            final Map<String, String> cache = new HashMap<>();
+            for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {
+                Object v = entry.getValue();
+                String key = entry.getKey();
+                if (v instanceof String && key.contains(ELEMENT_PREFERENCES_KEY_PREFIX)) {
+                    final String decodedValue = decodeRawValue((String) v);
+                    cache.put(key, decodedValue);
+                }
+            }
+            storageCipher = storageCipherFactory.getCurrentStorageCipher(applicationContext);
+            final SharedPreferences.Editor editor = source.edit();
+            for (Map.Entry<String, String> entry : cache.entrySet()) {
+                byte[] result = storageCipher.encrypt(entry.getValue().getBytes(charset));
+                editor.putString(entry.getKey(), Base64.encodeToString(result, 0));
+            }
+            storageCipherFactory.storeCurrentAlgorithms(editor);
+            editor.apply();
+        } catch (Exception e) {
+            Log.e(TAG, "re-encryption failed", e);
+            storageCipher = storageCipherFactory.getSavedStorageCipher(applicationContext);
+        }
+    }
+
+    private void checkAndMigrateToEncrypted(SharedPreferences source, SharedPreferences target) {
+        try {
+            for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {
+                Object v = entry.getValue();
+                String key = entry.getKey();
+                if (v instanceof String && key.contains(ELEMENT_PREFERENCES_KEY_PREFIX)) {
+                    final String decodedValue = decodeRawValue((String) v);
+                    target.edit().putString(key, (decodedValue)).apply();
+                    source.edit().remove(key).apply();
+                }
+            }
+            final SharedPreferences.Editor sourceEditor = source.edit();
+            storageCipherFactory.removeCurrentAlgorithms(sourceEditor);
+            sourceEditor.apply();
+        } catch (Exception e) {
+            Log.e(TAG, "Data migration failed", e);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -166,25 +230,6 @@ public class FlutterSecureStorage {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         );
-    }
-
-    private String addPrefixToKey(String key) {
-        return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key;
-    }
-
-    private void checkAndMigrateToEncrypted(SharedPreferences source, SharedPreferences target) {
-        for (Map.Entry<String, ?> entry : source.getAll().entrySet()) {
-            Object v = entry.getValue();
-            String key = entry.getKey();
-            if (v instanceof String && key.contains(ELEMENT_PREFERENCES_KEY_PREFIX))
-                try {
-                    final String decodedValue = decodeRawValue((String) v);
-                    target.edit().putString(key, (decodedValue)).apply();
-                    source.edit().remove(key).apply();
-                } catch (Exception e) {
-                    Log.e(TAG, "Data migration failed", e);
-                }
-        }
     }
 
     private String decodeRawValue(String value) throws Exception {

@@ -6,16 +6,6 @@ import android.os.Build;
 
 import java.util.Map;
 
-@FunctionalInterface
-interface StorageCipherFunction {
-    StorageCipher apply(Context context, KeyCipher keyCipher) throws Exception;
-}
-
-@FunctionalInterface
-interface KeyCipherFunction {
-    KeyCipher apply(Context context) throws Exception;
-}
-
 enum KeyCipherAlgorithm {
     RSA_ECB_PKCS1Padding(RSACipher18Implementation::new, 1),
     @SuppressWarnings({"UnusedDeclaration"})
@@ -42,6 +32,16 @@ enum StorageCipherAlgorithm {
     }
 }
 
+@FunctionalInterface
+interface StorageCipherFunction {
+    StorageCipher apply(Context context, KeyCipher keyCipher) throws Exception;
+}
+
+@FunctionalInterface
+interface KeyCipherFunction {
+    KeyCipher apply(Context context) throws Exception;
+}
+
 public class StorageCipherFactory {
     private static final String ELEMENT_PREFERENCES_ALGORITHM_PREFIX = "FlutterSecureSAlgorithm";
     private static final String ELEMENT_PREFERENCES_ALGORITHM_KEY = ELEMENT_PREFERENCES_ALGORITHM_PREFIX + "Key";
@@ -58,9 +58,9 @@ public class StorageCipherFactory {
         savedKeyAlgorithm = KeyCipherAlgorithm.valueOf(source.getString(ELEMENT_PREFERENCES_ALGORITHM_KEY, DEFAULT_KEY_ALGORITHM.name()));
         savedStorageAlgorithm = StorageCipherAlgorithm.valueOf(source.getString(ELEMENT_PREFERENCES_ALGORITHM_STORAGE, DEFAULT_STORAGE_ALGORITHM.name()));
 
-        final KeyCipherAlgorithm currentKeyAlgorithmTmp = KeyCipherAlgorithm.valueOf(getFromOptionsWithDefault(options,"keyCipherAlgorithm", DEFAULT_KEY_ALGORITHM.name()));
+        final KeyCipherAlgorithm currentKeyAlgorithmTmp = KeyCipherAlgorithm.valueOf(getFromOptionsWithDefault(options, "keyCipherAlgorithm", DEFAULT_KEY_ALGORITHM.name()));
         currentKeyAlgorithm = (currentKeyAlgorithmTmp.minVersionCode <= Build.VERSION.SDK_INT) ? currentKeyAlgorithmTmp : DEFAULT_KEY_ALGORITHM;
-        final StorageCipherAlgorithm currentStorageAlgorithmTmp = StorageCipherAlgorithm.valueOf(getFromOptionsWithDefault(options,"storageCipherAlgorithm", DEFAULT_STORAGE_ALGORITHM.name()));
+        final StorageCipherAlgorithm currentStorageAlgorithmTmp = StorageCipherAlgorithm.valueOf(getFromOptionsWithDefault(options, "storageCipherAlgorithm", DEFAULT_STORAGE_ALGORITHM.name()));
         currentStorageAlgorithm = (currentStorageAlgorithmTmp.minVersionCode <= Build.VERSION.SDK_INT) ? currentStorageAlgorithmTmp : DEFAULT_STORAGE_ALGORITHM;
     }
 
@@ -76,12 +76,12 @@ public class StorageCipherFactory {
 
     public StorageCipher getSavedStorageCipher(Context context) throws Exception {
         final KeyCipher keyCipher = savedKeyAlgorithm.keyCipher.apply(context);
-        return savedStorageAlgorithm.storageCipher.apply(context,keyCipher);
+        return savedStorageAlgorithm.storageCipher.apply(context, keyCipher);
     }
 
     public StorageCipher getCurrentStorageCipher(Context context) throws Exception {
         final KeyCipher keyCipher = currentKeyAlgorithm.keyCipher.apply(context);
-        return currentStorageAlgorithm.storageCipher.apply(context,keyCipher);
+        return currentStorageAlgorithm.storageCipher.apply(context, keyCipher);
     }
 
     public void storeCurrentAlgorithms(SharedPreferences.Editor editor) {
