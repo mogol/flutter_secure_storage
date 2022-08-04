@@ -169,8 +169,8 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
     if (status == noErr){
         NSData *data = (__bridge NSData*)resultData;
         value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        CFRelease(resultData);
     }
-    
     return value;
 }
 
@@ -251,9 +251,9 @@ static NSString *const InvalidParameters = @"Invalid parameter's type";
             NSString *value = [[NSString alloc] initWithData:item[(__bridge NSString *)kSecValueData] encoding:NSUTF8StringEncoding];
             results[key] = value;
         }
+        CFRelease(resultData);
         return [results copy];
     }
-    
     return @{};
 }
 

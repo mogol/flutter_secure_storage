@@ -6,12 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 
-part './options/web_options.dart';
-part './options/ios_options.dart';
 part './options/android_options.dart';
+part './options/apple_options.dart';
+part './options/ios_options.dart';
 part './options/linux_options.dart';
-part './options/windows_options.dart';
 part './options/macos_options.dart';
+part './options/web_options.dart';
+part './options/windows_options.dart';
 
 class FlutterSecureStorage {
   final IOSOptions iOptions;
@@ -120,6 +121,8 @@ class FlutterSecureStorage {
       );
 
   /// Deletes associated value for the given [key].
+  ///
+  /// If the given [key] does not exist, nothing will happen.
   ///
   /// [key] shouldn't be null.
   /// [iOptions] optional iOS options

@@ -1,10 +1,27 @@
 part of flutter_secure_storage;
 
+enum KeyCipherAlgorithm {
+  RSA_ECB_PKCS1Padding,
+  RSA_ECB_OAEPwithSHA_256andMGF1Padding,
+}
+
+enum StorageCipherAlgorithm {
+  AES_CBC_PKCS7Padding,
+  AES_GCM_NoPadding,
+}
+
 class AndroidOptions extends Options {
-  const AndroidOptions(
-      {bool encryptedSharedPreferences = false, bool resetOnError = false})
-      : _encryptedSharedPreferences = encryptedSharedPreferences,
-        _resetOnError = resetOnError;
+  const AndroidOptions({
+    bool encryptedSharedPreferences = false,
+    bool resetOnError = false,
+    KeyCipherAlgorithm keyCipherAlgorithm =
+        KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
+    StorageCipherAlgorithm storageCipherAlgorithm =
+        StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
+  })  : _encryptedSharedPreferences = encryptedSharedPreferences,
+        _resetOnError = resetOnError,
+        _keyCipherAlgorithm = keyCipherAlgorithm,
+        _storageCipherAlgorithm = storageCipherAlgorithm;
 
   /// EncryptedSharedPrefences are only available on API 23 and greater
   final bool _encryptedSharedPreferences;
@@ -16,18 +33,42 @@ class AndroidOptions extends Options {
   /// Defaults to false.
   final bool _resetOnError;
 
+  /// If EncryptedSharedPrefences is set to false, you can select algorithm
+  /// that will be used to encrypt secret key.
+  /// By default RSA/ECB/PKCS1Padding if used.
+  /// Newer RSA/ECB/OAEPWithSHA-256AndMGF1Padding is available from Android 6.
+  /// Plugin will fall back to default algorithm in previous system versions.
+  final KeyCipherAlgorithm _keyCipherAlgorithm;
+
+  /// If EncryptedSharedPrefences is set to false, you can select algorithm
+  /// that will be used to encrypt properties.
+  /// By default AES/CBC/PKCS7Padding if used.
+  /// Newer AES/GCM/NoPadding is available from Android 6.
+  /// Plugin will fall back to default algorithm in previous system versions.
+  final StorageCipherAlgorithm _storageCipherAlgorithm;
+
   static const AndroidOptions defaultOptions = AndroidOptions();
 
   @override
   Map<String, String> toMap() => <String, String>{
         'encryptedSharedPreferences': '$_encryptedSharedPreferences',
-        'resetOnError': '$_resetOnError'
+        'resetOnError': '$_resetOnError',
+        'keyCipherAlgorithm': describeEnum(_keyCipherAlgorithm),
+        'storageCipherAlgorithm': describeEnum(_storageCipherAlgorithm),
       };
 
-  AndroidOptions copyWith(
-          {bool? encryptedSharedPreferences, bool? resetOnError}) =>
+  AndroidOptions copyWith({
+    bool? encryptedSharedPreferences,
+    bool? resetOnError,
+    KeyCipherAlgorithm? keyCipherAlgorithm,
+    StorageCipherAlgorithm? storageCipherAlgorithm,
+  }) =>
       AndroidOptions(
-          encryptedSharedPreferences:
-              encryptedSharedPreferences ?? _encryptedSharedPreferences,
-          resetOnError: resetOnError ?? _resetOnError);
+        encryptedSharedPreferences:
+            encryptedSharedPreferences ?? _encryptedSharedPreferences,
+        resetOnError: resetOnError ?? _resetOnError,
+        keyCipherAlgorithm: keyCipherAlgorithm ?? _keyCipherAlgorithm,
+        storageCipherAlgorithm:
+            storageCipherAlgorithm ?? _storageCipherAlgorithm,
+      );
 }
