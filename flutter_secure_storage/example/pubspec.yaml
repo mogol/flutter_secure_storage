@@ -17,23 +17,23 @@ dependencies:
     path: ../
 
 dev_dependencies:
-  flutter_lints: ^1.0.4
-  flutter_test:
-    sdk: flutter
   flutter_driver:
     sdk: flutter
+  flutter_test:
+    sdk: flutter
+  lint: ^1.10.0
   test: any
 
 flutter:
   uses-material-design: true
 
 dependency_overrides:
-  flutter_secure_storage_platform_interface:
-    path: ../../flutter_secure_storage_platform_interface
   flutter_secure_storage_linux:
     path: ../../flutter_secure_storage_linux
   flutter_secure_storage_macos:
     path: ../../flutter_secure_storage_macos
+  flutter_secure_storage_platform_interface:
+    path: ../../flutter_secure_storage_platform_interface
   flutter_secure_storage_web:
     path: ../../flutter_secure_storage_web
   flutter_secure_storage_windows:
