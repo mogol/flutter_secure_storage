@@ -1,20 +1,12 @@
 package com.it_nomads.fluttersecurestorage;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipherFactory;
@@ -22,9 +14,6 @@ import com.it_nomads.fluttersecurestorage.ciphers.StorageCipherFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -38,26 +27,18 @@ import io.flutter.plugin.common.MethodChannel.Result;
 public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlugin {
 
     private static final String TAG = "FlutterSecureStoragePl";
-    private static final String ELEMENT_PREFERENCES_KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
-    private static final String SHARED_PREFERENCES_NAME = "FlutterSecureStorage";
     private MethodChannel channel;
-    private SharedPreferences preferences;
-    private SharedPreferences nonEncryptedPreferences;
-    private Charset charset;
-    private StorageCipher storageCipher;
-    // Necessary for deferred initialization of storageCipher.
-    private Context applicationContext;
+    private FlutterSecureStorage secureStorage;
     private HandlerThread workerThread;
     private Handler workerThreadHandler;
+
     private boolean useEncryptedSharedPreferences = false;
     private boolean resetOnError = false;
     private StorageCipherFactory storageCipherFactory;
 
     public void initInstance(BinaryMessenger messenger, Context context) {
         try {
-            applicationContext = context.getApplicationContext();
-            nonEncryptedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-            charset = Charset.forName("UTF-8");
+            secureStorage = new FlutterSecureStorage(context);
 
             workerThread = new HandlerThread("com.it_nomads.fluttersecurestorage.worker");
             workerThread.start();
@@ -194,6 +175,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
             channel.setMethodCallHandler(null);
             channel = null;
         }
+        secureStorage = null;
     }
 
     @Override
@@ -203,8 +185,8 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         workerThreadHandler.post(new MethodRunner(call, result));
     }
 
-    @SuppressWarnings("unchecked")
-    private String getKeyFromCall(MethodCall call) {
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    private boolean getResetOnErrorFromCall(MethodCall call) {
         Map<String, Object> arguments = (Map<String, Object>) call.arguments;
         String rawKey = (String) arguments.get("key");
         return addPrefixToKey(rawKey);
@@ -261,24 +243,22 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         return decodeRawValue(rawValue);
     }
 
-    private void delete(String key) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.remove(key);
-        editor.apply();
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    private boolean getUseEncryptedSharedPreferencesFromCall(MethodCall call) {
+        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+        return arguments.containsKey("encryptedSharedPreferences") && arguments.get("encryptedSharedPreferences").equals("true");
     }
 
-    private String addPrefixToKey(String key) {
-        return ELEMENT_PREFERENCES_KEY_PREFIX + "_" + key;
+    @SuppressWarnings("unchecked")
+    private String getKeyFromCall(MethodCall call) {
+        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+        return (String) arguments.get("key");
     }
 
-    private String decodeRawValue(String value) throws Exception {
-        if (value == null) {
-            return null;
-        }
-        byte[] data = Base64.decode(value, 0);
-        byte[] result = storageCipher.decrypt(data);
-
-        return new String(result, charset);
+    @SuppressWarnings("unchecked")
+    private String getValueFromCall(MethodCall call) {
+        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+        return (String) arguments.get("value");
     }
 
     /**
@@ -322,19 +302,19 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void run() {
+            boolean resetOnError = false;
+            boolean useEncryptedSharedPreferences = false;
             try {
+                resetOnError = getResetOnErrorFromCall(call);
+                useEncryptedSharedPreferences = getUseEncryptedSharedPreferencesFromCall(call);
                 switch (call.method) {
                     case "write": {
                         String key = getKeyFromCall(call);
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
-
-                        String value = (String) arguments.get("value");
+                        String value = getValueFromCall(call);
 
                         if (value != null) {
-                            write(key, value, useEncryptedSharedPreferences);
+                            secureStorage.write(key, value, useEncryptedSharedPreferences);
                             result.success(null);
                         } else {
                             result.error("null", null, null);
@@ -343,11 +323,9 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                     }
                     case "read": {
                         String key = getKeyFromCall(call);
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
 
-                        if (preferences.contains(key)) {
-                            String value = read(key, useEncryptedSharedPreferences);
+                        if (secureStorage.containsKey(key, useEncryptedSharedPreferences)) {
+                            String value = secureStorage.read(key, useEncryptedSharedPreferences);
                             result.success(value);
                         } else {
                             result.success(null);
@@ -355,36 +333,26 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         break;
                     }
                     case "readAll": {
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
-
-                        Map<String, String> value = readAll(useEncryptedSharedPreferences);
+                        Map<String, String> value = secureStorage.readAll(useEncryptedSharedPreferences);
                         result.success(value);
                         break;
                     }
                     case "containsKey": {
                         String key = getKeyFromCall(call);
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
 
-                        boolean containsKey = preferences.contains(key);
+                        boolean containsKey = secureStorage.containsKey(key, useEncryptedSharedPreferences);
                         result.success(containsKey);
                         break;
                     }
                     case "delete": {
                         String key = getKeyFromCall(call);
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
 
-                        delete(key);
+                        secureStorage.delete(key, useEncryptedSharedPreferences);
                         result.success(null);
                         break;
                     }
                     case "deleteAll": {
-                        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-                        ensureInitialized(arguments);
-
-                        deleteAll();
+                        secureStorage.deleteAll(useEncryptedSharedPreferences);
                         result.success(null);
                         break;
                     }
@@ -395,7 +363,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
             } catch (Exception e) {
                 if (resetOnError) {
-                    deleteAll();
+                    secureStorage.deleteAll(useEncryptedSharedPreferences);
                     result.success("Data has been reset");
                 } else {
                     StringWriter stringWriter = new StringWriter();
