@@ -61,13 +61,13 @@ class FlutterSecureStorage {
           ? _platform.delete(
               key: key,
               options: _selectOptions(
-                  iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+                  iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
             )
           : _platform.write(
               key: key,
               value: value,
               options: _selectOptions(
-                  iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+                  iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
             );
 
   /// Decrypts and returns the value for the given [key] or null if [key] is not in the storage.
@@ -92,7 +92,7 @@ class FlutterSecureStorage {
       _platform.read(
         key: key,
         options: _selectOptions(
-            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
       );
 
   /// Returns true if the storage contains the given [key].
@@ -117,7 +117,7 @@ class FlutterSecureStorage {
       _platform.containsKey(
         key: key,
         options: _selectOptions(
-            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
       );
 
   /// Deletes associated value for the given [key].
@@ -144,7 +144,7 @@ class FlutterSecureStorage {
       _platform.delete(
         key: key,
         options: _selectOptions(
-            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
       );
 
   /// Decrypts and returns all keys with associated values.
@@ -166,7 +166,7 @@ class FlutterSecureStorage {
   }) =>
       _platform.readAll(
         options: _selectOptions(
-            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
       );
 
   /// Deletes all keys with associated values.
@@ -188,7 +188,7 @@ class FlutterSecureStorage {
   }) =>
       _platform.deleteAll(
         options: _selectOptions(
-            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions),
+            iOptions, aOptions, lOptions, webOptions, mOptions, wOptions,),
       );
 
   /// Select correct options based on current platform

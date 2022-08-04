@@ -25,7 +25,6 @@ flutter:
         default_package: flutter_secure_storage_windows
 
 dependencies:
-  meta: ^1.3.0
   flutter:
     sdk: flutter
   # The design on https://flutter.dev/go/federated-plugins was to leave
@@ -37,8 +36,10 @@ dependencies:
   flutter_secure_storage_platform_interface: ^1.0.0
   flutter_secure_storage_web: ^1.0.2
   flutter_secure_storage_windows: ^1.1.2
+  meta: ^1.3.0
 
 dev_dependencies:
-  flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
+  lint: ^1.10.0
+
