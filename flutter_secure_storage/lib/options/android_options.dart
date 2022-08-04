@@ -75,13 +75,14 @@ class AndroidOptions extends Options {
         'preferencesKeyPrefix': preferencesKeyPrefix ?? '',
       };
 
-  AndroidOptions copyWith(
-          {bool? encryptedSharedPreferences,
-          bool? resetOnError,
-          KeyCipherAlgorithm? keyCipherAlgorithm,
-          StorageCipherAlgorithm? storageCipherAlgorithm,
-          String? preferencesKeyPrefix,
-          String? sharedPreferencesName,}) =>
+  AndroidOptions copyWith({
+    bool? encryptedSharedPreferences,
+    bool? resetOnError,
+    KeyCipherAlgorithm? keyCipherAlgorithm,
+    StorageCipherAlgorithm? storageCipherAlgorithm,
+    String? preferencesKeyPrefix,
+    String? sharedPreferencesName,
+  }) =>
       AndroidOptions(
         encryptedSharedPreferences:
             encryptedSharedPreferences ?? _encryptedSharedPreferences,
