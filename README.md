@@ -14,14 +14,26 @@ flutter_secure_storage only works on HTTPS or localhost environments. [Please se
 A Flutter plugin to store data in secure storage:
 
 - [Keychain](https://developer.apple.com/library/content/documentation/Security/Conceptual/keychainServConcepts/01introduction/introduction.html#//apple_ref/doc/uid/TP30000897-CH203-TP1) is used for iOS
-- AES encryption is used for Android. AES secret key is encrypted with RSA and RSA key is stored in [KeyStore](https://developer.android.com/training/articles/keystore.html)
+- AES encryption is used for Android. AES secret key is encrypted with RSA and RSA key is stored in [KeyStore](https://developer.android.com/training/articles/keystore.html).   
+  By default following algorithms are used for AES and secret key encryption: AES/CBC/PKCS7Padding and RSA/ECB/PKCS1Padding  
+  From Android 6 you can use newer, recommended algoritms:  
+  AES/GCM/NoPadding and RSA/ECB/OAEPWithSHA-256AndMGF1Padding  
+  You can set them in Android options like so:
+```dart
+  AndroidOptions _getAndroidOptions() => const AndroidOptions(
+         keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
+         storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
+      );
+```
+On devices running Android with version less than 6, plugin will fall back to default implementation. You can change the algorithm, even if you already have some encrypted preferences - they will be re-encrypted using selected algorithms.
+Choosing algorithm is irrelevant if you are using EncryptedSharedPreferences as described below.
 - With v5.0.0 we can use [EncryptedSharedPreferences](https://developer.android.com/topic/security/data) on Android by enabling it in the Android Options like so:
 ```dart
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
-        encryptedSharedPreferences: true,
-      );
-```    
-  For more information see the example app.
+  encryptedSharedPreferences: true,
+);
+```
+For more information see the example app.
 - [`libsecret`](https://wiki.gnome.org/Projects/Libsecret) is used for Linux.
 
 _Note_ KeyStore was introduced in Android 4.3 (API level 18). The plugin wouldn't work for earlier versions.

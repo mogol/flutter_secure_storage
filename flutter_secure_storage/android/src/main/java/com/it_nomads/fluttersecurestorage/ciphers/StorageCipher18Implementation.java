@@ -7,32 +7,30 @@ import android.util.Log;
 
 import java.security.Key;
 import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class StorageCipher18Implementation implements StorageCipher {
-
-    private static final int ivSize = 16;
     private static final int keySize = 16;
     private static final String KEY_ALGORITHM = "AES";
-    private static final String AES_PREFERENCES_KEY = "VGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureKeyStorage";
     private final Cipher cipher;
     private final SecureRandom secureRandom;
     private Key secretKey;
 
-    public StorageCipher18Implementation(Context context) throws Exception {
+    public StorageCipher18Implementation(Context context, KeyCipher rsaCipher) throws Exception {
         secureRandom = new SecureRandom();
-        RSACipher18Implementation rsaCipher = new RSACipher18Implementation(context);
+        String aesPreferencesKey = getAESPreferencesKey();
 
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
-        String aesKey = preferences.getString(AES_PREFERENCES_KEY, null);
+        String aesKey = preferences.getString(aesPreferencesKey, null);
 
-        cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+        cipher = getCipher();
 
         if (aesKey != null) {
             byte[] encrypted;
@@ -50,32 +48,24 @@ public class StorageCipher18Implementation implements StorageCipher {
         secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
 
         byte[] encryptedKey = rsaCipher.wrap(secretKey);
-        editor.putString(AES_PREFERENCES_KEY, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
+        editor.putString(aesPreferencesKey, Base64.encodeToString(encryptedKey, Base64.DEFAULT));
         editor.apply();
     }
 
-    public static void moveSecretFromPreferencesIfNeeded(SharedPreferences oldPreferences, Context context) {
-        String existedSecretKey = oldPreferences.getString(AES_PREFERENCES_KEY, null);
-        if (existedSecretKey == null) {
-            return;
-        }
+    protected String getAESPreferencesKey() {
+        return "VGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
+    }
 
-        SharedPreferences.Editor oldEditor = oldPreferences.edit();
-        oldEditor.remove(AES_PREFERENCES_KEY);
-        oldEditor.apply();
-
-        SharedPreferences newPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor newEditor = newPreferences.edit();
-        newEditor.putString(AES_PREFERENCES_KEY, existedSecretKey);
-        newEditor.apply();
+    protected Cipher getCipher() throws Exception {
+        return Cipher.getInstance("AES/CBC/PKCS7Padding");
     }
 
     @Override
     public byte[] encrypt(byte[] input) throws Exception {
-        byte[] iv = new byte[ivSize];
+        byte[] iv = new byte[getIvSize()];
         secureRandom.nextBytes(iv);
 
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+        AlgorithmParameterSpec ivParameterSpec = getParameterSpec(iv);
 
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
 
@@ -90,17 +80,25 @@ public class StorageCipher18Implementation implements StorageCipher {
 
     @Override
     public byte[] decrypt(byte[] input) throws Exception {
-        byte[] iv = new byte[ivSize];
+        byte[] iv = new byte[getIvSize()];
         System.arraycopy(input, 0, iv, 0, iv.length);
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+        AlgorithmParameterSpec ivParameterSpec = getParameterSpec(iv);
 
-        int payloadSize = input.length - ivSize;
+        int payloadSize = input.length - getIvSize();
         byte[] payload = new byte[payloadSize];
         System.arraycopy(input, iv.length, payload, 0, payloadSize);
 
         cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
 
         return cipher.doFinal(payload);
+    }
+
+    protected int getIvSize() {
+        return 16;
+    }
+
+    protected AlgorithmParameterSpec getParameterSpec(byte[] iv) {
+        return new IvParameterSpec(iv);
     }
 
 }
