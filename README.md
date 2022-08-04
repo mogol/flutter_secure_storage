@@ -1,5 +1,8 @@
 # flutter_secure_storage
 
+### Breaking change for v5.1.0
+IOSAccessibility has been renamed to KeychainAccessibility. This however hasn't been properly documented in the changelog.
+
 ### Important notice for Android and v5.0.0
 When upgrading from 4.2.1 to 5.0.0 you can migrate to EncryptedSharedPreferences by
 setting the encryptedSharedPreference parameter to true as explained below. This will automatically
