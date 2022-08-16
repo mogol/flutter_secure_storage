@@ -1,3 +1,15 @@
+## 6.0.0
+* [Android] Upgrade tot Android SDK 33.
+
+## 5.1.2
+This version reverts some breaking changes of update 5.1.0.
+These changes will become available in version 6.0.0
+* [Android] Revert upgrade tot Android SDK 33.
+
+## 5.1.1
+* Example app dependencies updated
+* Updated homepage
+
 ## 5.1.0
 * [Android] You can now select your own key prefix or database name.
 * [Android] Upgraded to Android SDK 33.

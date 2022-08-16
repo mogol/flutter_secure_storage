@@ -1,5 +1,6 @@
 part of flutter_secure_storage;
 
+/// Specific options for iOS platform.
 class IOSOptions extends AppleOptions {
   const IOSOptions({
     String? groupId,

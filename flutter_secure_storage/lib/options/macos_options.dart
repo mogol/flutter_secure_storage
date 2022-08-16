@@ -1,5 +1,6 @@
 part of flutter_secure_storage;
 
+/// Specific options for macOS platform.
 class MacOsOptions extends AppleOptions {
   const MacOsOptions({
     String? groupId,
