@@ -1,5 +1,5 @@
 ## 6.0.0
-* [Android] Upgrade tot Android SDK 33.
+* [Android] Upgrade to Android SDK 33.
 
 ## 5.1.2
 This version reverts some breaking changes of update 5.1.0.
