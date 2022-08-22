@@ -43,3 +43,11 @@ dev_dependencies:
     sdk: flutter
   lint: ^1.10.0
 
+# We need to manually declare supported platforms, because pub.dev won't find them.
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
