@@ -9,7 +9,7 @@ import Flutter
 
 public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
     
-    private let flutterSecureStorageManager: FlutterSecureStorageManager = FlutterSecureStorageManager()
+    private let flutterSecureStorageManager: FlutterSecureStorage = FlutterSecureStorage()
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.it_nomads.com/flutter_secure_storage", binaryMessenger: registrar.messenger())
@@ -37,107 +37,107 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
     }
     
     private func read(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
+        let values = parseCall(call)
+        if (values.key == nil) {
+            result(FlutterError.init(code: "Missing Parameter", message: "write requires key parameter", details: nil))
+            return
+        }
         
-        let key = arguments["key"] as! String
-        let synchronizableString = options["synchronizable"] as! String?
-        
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
-        let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
-        
-        let value = flutterSecureStorageManager.read(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        result(value)
+        let response = flutterSecureStorageManager.read(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
+        result(response.value)
     }
     
     private func write(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
-        let synchronizableString = options["synchronizable"] as! String?
-        
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
-        let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
-        
-        let key = arguments["key"] as! String
-        let accessibility = options["accessibility"] as! String
-        
-        if (!(arguments["value"] is String)){
-            result("Invalid parameter's type");
+        if (!((call.arguments as! [String : Any?])["value"] is String)){
+            result(FlutterError.init(code: "Invalid Parameter", message: "key parameter must be String", details: nil))
             return;
         }
-        let value = arguments["value"] as! String
         
-        flutterSecureStorageManager.write(key: key, value: value, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: accessibility)
+        let values = parseCall(call)
+        if (values.key == nil) {
+            result(FlutterError.init(code: "Missing Parameter", message: "write requires key parameter", details: nil))
+            return
+        }
         
-        result(nil)
+        if (values.value == nil) {
+            result(FlutterError.init(code: "Missing Parameter", message: "write requires value parameter", details: nil))
+            return
+        }
+        
+        let response = flutterSecureStorageManager.write(key: values.key!, value: values.value!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility)
+        
+        result(response)
     }
     
     private func delete(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
-        let synchronizableString = options["synchronizable"] as! String?
+        let values = parseCall(call)
+        if (values.key == nil) {
+            result(FlutterError.init(code: "Missing Parameter", message: "delete requires key parameter", details: nil))
+            return
+        }
         
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
-        let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
+        let response = flutterSecureStorageManager.delete(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         
-        let key = arguments["key"] as! String
-        
-        flutterSecureStorageManager.delete(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        
-        result(nil)
+        result(response)
     }
     
     private func deleteAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
-        let synchronizableString = options["synchronizable"] as! String?
+        let values = parseCall(call)
         
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
-        let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
+        let response = flutterSecureStorageManager.deleteAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         
-        flutterSecureStorageManager.deleteAll(groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        
-        result(nil)
+        result(response)
     }
     
     private func readAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
-        let synchronizableString = options["synchronizable"] as! String?
+        let values = parseCall(call)
         
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
-        let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
+        let response = flutterSecureStorageManager.readAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         
-        let value = flutterSecureStorageManager.readAll(groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        
-        result(value);
+        result(response.value);
     }
     
     private func containsKey(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        let arguments: [String: Any] = call.arguments as! [String : Any]
-        let options: [String: Any] = arguments["options"] as! [String : Any]
-        let accountName = options["accountName"] as! String
-        let groupIdString = options["groupId"] as! String?
-        let synchronizableString = options["synchronizable"] as! String?
+        let values = parseCall(call)
+        if (values.key == nil) {
+            result(FlutterError.init(code: "Missing Parameter", message: "containsKey requires key parameter", details: nil))
+        }
+        
+        let response = flutterSecureStorageManager.containsKey(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
+        
+        result(response);
+    }
+    
+    private func parseCall(_ call: FlutterMethodCall) -> FlutterSecureStorageRequest {
+        let arguments = call.arguments as! [String : Any?]
+        let options = arguments["options"] as! [String : Any?]
+        
+        let accountName = options["accountName"] as? String
+        let groupIdString = options["groupId"] as? String
+        let synchronizableString = options["synchronizable"] as? String
         
         let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
         let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
         
-        let key = arguments["key"] as! String
+        let key = arguments["key"] as? String
+        let accessibility = options["accessibility"] as? String
+        let value = arguments["value"] as? String
         
-        let value = flutterSecureStorageManager.containsKey(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
-        
-        result(value);
+        return FlutterSecureStorageRequest(
+            accountName: accountName,
+            groupId: groupId,
+            synchronizable: synchronizable,
+            accessibility: accessibility, key: key, value: value
+        )
+    }
+    
+    struct FlutterSecureStorageRequest {
+        var accountName: String?
+        var groupId: Int?
+        var synchronizable: Bool?
+        var accessibility: String?
+        var key: String?
+        var value: String?
     }
     
 }
