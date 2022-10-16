@@ -113,10 +113,10 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         let options = arguments["options"] as! [String : Any?]
         
         let accountName = options["accountName"] as? String
-        let groupIdString = options["groupId"] as? String
+        let groupId = options["groupId"] as? String
         let synchronizableString = options["synchronizable"] as? String
         
-        let groupId:Int? = groupIdString != nil ? Int(groupIdString!) : nil
+        
         let synchronizable: Bool = synchronizableString != nil ? Bool(synchronizableString!)! : false
         
         let key = arguments["key"] as? String
@@ -133,7 +133,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
     
     struct FlutterSecureStorageRequest {
         var accountName: String?
-        var groupId: Int?
+        var groupId: String?
         var synchronizable: Bool?
         var accessibility: String?
         var key: String?
