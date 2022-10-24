@@ -32,7 +32,8 @@ class FlutterSecureStorage {
   });
 
   static const UNSUPPORTED_PLATFORM = 'unsupported_platform';
-  static final _platform = FlutterSecureStoragePlatform.instance;
+  FlutterSecureStoragePlatform get _platform =>
+      FlutterSecureStoragePlatform.instance;
 
   /// Encrypts and saves the [key] with the given [value].
   ///
