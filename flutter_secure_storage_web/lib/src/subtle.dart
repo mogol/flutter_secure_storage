@@ -33,8 +33,8 @@ export 'jsonwebkey.dart' show JsonWebKey;
 /// Convert a promise to a future.
 @JS()
 class Promise<T> {
-  external Promise(void executor(void resolve(T result), Function reject));
-  external Promise then(void onFulfilled(T result), [Function onRejected]);
+  external Promise(void Function(void Function(T result) resolve, Function reject) executor);
+  external Promise then(void Function(T result) onFulfilled, [Function onRejected]);
 }
 
 /// Convert [BigInt] to [Uint8List] formatted as [BigInteger][1] following
@@ -48,6 +48,7 @@ Uint8List bigIntToUint8ListBigInteger(BigInt integer) {
   if (integer == BigInt.from(3)) {
     return Uint8List.fromList([0x03]); // 3
   }
+  // ignore: todo
   // TODO: Implement bigIntToUint8ListBigInteger for all positive integers
   // There is no rush as this is only used for public exponent, and chrome only
   // supports 3 and 65537, so supporting other numbers is a low priority.

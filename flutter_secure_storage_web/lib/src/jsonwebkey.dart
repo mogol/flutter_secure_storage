@@ -21,7 +21,7 @@
 class JsonWebKey {
   String? kty;
   String? use;
-  List<String>? key_ops;
+  List<String>? keyops;
   String? alg;
   bool? ext;
   String? crv;
@@ -41,7 +41,7 @@ class JsonWebKey {
   JsonWebKey({
     this.kty,
     this.use,
-    this.key_ops,
+    this.keyops,
     this.alg,
     this.ext,
     this.crv,
@@ -82,14 +82,14 @@ class JsonWebKey {
         throw FormatException('JWK entry "$k" must be a string', json);
       }
     }
-    List<String>? key_ops;
-    if (json.containsKey('key_ops')) {
-      if (json['key_ops'] is! List ||
-          (json['key_ops'] as List).any((e) => e is! String)) {
+    List<String>? keyops;
+    if (json.containsKey('keyops')) {
+      if (json['keyops'] is! List ||
+          (json['keyops'] as List).any((e) => e is! String)) {
         throw FormatException(
-            'JWK entry "key_ops" must be a list of strings', json);
+            'JWK entry "keyops" must be a list of strings', json);
       }
-      key_ops = (json['key_ops'] as List).map((e) => e as String).toList();
+      keyops = (json['keyops'] as List).map((e) => e as String).toList();
     }
 
     if (json.containsKey('ext') && json['ext'] is! bool) {
@@ -107,7 +107,7 @@ class JsonWebKey {
     return JsonWebKey(
       kty: json['kty'] as String?,
       use: json['use'] as String?,
-      key_ops: key_ops,
+      keyops: keyops,
       alg: json['alg'] as String?,
       ext: json['ext'] as bool?,
       crv: json['crv'] as String?,
@@ -192,9 +192,9 @@ class JsonWebKey {
     }
 
     // Set non-string properties
-    final key_ops_ = key_ops;
-    if (key_ops_ != null) {
-      json['key_ops'] = key_ops_;
+    final keyops_ = keyops;
+    if (keyops_ != null) {
+      json['keyops'] = keyops_;
     }
     final ext_ = ext;
     if (ext_ != null) {
