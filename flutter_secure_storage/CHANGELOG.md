@@ -7,7 +7,7 @@
 ## 5.1.2
 This version reverts some breaking changes of update 5.1.0.
 These changes will become available in version 6.0.0
-* [Android] Revert upgrade tot Android SDK 33.
+* [Android] Revert upgrade to Android SDK 33.
 
 ## 5.1.1
 * Example app dependencies updated
