@@ -4,6 +4,11 @@
 #include <windows.h>
 #include <wincred.h>
 #include <atlstr.h>
+#include <ShlObj_core.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <direct.h>
+#include <bcrypt.h>
 
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
@@ -15,6 +20,15 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+#include <string>
+
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
+
+#pragma comment(lib, "version.lib")
+#pragma comment(lib, "bcrypt.lib")
 
 namespace
 {
@@ -50,6 +64,16 @@ namespace
 
     // Gets the string name for the given int error code
     std::string GetErrorString(const DWORD &error_code);
+
+    DWORD GetApplicationSupportPath(std::wstring& path);
+
+    std::wstring SanitizeDirString(std::wstring string);
+
+    bool PathExists(const std::wstring& path);
+
+    bool MakePath(const std::wstring& path);
+
+    PBYTE GetEncryptionKey();
 
     // Stores the given value under the given key.
     void Write(const std::string &key, const std::string &val);
@@ -144,13 +168,149 @@ namespace
     }
   }
 
+  DWORD FlutterSecureStorageWindowsPlugin::GetApplicationSupportPath(std::wstring &path)
+  {
+      std::wstring companyName;
+      std::wstring productName;
+      TCHAR nameBuffer[MAX_PATH + 1]{};
+      char* infoBuffer;
+      DWORD versionInfoSize;
+      DWORD resVal;
+      UINT queryLen;
+      LPVOID queryVal;
+      LPWSTR appdataPath;
+      std::wostringstream stream;
+
+      SHGetKnownFolderPath(FOLDERID_RoamingAppData,KF_FLAG_DEFAULT,NULL,&appdataPath);
+      
+      if (nameBuffer == NULL) {
+          return ERROR_OUTOFMEMORY;
+      }
+
+      resVal = GetModuleFileName(NULL,nameBuffer,MAX_PATH);
+      if (resVal == 0) {
+          return GetLastError();
+      }
+
+      versionInfoSize = GetFileVersionInfoSize(nameBuffer, NULL);
+      if (versionInfoSize != 0) {
+          infoBuffer = (char*) calloc(versionInfoSize,sizeof(char));
+          if (infoBuffer == NULL) {
+              return ERROR_OUTOFMEMORY;
+          }
+          if (GetFileVersionInfo(nameBuffer, 0, versionInfoSize, infoBuffer) == 0) {
+              free(infoBuffer);
+              infoBuffer = NULL;
+          }
+          else {
+
+              if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\CompanyName"), &queryVal, &queryLen) != 0) {
+                  companyName = std::wstring((const TCHAR*)queryVal);
+              }
+              if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\ProductName"), &queryVal, &queryLen) != 0) {
+                  productName = std::wstring((const TCHAR*)queryVal);
+              }
+          }
+          stream << appdataPath << "\\" << companyName << "\\" << productName;
+          path = stream.str();
+      }
+      else {
+          return GetLastError();
+      }
+      return ERROR_SUCCESS;
+
+  }
+
+  std::wstring FlutterSecureStorageWindowsPlugin::SanitizeDirString(std::wstring string)
+  {
+      return std::wstring();
+  }
+
+  bool FlutterSecureStorageWindowsPlugin::PathExists(const std::wstring& path)
+  {
+      struct _stat info;
+      if (_wstat(path.c_str(), &info) != 0) {
+          return false;
+      }
+      return (info.st_mode & _S_IFDIR) != 0;
+  }
+
+  bool FlutterSecureStorageWindowsPlugin::MakePath(const std::wstring& path)
+  {
+      int ret = _wmkdir(path.c_str());
+      if (ret == 0) {
+          return true;
+      }
+      switch (errno) {
+      case ENOENT:
+        {
+          size_t pos = path.find_last_of('/');
+          if (pos == std::wstring::npos)
+              pos = path.find_last_of('\\');
+          if (pos == std::wstring::npos)
+              return false;
+          if (!MakePath(path.substr(0, pos)))
+              return false; 
+        }
+        return 0 == _wmkdir(path.c_str());
+      case EEXIST:
+          return PathExists(path);
+      default:
+          return false;
+      }
+  }
+
+  PBYTE FlutterSecureStorageWindowsPlugin::GetEncryptionKey()
+  {
+      DWORD credError = 0;
+      PBYTE AesKey;
+      PCREDENTIALW pcred;
+      CA2W target_name(("key_"+ELEMENT_PREFERENCES_KEY_PREFIX).c_str());
+
+      AesKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, 16);
+      if (NULL == AesKey) {
+          return NULL;
+      }
+
+      bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
+      if (ok) {
+          memcpy(AesKey, pcred->CredentialBlob, 16);
+          CredFree(pcred);
+          return AesKey;
+      }
+      credError = GetLastError();
+      if (credError != ERROR_NOT_FOUND) {
+          return NULL;
+      }
+      
+      if (BCryptGenRandom(NULL, AesKey, sizeof(AesKey), BCRYPT_USE_SYSTEM_PREFERRED_RNG) != ERROR_SUCCESS) {
+          return NULL;
+      }
+      CREDENTIALW cred = { 0 };
+      cred.Type = CRED_TYPE_GENERIC;
+      cred.TargetName = target_name.m_psz;
+      cred.CredentialBlobSize = sizeof(AesKey);
+      cred.CredentialBlob = AesKey;
+      cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
+
+      ok = CredWriteW(&cred, 0);
+      if (!ok) {
+          return NULL;
+      }
+      return AesKey;
+  }
+
   void FlutterSecureStorageWindowsPlugin::HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
   {
     auto method = method_call.method_name();
     const auto *args = std::get_if<flutter::EncodableMap>(method_call.arguments());
-
+    std::wstring path;
+    if (GetApplicationSupportPath(path) != ERROR_SUCCESS) {
+        result->Error("Exception occurred", "GetApplicationSupportPath");
+        return;
+    }
     try
     {
       if (method == "write")
@@ -236,7 +396,130 @@ namespace
 
   void FlutterSecureStorageWindowsPlugin::Write(const std::string &key, const std::string &val)
   {
-    size_t len = 1 + strlen(val.c_str());
+      BCRYPT_ALG_HANDLE       hAesAlg = NULL;
+      BCRYPT_KEY_HANDLE       hKey = NULL;
+      NTSTATUS                status = STATUS_UNSUCCESSFUL;
+      DWORD                   cbCipherText = 0,
+                              cbPlainText = 0,
+                              cbData = 0,
+                              cbKeyObject = 0,
+                              cbBlockLen = 0,
+                              cbSKeySize = 16;
+      PBYTE                   pbCipherText = NULL,
+                              pbPlainText = NULL,
+                              pbKeyObject = NULL,
+                              pbIV = NULL,
+                              pbSKey = NULL;
+      std::wstring            appSupportPath;
+      std::basic_ofstream<BYTE> fs;
+      pbSKey = GetEncryptionKey();
+      if (!NT_SUCCESS(status = BCryptOpenAlgorithmProvider(&hAesAlg, BCRYPT_AES_ALGORITHM, NULL, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptOpenAlgorithmProvider\n", status);
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGetProperty(hAesAlg, BCRYPT_OBJECT_LENGTH, (PBYTE)&cbKeyObject, sizeof(DWORD), &cbData, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
+          goto Cleanup;
+      }
+      pbKeyObject = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbKeyObject);
+      if (NULL == pbKeyObject) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGetProperty(hAesAlg, BCRYPT_BLOCK_LENGTH, (PBYTE)&cbBlockLen, sizeof(DWORD), &cbData, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
+          goto Cleanup;
+      }
+      pbIV = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbBlockLen);
+      if (NULL == pbIV) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGenRandom(NULL, pbIV, cbBlockLen, BCRYPT_USE_SYSTEM_PREFERRED_RNG))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGenRandom\n", status);
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptSetProperty(hAesAlg, BCRYPT_CHAINING_MODE, (PBYTE)BCRYPT_CHAIN_MODE_CBC, sizeof(BCRYPT_CHAIN_MODE_CBC), 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptSetProperty\n", status);
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGenerateSymmetricKey(hAesAlg, &hKey, pbKeyObject, cbKeyObject, pbSKey, cbSKeySize, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGenerateSymmetricKey\n", status);
+          goto Cleanup;
+      }
+
+      cbPlainText = (DWORD)val.length();
+      pbPlainText = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbPlainText);
+      if (NULL == pbPlainText) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+
+      memcpy(pbPlainText, val.c_str(), val.length());
+
+      if (!NT_SUCCESS(status = BCryptEncrypt(hKey, pbPlainText, cbPlainText, NULL, NULL, cbBlockLen, NULL, 0, &cbCipherText, BCRYPT_BLOCK_PADDING))) {
+          wprintf(L"**** Error 0x%x returned by BCryptEncrypt\n", status);
+          goto Cleanup;
+      }
+
+      pbCipherText = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbCipherText);
+      if (NULL == pbCipherText) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+
+      if (!NT_SUCCESS(status = BCryptEncrypt(hKey, pbPlainText, cbPlainText, NULL, NULL, cbBlockLen, pbCipherText, cbCipherText, &cbData, BCRYPT_BLOCK_PADDING))) {
+          wprintf(L"**** Error 0x%x returned by BCryptEncrypt\n", status);
+          goto Cleanup;
+      }
+
+      GetApplicationSupportPath(appSupportPath);
+      if (!PathExists(appSupportPath)) {
+          MakePath(appSupportPath);
+      }
+      fs = std::basic_ofstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(),key.end()) + L".secure",std::ios::binary);
+      if (!fs) {
+          wprintf(L"**** Error cannot open the output file");
+          goto Cleanup;
+      }
+      fs.write(pbCipherText, cbCipherText);
+      fs.close();
+  Cleanup:
+      if (hAesAlg)
+      {
+          BCryptCloseAlgorithmProvider(hAesAlg, 0);
+      }
+
+      if (hKey)
+      {
+          BCryptDestroyKey(hKey);
+      }
+
+      if (pbCipherText)
+      {
+          HeapFree(GetProcessHeap(), 0, pbCipherText);
+      }
+
+      if (pbPlainText)
+      {
+          HeapFree(GetProcessHeap(), 0, pbPlainText);
+      }
+
+      if (pbKeyObject)
+      {
+          HeapFree(GetProcessHeap(), 0, pbKeyObject);
+      }
+
+      if (pbIV)
+      {
+          HeapFree(GetProcessHeap(), 0, pbIV);
+      }
+
+      if (pbSKey) {
+          HeapFree(GetProcessHeap(), 0, pbSKey);
+      }
+      return;
+    /*size_t len = 1 + strlen(val.c_str());
     CA2W keyw(key.c_str());
 
     CREDENTIALW cred = {0};
@@ -250,11 +533,154 @@ namespace
     if (!ok)
     {
       throw GetLastError();
-    }
+    }*/
   }
 
   std::optional<std::string> FlutterSecureStorageWindowsPlugin::Read(const std::string &key)
   {
+      BCRYPT_ALG_HANDLE hAesAlg = NULL;
+      BCRYPT_KEY_HANDLE hKey = NULL;
+      NTSTATUS status = STATUS_UNSUCCESSFUL;
+      DWORD cbCipherText = 0,
+          cbPlainText = 0,
+          cbKeyObject = 0,
+          cbBlockLen = 0,
+          cbData = 0,
+          cbSKeySize = 16;
+      PBYTE pbCipherText = NULL,
+          pbPlainText = NULL,
+          pbKeyObject = NULL,
+          pbIV = NULL,
+          pbSKey = NULL;
+
+      std::wstring appSupportPath;
+      std::basic_ifstream<BYTE> fs;
+      PBYTE fileBuffer;
+      std::streampos fileSize;
+      std::optional<std::string> returnVal = std::nullopt;
+
+      GetApplicationSupportPath(appSupportPath);
+      if (!PathExists(appSupportPath)) {
+          MakePath(appSupportPath);
+      }
+      //Read full file into a buffer
+      fs = std::basic_ifstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure",std::ios::binary);
+      if (!fs.good()) {
+          //TODO add backwards comp.
+          goto Cleanup;
+      }
+      fs.unsetf(std::ios::skipws);
+      fs.seekg(0, std::ios::end);
+      fileSize = fs.tellg();
+      fs.seekg(0, std::ios::beg);
+      fileBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), 0, fileSize);
+      if (NULL == fileBuffer) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+      fs.read(fileBuffer, fileSize);
+      fs.close();
+
+      pbSKey = GetEncryptionKey();
+      if (!NT_SUCCESS(status = BCryptOpenAlgorithmProvider(&hAesAlg, BCRYPT_AES_ALGORITHM, NULL, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptOpenAlgorithmProvider\n", status);
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGetProperty(hAesAlg, BCRYPT_OBJECT_LENGTH, (PBYTE)&cbKeyObject, sizeof(DWORD), &cbData, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
+          goto Cleanup;
+      }
+
+      pbKeyObject = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbKeyObject);
+      if (NULL == pbKeyObject) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+
+      if (!NT_SUCCESS(status = BCryptGetProperty(hAesAlg, BCRYPT_BLOCK_LENGTH, (PBYTE)&cbBlockLen, sizeof(DWORD), &cbData, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
+          goto Cleanup;
+      }
+
+      pbIV = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbBlockLen);
+      if (NULL == pbIV) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+      if (cbBlockLen > fileSize) {
+          wprintf(L"**** invalid fileSize\n");
+          goto Cleanup;
+      }
+
+      if (!NT_SUCCESS(status = BCryptSetProperty(hAesAlg, BCRYPT_CHAINING_MODE, (PBYTE)BCRYPT_CHAIN_MODE_CBC, sizeof(BCRYPT_CHAIN_MODE_CBC), 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptSetProperty\n", status);
+          goto Cleanup;
+      }
+      if (!NT_SUCCESS(status = BCryptGenerateSymmetricKey(hAesAlg, &hKey, pbKeyObject, cbKeyObject, pbSKey, cbSKeySize, 0))) {
+          wprintf(L"**** Error 0x%x returned by BCryptGenerateSymmetricKey\n", status);
+          goto Cleanup;
+      }
+
+      cbCipherText = (DWORD)fileSize;
+      pbCipherText = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbCipherText);
+      if (NULL == pbCipherText) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+
+      if (!NT_SUCCESS(status = BCryptDecrypt(hKey, fileBuffer, cbCipherText, NULL, NULL, cbBlockLen, NULL, 0, &cbPlainText, BCRYPT_BLOCK_PADDING))) {
+          wprintf(L"**** Error 0x%x returned by BCryptDecrypt1\n", status);
+          goto Cleanup;
+      }
+
+      pbPlainText = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbPlainText);
+      if (NULL == pbPlainText) {
+          wprintf(L"**** memory allocation failed\n");
+          goto Cleanup;
+      }
+      memset(pbPlainText, 0, cbPlainText);
+
+      if (!NT_SUCCESS(status = BCryptDecrypt(hKey, fileBuffer, cbCipherText, NULL, NULL, cbBlockLen, pbPlainText, cbPlainText, &cbData, BCRYPT_BLOCK_PADDING))) {
+          wprintf(L"**** Error 0x%x returned by BCryptDecrypt2\n", status);
+          goto Cleanup;
+      }
+      returnVal = (char*)pbPlainText;
+  Cleanup:
+      if (hAesAlg)
+      {
+          BCryptCloseAlgorithmProvider(hAesAlg, 0);
+      }
+
+      if (hKey)
+      {
+          BCryptDestroyKey(hKey);
+      }
+
+      if (pbCipherText)
+      {
+          HeapFree(GetProcessHeap(), 0, pbCipherText);
+      }
+
+      if (pbPlainText)
+      {
+          HeapFree(GetProcessHeap(), 0, pbPlainText);
+      }
+
+      if (pbKeyObject)
+      {
+          HeapFree(GetProcessHeap(), 0, pbKeyObject);
+      }
+
+      if (pbIV)
+      {
+          HeapFree(GetProcessHeap(), 0, pbIV);
+      }
+
+      if (pbSKey) {
+          HeapFree(GetProcessHeap(), 0, pbSKey);
+      }
+      return returnVal;
+    /*
     PCREDENTIALW pcred;
     CA2W target_name(key.c_str());
     bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
@@ -269,12 +695,45 @@ namespace
     auto error = GetLastError();
     if (error == ERROR_NOT_FOUND)
       return std::nullopt;
-    throw error;
+    throw error;*/
   }
 
   flutter::EncodableMap FlutterSecureStorageWindowsPlugin::ReadAll()
   {
-    PCREDENTIALW* pcreds;
+      WIN32_FIND_DATA searchRes;
+      HANDLE hFile;
+      std::wstring appSupportPath;
+
+      GetApplicationSupportPath(appSupportPath);
+      if (!PathExists(appSupportPath)) {
+          MakePath(appSupportPath);
+      }
+      hFile = FindFirstFile((appSupportPath + L"\\*.secure").c_str(), &searchRes);
+      if (hFile == INVALID_HANDLE_VALUE) {
+          return flutter::EncodableMap();
+      }
+
+      flutter::EncodableMap creds;
+
+      do {
+          std::wstring fileName(searchRes.cFileName);
+          size_t pos = fileName.find(L".secure");
+          fileName.erase(pos, 7);
+          char* out = new char[fileName.length() + 1];
+          size_t charsConverted = 0;
+          wcstombs_s(&charsConverted, out, fileName.length() + 1, fileName.c_str(), fileName.length() + 1);
+          std::optional<std::string> val = this->Read(out);
+          auto key = this->RemoveKeyPrefix(out);
+          if (val.has_value()) {
+              creds[key] = val.value();
+              continue;
+          }
+          wprintf(L"**error no data\n");
+
+      } while (FindNextFile(hFile, &searchRes) != 0);
+
+      return creds;
+    /*PCREDENTIALW* pcreds;
     DWORD cred_count = 0;
 
     bool ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
@@ -300,13 +759,22 @@ namespace
 
     CredFree(pcreds);
 
-    return creds;
+    return creds;*/
   }
 
   void FlutterSecureStorageWindowsPlugin::Delete(const std::string &key)
   {
-    auto wstr = std::wstring(key.begin(), key.end());
-    bool ok = CredDeleteW(wstr.c_str(), CRED_TYPE_GENERIC, 0);
+      std::wstring appSupportPath;
+      GetApplicationSupportPath(appSupportPath);
+      auto wstr = std::wstring(key.begin(), key.end());
+      BOOL ok = DeleteFile((appSupportPath + L"\\" + wstr + L".secure").c_str());
+      if (!ok) {
+          DWORD error = GetLastError();
+          if (error != ERROR_NOT_FOUND) {
+              throw error;
+          }
+      }
+    /*bool ok = CredDeleteW(wstr.c_str(), CRED_TYPE_GENERIC, 0);
     if (!ok)
     {
       auto error = GetLastError();
@@ -316,12 +784,32 @@ namespace
         return;
 
       throw error;
-    }
+    }*/
   }
 
   void FlutterSecureStorageWindowsPlugin::DeleteAll()
   {
-    PCREDENTIALW* pcreds;
+
+      WIN32_FIND_DATA searchRes;
+      HANDLE hFile;
+      std::wstring appSupportPath;
+
+      GetApplicationSupportPath(appSupportPath);
+      if (!PathExists(appSupportPath)) {
+          MakePath(appSupportPath);
+      }
+      hFile = FindFirstFile((appSupportPath + L"\\*.secure").c_str(), &searchRes);
+      if (hFile == INVALID_HANDLE_VALUE) {
+          return;
+      }
+      do {
+          std::wstring fileName(searchRes.cFileName);
+          BOOL ok = DeleteFile((appSupportPath + L"\\" + fileName).c_str());
+          if (!ok) {
+              throw GetLastError();
+          }
+      } while (FindNextFile(hFile, &searchRes) != 0);
+    /*PCREDENTIALW* pcreds;
     DWORD cred_count = 0;
     
     bool read_ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
@@ -346,12 +834,19 @@ namespace
       }
     }
 
-    CredFree(pcreds);
+    CredFree(pcreds);*/
   }
 
   bool FlutterSecureStorageWindowsPlugin::ContainsKey(const std::string &key)
   {
-    PCREDENTIALW pcred;
+      std::wstring appSupportPath;
+      GetApplicationSupportPath(appSupportPath);
+      std::wstring wstr = std::wstring(key.begin(), key.end());
+      if (INVALID_FILE_ATTRIBUTES == GetFileAttributes((appSupportPath + L"\\" + wstr + L".secure").c_str())) {
+          return false;
+      }
+      return true;
+    /*PCREDENTIALW pcred;
     CA2W target_name(key.c_str());
 
     bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
@@ -360,7 +855,7 @@ namespace
     auto error = GetLastError();
     if (error == ERROR_NOT_FOUND)
       return false;
-    throw error;
+    throw error;*/
   }
 } // namespace
 
