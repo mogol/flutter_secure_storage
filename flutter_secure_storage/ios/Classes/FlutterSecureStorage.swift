@@ -7,12 +7,13 @@
 
 import Foundation
 
-class FlutterSecureStorage {
+class FlutterSecureStorage{
     
-    private func baseQuery(key: String?, groupId: Int?, accountName: String?, synchronizable: Bool?, returnData: Bool?) -> Dictionary<CFString, Any> {
+    private func baseQuery(key: String?, groupId: String?, accountName: String?, synchronizable: Bool?, returnData: Bool?) -> Dictionary<CFString, Any> {
         var keychainQuery: [CFString: Any] = [kSecClass : kSecClassGenericPassword]
         if (key != nil) {
             keychainQuery[kSecAttrAccount] = key
+            
         }
         
         if (groupId != nil) {
@@ -33,7 +34,7 @@ class FlutterSecureStorage {
         return keychainQuery
     }
     
-    internal func containsKey(key: String, groupId: Int?, accountName: String?, synchronizable: Bool?) -> Bool {
+    internal func containsKey(key: String, groupId: String?, accountName: String?, synchronizable: Bool?) -> Bool {
         if read(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable).value != nil {
             return true
         } else {
@@ -41,7 +42,7 @@ class FlutterSecureStorage {
         }
     }
     
-    internal func readAll(groupId: Int?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
+    internal func readAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
         var keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
         
         keychainQuery[kSecMatchLimit] = kSecMatchLimitAll
@@ -66,7 +67,7 @@ class FlutterSecureStorage {
         return FlutterSecureStorageResponse(status: status, value: results)
     }
     
-    internal func read(key: String, groupId: Int?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
+    internal func read(key: String, groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
         let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
         
         var ref: AnyObject?
@@ -83,19 +84,19 @@ class FlutterSecureStorage {
         return FlutterSecureStorageResponse(status: status, value: value)
     }
     
-    internal func deleteAll(groupId: Int?, accountName: String?, synchronizable: Bool?) -> OSStatus {
+    internal func deleteAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> OSStatus {
         let keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil)
         
         return SecItemDelete(keychainQuery as CFDictionary)
     }
     
-    internal func delete(key: String, groupId: Int?, accountName: String?, synchronizable: Bool?) -> OSStatus {
+    internal func delete(key: String, groupId: String?, accountName: String?, synchronizable: Bool?) -> OSStatus {
         let keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: true)
         
         return SecItemDelete(keychainQuery as CFDictionary)
     }
     
-    internal func write(key: String, value: String, groupId: Int?, accountName: String?, synchronizable: Bool?, accessibility: String?) -> OSStatus {
+    internal func write(key: String, value: String, groupId: String?, accountName: String?, synchronizable: Bool?, accessibility: String?) -> OSStatus {
         var attrAccessible: CFString = kSecAttrAccessibleWhenUnlocked
         if (accessibility != nil) {
             switch accessibility {
@@ -142,3 +143,4 @@ class FlutterSecureStorage {
         var value: Any?
     }
 }
+
