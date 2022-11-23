@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform.dart';
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 
 part './options/android_options.dart';
@@ -32,7 +33,8 @@ class FlutterSecureStorage {
   });
 
   static const UNSUPPORTED_PLATFORM = 'unsupported_platform';
-  static final _platform = FlutterSecureStoragePlatform.instance;
+  FlutterSecureStoragePlatform get _platform =>
+      FlutterSecureStoragePlatform.instance;
 
   /// Encrypts and saves the [key] with the given [value].
   ///
@@ -257,5 +259,12 @@ class FlutterSecureStorage {
     } else {
       throw UnsupportedError(UNSUPPORTED_PLATFORM);
     }
+  }
+
+  /// Initializes the shared preferences with mock values for testing.
+  @visibleForTesting
+  static void setMockInitialValues(Map<String, String> values) {
+    FlutterSecureStoragePlatform.instance =
+        TestFlutterSecureStoragePlatform(values);
   }
 }
