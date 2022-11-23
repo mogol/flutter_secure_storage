@@ -17,9 +17,10 @@ jobs:
         - name: "Run Flutter Driver tests"
           uses: reactivecircus/android-emulator-runner@v2
           with:
-            api-level: ${{ matrix.api-level }}
-            target: ${{ matrix.target }}
-            arch: x86_64
-            profile: Nexus 6
+            api-level: 33
+#            api-level: ${{ matrix.api-level }}
+#            target: ${{ matrix.target }}
+#            arch: x86_64
+#            profile: Nexus 6
             script: "cd example && flutter drive --target=test_driver/app.dart"
             working-directory: ./flutter_secure_storage
