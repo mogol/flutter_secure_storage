@@ -5,8 +5,8 @@ jobs:
       runs-on: macos-latest
       strategy:
         matrix:
-          api-level: [31]
-          target: [default]
+          api-level: [33]
+          target: [google_apis]
       steps:
         - uses: actions/checkout@v3
         - uses: subosito/flutter-action@v2.8.0
@@ -20,6 +20,5 @@ jobs:
             api-level: ${{ matrix.api-level }}
             target: ${{ matrix.target }}
             arch: x86_64
-            profile: Nexus 6
             script: "cd example && flutter drive --target=test_driver/app.dart"
             working-directory: ./flutter_secure_storage
