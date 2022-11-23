@@ -2,16 +2,15 @@ library flutter_secure_storage_web;
 
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:typed_data';
 import 'dart:js_util' as js_util;
+import 'dart:typed_data';
 
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
+import 'package:flutter_secure_storage_web/src/subtle.dart' as crypto;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import './src/subtle.dart' as crypto;
-
 class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
-  static const _PUBLIC_KEY = 'publicKey';
+  static const _publicKey = 'publicKey';
 
   static void registerWith(Registrar registrar) {
     FlutterSecureStoragePlatform.instance = FlutterSecureStorageWeb();
@@ -22,32 +21,34 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     required String key,
     required Map<String, String> options,
   }) =>
-      Future.value(html.window.localStorage
-          .containsKey(options[_PUBLIC_KEY]! + "." + key));
+      Future.value(
+        html.window.localStorage.containsKey("${options[_publicKey]!}.$key"),
+      );
 
   @override
   Future<void> delete({
     required String key,
     required Map<String, String> options,
-  }) =>
-      Future.value(
-          html.window.localStorage.remove(options[_PUBLIC_KEY]! + "." + key));
+  }) async {
+    html.window.localStorage.remove("${options[_publicKey]!}.$key");
+  }
 
   @override
   Future<void> deleteAll({
     required Map<String, String> options,
   }) =>
       Future.sync(
-          () => html.window.localStorage.removeWhere((key, value) => true));
+        () => html.window.localStorage.removeWhere((key, value) => true),
+      );
 
   @override
   Future<String?> read({
     required String key,
     required Map<String, String> options,
   }) async {
-    final value = html.window.localStorage[options[_PUBLIC_KEY]! + "." + key];
+    final value = html.window.localStorage["${options[_publicKey]!}.$key"];
 
-    return await _decryptValue(value, options);
+    return _decryptValue(value, options);
   }
 
   @override
@@ -55,7 +56,7 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     required Map<String, String> options,
   }) async {
     final map = <String, String>{};
-    final prefix = options[_PUBLIC_KEY]! + ".";
+    final prefix = "${options[_publicKey]!}.";
     for (int j = 0; j < html.window.localStorage.length; j++) {
       final entry = html.window.localStorage.entries.elementAt(j);
       if (!entry.key.startsWith(prefix)) {
@@ -78,9 +79,11 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
       crypto.Algorithm(name: 'AES-GCM', length: 256, iv: iv);
 
   Future<html.CryptoKey> _getEncryptionKey(
-      crypto.Algorithm algorithm, Map<String, String> options) async {
+    crypto.Algorithm algorithm,
+    Map<String, String> options,
+  ) async {
     late html.CryptoKey encryptionKey;
-    final key = options[_PUBLIC_KEY]!;
+    final key = options[_publicKey]!;
 
     if (html.window.localStorage.containsKey(key)) {
       final jwk = base64Decode(html.window.localStorage[key]!);
@@ -127,9 +130,9 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     );
 
     final encoded =
-        base64Encode(iv) + "." + base64Encode(encryptedContent.asUint8List());
+        "${base64Encode(iv)}.${base64Encode(encryptedContent.asUint8List())}";
 
-    html.window.localStorage[options[_PUBLIC_KEY]! + "." + key] = encoded;
+    html.window.localStorage["${options[_publicKey]!}.$key"] = encoded;
   }
 
   Future<String?> _decryptValue(

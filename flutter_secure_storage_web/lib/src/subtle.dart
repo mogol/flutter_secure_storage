@@ -19,12 +19,11 @@ library common;
 
 import 'dart:convert' show jsonDecode;
 import 'dart:html';
+import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
+import 'package:flutter_secure_storage_web/src/jsonwebkey.dart' show JsonWebKey;
 import 'package:js/js.dart';
-import 'dart:js_util' as js_util;
-
-import 'jsonwebkey.dart' show JsonWebKey;
 
 export 'jsonwebkey.dart' show JsonWebKey;
 
@@ -33,8 +32,13 @@ export 'jsonwebkey.dart' show JsonWebKey;
 /// Convert a promise to a future.
 @JS()
 class Promise<T> {
-  external Promise(void executor(void resolve(T result), Function reject));
-  external Promise then(void onFulfilled(T result), [Function onRejected]);
+  external Promise(
+    void Function(void Function(T result) resolve, Function reject) executor,
+  );
+  external Promise then(
+    void Function(T result) onFulfilled, [
+    Function onRejected,
+  ]);
 }
 
 /// Convert [BigInt] to [Uint8List] formatted as [BigInteger][1] following
@@ -118,7 +122,7 @@ class Algorithm {
 }
 
 JsonWebKey jsonWebKeyFromJs(dynamic obj) {
-  final json = jsonDecode(_stringify(obj));
+  final json = jsonDecode(_stringify(obj)) as Map<String, dynamic>;
   try {
     return JsonWebKey.fromJson(json);
   } on FormatException catch (e) {
