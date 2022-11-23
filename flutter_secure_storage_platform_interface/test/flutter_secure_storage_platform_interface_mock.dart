@@ -15,13 +15,17 @@ class ImplementsFlutterSecureStoragePlatform extends Mock
 
 class ExtendsFlutterSecureStoragePlatform extends FlutterSecureStoragePlatform {
   @override
-  Future<bool> containsKey(
-          {required String key, required Map<String, String> options}) =>
+  Future<bool> containsKey({
+    required String key,
+    required Map<String, String> options,
+  }) =>
       Future.value(true);
 
   @override
-  Future<void> delete(
-          {required String key, required Map<String, String> options}) =>
+  Future<void> delete({
+    required String key,
+    required Map<String, String> options,
+  }) =>
       Future<void>.value();
 
   @override
@@ -29,18 +33,21 @@ class ExtendsFlutterSecureStoragePlatform extends FlutterSecureStoragePlatform {
       Future<void>.value();
 
   @override
-  Future<String?> read(
-          {required String key, required Map<String, String> options}) =>
-      Future<String?>.value(null);
+  Future<String?> read({
+    required String key,
+    required Map<String, String> options,
+  }) =>
+      Future<String?>.value();
 
   @override
   Future<Map<String, String>> readAll({required Map<String, String> options}) =>
       Future.value(<String, String>{});
 
   @override
-  Future<void> write(
-          {required String key,
-          required String value,
-          required Map<String, String> options}) =>
+  Future<void> write({
+    required String key,
+    required String value,
+    required Map<String, String> options,
+  }) =>
       Future<void>.value();
 }

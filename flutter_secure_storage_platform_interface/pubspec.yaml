@@ -13,7 +13,7 @@ dependencies:
   plugin_platform_interface: ^2.0.1
 
 dev_dependencies:
-  flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
+  lint: ^1.10.0
   mockito: ^5.0.12
