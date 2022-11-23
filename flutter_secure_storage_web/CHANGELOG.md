@@ -1,3 +1,6 @@
+## 1.1.1
+Updated flutter_secure_storage_platform_interface to latest version.
+
 ## 1.1.0
 - Migrated from flutter_lints to lint and applied suggestions.
 - Remove pubspec.lock according to https://dart.dev/guides/libraries/private-files#pubspeclock
