@@ -20,33 +20,37 @@ void main() {
       driver.close();
     });
 
-    test('basic operations', () async {
-      await pageObject.hasNoRow(0);
+    test(
+      'basic operations',
+      () async {
+        await pageObject.hasNoRow(0);
 
-      await pageObject.addRandom();
-      await pageObject.hasRow(0);
-      await pageObject.addRandom();
-      await pageObject.hasRow(1);
+        await pageObject.addRandom();
+        await pageObject.hasRow(0);
+        await pageObject.addRandom();
+        await pageObject.hasRow(1);
 
-      await pageObject.editRow('Row 0', 0);
-      await pageObject.editRow('Row 1', 1);
+        await pageObject.editRow('Row 0', 0);
+        await pageObject.editRow('Row 1', 1);
 
-      await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
 
-      await pageObject.rowHasTitle('Row 0', 0);
-      await pageObject.rowHasTitle('Row 1', 1);
+        await pageObject.rowHasTitle('Row 0', 0);
+        await pageObject.rowHasTitle('Row 1', 1);
 
-      await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
 
-      await pageObject.deleteRow(1);
-      await pageObject.hasNoRow(1);
+        await pageObject.deleteRow(1);
+        await pageObject.hasNoRow(1);
 
-      await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
 
-      await pageObject.rowHasTitle('Row 0', 0);
-      await pageObject.deleteRow(0);
-      await pageObject.hasNoRow(0);
-    });
+        await pageObject.rowHasTitle('Row 0', 0);
+        await pageObject.deleteRow(0);
+        await pageObject.hasNoRow(0);
+      },
+      timeout: const Timeout(Duration(seconds: 120)),
+    );
   });
 }
 
