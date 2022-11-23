@@ -9,13 +9,16 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:flutter_secure_storage_web/src/subtle.dart' as crypto;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
+/// Web implementation of FlutterSecureStorage
 class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
   static const _publicKey = 'publicKey';
 
+  /// Registrar for FlutterSecureStorageWeb
   static void registerWith(Registrar registrar) {
     FlutterSecureStoragePlatform.instance = FlutterSecureStorageWeb();
   }
 
+  /// Returns true if the storage contains the given [key].
   @override
   Future<bool> containsKey({
     required String key,
@@ -25,6 +28,9 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
         html.window.localStorage.containsKey("${options[_publicKey]!}.$key"),
       );
 
+  /// Deletes associated value for the given [key].
+  ///
+  /// If the given [key] does not exist, nothing will happen.
   @override
   Future<void> delete({
     required String key,
@@ -33,6 +39,7 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     html.window.localStorage.remove("${options[_publicKey]!}.$key");
   }
 
+  /// Deletes all keys with associated values.
   @override
   Future<void> deleteAll({
     required Map<String, String> options,
@@ -41,6 +48,10 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
         () => html.window.localStorage.removeWhere((key, value) => true),
       );
 
+  /// Encrypts and saves the [key] with the given [value].
+  ///
+  /// If the key was already in the storage, its associated value is changed.
+  /// If the value is null, deletes associated value for the given [key].
   @override
   Future<String?> read({
     required String key,
@@ -51,6 +62,7 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     return _decryptValue(value, options);
   }
 
+  /// Decrypts and returns all keys with associated values.
   @override
   Future<Map<String, String>> readAll({
     required Map<String, String> options,
@@ -106,6 +118,10 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     return encryptionKey;
   }
 
+  /// Encrypts and saves the [key] with the given [value].
+  ///
+  /// If the key was already in the storage, its associated value is changed.
+  /// If the value is null, deletes associated value for the given [key].
   @override
   Future<void> write({
     required String key,
