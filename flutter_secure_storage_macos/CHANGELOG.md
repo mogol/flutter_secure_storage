@@ -1,3 +1,6 @@
+## 1.1.2
+Updated flutter_secure_storage_platform_interface to latest version.
+
 ## 1.1.1
 Fixes a memory leak in the keychain
 
