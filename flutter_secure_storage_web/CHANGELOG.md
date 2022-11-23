@@ -1,12 +1,13 @@
-## 1.0.2
+## 1.1.0
+- Migrated from flutter_lints to lint and applied suggestions.
+- Remove pubspec.lock according to https://dart.dev/guides/libraries/private-files#pubspeclock
 
+## 1.0.2
 - Fix issue with delete key
 
 ## 1.0.1
-
 - Fix issue with containsKey
 
 ## 1.0.0
-
 - Initial Release of Web Implementation
 - Migrated to flutter_lints
