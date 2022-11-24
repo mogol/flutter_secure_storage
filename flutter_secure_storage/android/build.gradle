@@ -12,7 +12,7 @@ buildscript {
     }
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
@@ -31,13 +31,8 @@ android {
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 33
-        versionCode 6
-        versionName "3.3.1"
     }
-    lintOptions {
-        disable 'InvalidPackage'
-    }
+    
 }
 
 dependencies {

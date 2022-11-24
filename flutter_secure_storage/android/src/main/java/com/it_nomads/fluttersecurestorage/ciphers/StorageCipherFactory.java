@@ -64,7 +64,6 @@ public class StorageCipherFactory {
         currentStorageAlgorithm = (currentStorageAlgorithmTmp.minVersionCode <= Build.VERSION.SDK_INT) ? currentStorageAlgorithmTmp : DEFAULT_STORAGE_ALGORITHM;
     }
 
-
     private String getFromOptionsWithDefault(Map<String, Object> options, String key, String defaultValue) {
         final Object value = options.get(key);
         return value != null ? value.toString() : defaultValue;
