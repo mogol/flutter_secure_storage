@@ -1,3 +1,7 @@
+## 6.1.0
+* (From beta release)[iOS] Migrated from objective C to Swift. This also fixes issues with constainsKey and possibly other issues.
+* [Android] Upgrade security-crypto from 1.1.0-alpha03 to 1.1.0-alpha04
+
 ## 6.1.0-beta.1
 * [iOS] Migrated from objective C to Swift. This also fixes issues with constainsKey and possibly other issues.
 
