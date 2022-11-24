@@ -1,6 +1,5 @@
 package com.it_nomads.fluttersecurestorage.ciphers;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -120,26 +119,8 @@ class RSACipher18Implementation implements KeyCipher {
     private void setLocale(Locale locale) {
         Locale.setDefault(locale);
         Configuration config = context.getResources().getConfiguration();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            setSystemLocale(config, locale);
-            context.createConfigurationContext(config);
-        } else {
-            setSystemLocaleLegacy(config, locale);
-            setContextConfigurationLegacy(context, config);
-        }
-    }
-
-    private void setContextConfigurationLegacy(Context context, Configuration config) {
-        context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
-    }
-
-    private void setSystemLocaleLegacy(Configuration config, Locale locale) {
-        config.locale = locale;
-    }
-
-    @TargetApi(Build.VERSION_CODES.N)
-    private void setSystemLocale(Configuration config, Locale locale) {
         config.setLocale(locale);
+        context.createConfigurationContext(config);
     }
 
     private void createKeys(Context context) throws Exception {
@@ -167,6 +148,8 @@ class RSACipher18Implementation implements KeyCipher {
         }
     }
 
+    // Flutter gives deprecation warning without suppress
+    @SuppressWarnings("deprecation")
     private AlgorithmParameterSpec makeAlgorithmParameterSpecLegacy(Context context, Calendar start, Calendar end) {
         return new android.security.KeyPairGeneratorSpec.Builder(context)
                 .setAlias(keyAlias)

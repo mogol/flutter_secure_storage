@@ -3,10 +3,6 @@ on: [pull_request]
 jobs:
   drive_android:
       runs-on: macos-latest
-      strategy:
-        matrix:
-          api-level: [33]
-          target: [google_apis]
       steps:
         - uses: actions/checkout@v3
         - uses: subosito/flutter-action@v2.8.0
@@ -14,11 +10,19 @@ jobs:
           with:
             distribution: 'temurin'
             java-version: '11'
-        - name: "Run Flutter Driver tests"
+        - name: "Run Flutter Driver tests API 18"
           uses: reactivecircus/android-emulator-runner@v2
           with:
-            api-level: ${{ matrix.api-level }}
-            target: ${{ matrix.target }}
+            api-level: 18
+            target: default
+            arch: x86
+            script: "cd example && flutter drive --target=test_driver/app.dart"
+            working-directory: ./flutter_secure_storage
+        - name: "Run Flutter Driver tests API 33"
+          uses: reactivecircus/android-emulator-runner@v2
+          with:
+            api-level: 33
+            target: google_apis
             arch: x86_64
             script: "cd example && flutter drive --target=test_driver/app.dart"
             working-directory: ./flutter_secure_storage
