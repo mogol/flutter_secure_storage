@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <regex>
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
@@ -95,6 +96,12 @@ namespace
   // this string is used to filter the credential storage so that only the values written
   // by this plugin shows up.
   const CA2W CREDENTIAL_FILTER((ELEMENT_PREFERENCES_KEY_PREFIX + '*').c_str());
+
+  static inline void rtrim(std::wstring& s) {
+      s.erase(std::find_if(s.rbegin(), s.rend(), [](wchar_t ch) {
+          return !std::isspace(ch);
+          }).base(), s.end());
+  }
 
   // static
   void FlutterSecureStorageWindowsPlugin::RegisterWithRegistrar(
@@ -205,10 +212,10 @@ namespace
           else {
 
               if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\CompanyName"), &queryVal, &queryLen) != 0) {
-                  companyName = std::wstring((const TCHAR*)queryVal);
+                  companyName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
               }
               if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\ProductName"), &queryVal, &queryLen) != 0) {
-                  productName = std::wstring((const TCHAR*)queryVal);
+                  productName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
               }
           }
           stream << appdataPath << "\\" << companyName << "\\" << productName;
@@ -223,7 +230,10 @@ namespace
 
   std::wstring FlutterSecureStorageWindowsPlugin::SanitizeDirString(std::wstring string)
   {
-      return std::wstring();
+      std::wstring sanitizedString = std::regex_replace(string,std::wregex(L"[<>:\"/\\\\|?*]"),L"_");
+      rtrim(sanitizedString);
+      sanitizedString = std::regex_replace(sanitizedString, std::wregex(L"[.]+$"), L"");
+      return sanitizedString;
   }
 
   bool FlutterSecureStorageWindowsPlugin::PathExists(const std::wstring& path)
@@ -728,8 +738,7 @@ namespace
               creds[key] = val.value();
               continue;
           }
-          wprintf(L"**error no data\n");
-
+          //Delete file if we can't read it? 
       } while (FindNextFile(hFile, &searchRes) != 0);
 
       return creds;
