@@ -214,22 +214,29 @@ class ItemsWidgetState extends State<ItemsWidget> {
     }
   }
 
-  Future<String> _displayTextInputDialog(BuildContext context, String key) async {
+  Future<String> _displayTextInputDialog(
+    BuildContext context,
+    String key,
+  ) async {
     final controller = TextEditingController();
     controller.text = key;
     await showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Check if key exists'),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('OK'))
-            ],
-            content: TextField(
-              controller: controller,
-            ),
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Check if key exists'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            )
+          ],
+          content: TextField(
+            controller: controller,
+          ),
+        );
+      },
+    );
     return controller.text;
   }
 
