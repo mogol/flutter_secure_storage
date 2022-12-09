@@ -1,3 +1,11 @@
+## 7.0.0
+Breaking changes:
+* [macOS] The minimum macOS version supported is now 10.13.
+
+Other changes:
+* [Android] Fixed double initialization of the SharedPreferences which caused containsKey and other functions to not work properly.
+* [macOS] Upgraded codebase to swift which fixed containsKey always returning true.
+
 ## 6.1.0
 * [iOS] (From 6.1.0-beta.1) Migrated from objective C to Swift. This also fixes issues with constainsKey and possibly other issues.
 * [Android] Upgrade security-crypto from 1.1.0-alpha03 to 1.1.0-alpha04
