@@ -17,4 +17,4 @@ flutter:
     implements: flutter_secure_storage
     platforms:
       macos:
-        pluginClass: FlutterSecureStorageMacosPlugin
+        pluginClass: FlutterSecureStoragePlugin
