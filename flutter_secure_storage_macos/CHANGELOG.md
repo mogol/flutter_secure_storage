@@ -1,3 +1,6 @@
+## 2.0.1
+Fixed build error.
+
 ## 2.0.0
 - Changed minimum macOS version from 10.11 to 10.13 to mach min Flutter version.
 - Upgraded codebase to swift
