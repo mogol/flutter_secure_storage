@@ -125,7 +125,8 @@ public class FlutterSecureStorage {
     @SuppressWarnings({"ConstantConditions"})
     private void ensureInitialized() {
         // Check if already initialized.
-        if (preferences != null) return;
+        // TODO: Disable for now because this will break mixed usage of secureSharedPreference
+//        if (preferences != null) return;
 
         if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
             SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");

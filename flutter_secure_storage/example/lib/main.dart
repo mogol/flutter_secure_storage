@@ -19,7 +19,7 @@ class ItemsWidget extends StatefulWidget {
 
 enum _Actions { deleteAll }
 
-enum _ItemActions { delete, edit, containsKey }
+enum _ItemActions { delete, edit, containsKey, read }
 
 class ItemsWidgetState extends State<ItemsWidget> {
   final _storage = const FlutterSecureStorage();
@@ -153,6 +153,13 @@ class ItemsWidgetState extends State<ItemsWidget> {
                           key: Key('contains_row_$index'),
                         ),
                       ),
+                          PopupMenuItem(
+                            value: _ItemActions.read,
+                            child: Text(
+                              'Read',
+                              key: Key('contains_row_$index'),
+                            ),
+                          ),
                     ],
                   ),
                   title: Text(
@@ -208,6 +215,16 @@ class ItemsWidgetState extends State<ItemsWidget> {
           SnackBar(
             content: Text('Contains Key: $result, key checked: $key'),
             backgroundColor: result ? Colors.green : Colors.red,
+          ),
+        );
+        break;
+      case _ItemActions.read:
+        final key = await _displayTextInputDialog(context, item.key);
+        final result = await _storage.read(key: key, aOptions: _getAndroidOptions());
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('value: $result'),
           ),
         );
         break;

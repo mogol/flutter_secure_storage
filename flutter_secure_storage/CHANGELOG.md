@@ -1,3 +1,6 @@
+## 7.0.1
+[Android] Reverted double initialization of the SharedPreferences because this will break mixed usage of secureSharedPreference on Android.
+
 ## 7.0.0
 Breaking changes:
 * [macOS] The minimum macOS version supported is now 10.13.
