@@ -3,6 +3,9 @@
 #include <libsecret/secret.h>
 #include <memory>
 
+#define secret_autofree _GLIB_CLEANUP(secret_cleanup_free)
+static inline void secret_cleanup_free(gchar **p) { secret_password_free(*p); }
+
 class SecretStorage {
   FHashTable m_attributes;
   std::string label;
@@ -52,17 +55,16 @@ public:
   bool storeToKeyring(Json::Value value) {
     Json::StreamWriterBuilder builder;
     const std::string output = Json::writeString(builder, value);
-    std::unique_ptr<GError> err = nullptr;
-    GError *errPtr = err.get();
+    g_autoptr(GError) err = nullptr;
 
     builder["indentation"] = "";
 
     bool result = secret_password_storev_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
-        output.c_str(), nullptr, &errPtr);
+        output.c_str(), nullptr, &err);
 
-    if (errPtr) {
-      throw errPtr->message;
+    if (err) {
+      throw err->message;
     }
 
     return result;
@@ -72,14 +74,13 @@ public:
     Json::Value root;
     Json::CharReaderBuilder charBuilder;
     std::unique_ptr<Json::CharReader> reader(charBuilder.newCharReader());
-    std::unique_ptr<GError> err = nullptr;
-    GError *errPtr = err.get();
+    g_autoptr(GError) err = nullptr;
 
-    const gchar *result = secret_password_lookupv_sync(
-        &the_schema, m_attributes.getGHashTable(), nullptr, &errPtr);
+    secret_autofree gchar *result = secret_password_lookupv_sync(
+        &the_schema, m_attributes.getGHashTable(), nullptr, &err);
 
-    if (errPtr) {
-      throw errPtr->message;
+    if (err) {
+      throw err->message;
     }
 
     if (result != nullptr && strcmp(result, "") != 0 &&

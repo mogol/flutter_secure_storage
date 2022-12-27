@@ -44,8 +44,8 @@ FlValue *readAll()
   Json::Value data = keyring.readFromKeyring();
   for (auto each : data.getMemberNames())
   {
-    fl_value_set_string(result, each.c_str(),
-                        fl_value_new_string(data[each].asCString()));
+    fl_value_set_string_take(result, each.c_str(),
+                             fl_value_new_string(data[each].asCString()));
   }
   return result;
 }
@@ -109,8 +109,9 @@ static void flutter_secure_storage_linux_plugin_handle_method_call(
       }
       else if (strcmp(method, "readAll") == 0)
       {
+        g_autoptr(FlValue) result = readAll();
         response =
-            FL_METHOD_RESPONSE(fl_method_success_response_new(readAll()));
+            FL_METHOD_RESPONSE(fl_method_success_response_new(result));
       }
       else if (strcmp(method, "delete") == 0)
       {
@@ -188,9 +189,9 @@ void flutter_secure_storage_linux_plugin_register_with_registrar(
       "plugins.it_nomads.com/flutter_secure_storage", FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(
       channel, method_call_cb, g_object_ref(plugin), g_object_unref);
-  const gchar *label =
+  g_autofree gchar *label =
       g_strdup_printf("%s/FlutterSecureStorage", APPLICATION_ID);
-  const gchar *account = g_strdup_printf("%s.secureStorage", APPLICATION_ID);
+  g_autofree gchar *account = g_strdup_printf("%s.secureStorage", APPLICATION_ID);
   keyring.setLabel(label);
   keyring.addAttribute("account", account);
   g_object_unref(plugin);
