@@ -153,13 +153,13 @@ class ItemsWidgetState extends State<ItemsWidget> {
                           key: Key('contains_row_$index'),
                         ),
                       ),
-                          PopupMenuItem(
-                            value: _ItemActions.read,
-                            child: Text(
-                              'Read',
-                              key: Key('contains_row_$index'),
-                            ),
-                          ),
+                      PopupMenuItem(
+                        value: _ItemActions.read,
+                        child: Text(
+                          'Read',
+                          key: Key('contains_row_$index'),
+                        ),
+                      ),
                     ],
                   ),
                   title: Text(
@@ -220,7 +220,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
         break;
       case _ItemActions.read:
         final key = await _displayTextInputDialog(context, item.key);
-        final result = await _storage.read(key: key, aOptions: _getAndroidOptions());
+        final result =
+            await _storage.read(key: key, aOptions: _getAndroidOptions());
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
