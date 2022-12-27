@@ -115,7 +115,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "7.0.0"
+    version: "7.0.1"
   flutter_secure_storage_linux:
     dependency: "direct overridden"
     description:
