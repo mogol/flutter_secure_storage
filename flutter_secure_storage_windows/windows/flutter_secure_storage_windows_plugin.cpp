@@ -285,7 +285,7 @@ namespace
 
       bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
       if (ok) {
-          memcpy(AesKey, pcred->CredentialBlob, keySize);
+          memcpy(AesKey, pcred->CredentialBlob, pcred->CredentialBlobSize);
           CredFree(pcred);
           return AesKey;
       }
