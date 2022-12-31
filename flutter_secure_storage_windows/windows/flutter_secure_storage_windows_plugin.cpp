@@ -272,19 +272,20 @@ namespace
 
   PBYTE FlutterSecureStorageWindowsPlugin::GetEncryptionKey()
   {
+      const size_t keySize = 16;
       DWORD credError = 0;
       PBYTE AesKey;
       PCREDENTIALW pcred;
       CA2W target_name(("key_"+ELEMENT_PREFERENCES_KEY_PREFIX).c_str());
 
-      AesKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, 16);
+      AesKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, keySize);
       if (NULL == AesKey) {
           return NULL;
       }
 
       bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
       if (ok) {
-          memcpy(AesKey, pcred->CredentialBlob, 16);
+          memcpy(AesKey, pcred->CredentialBlob, keySize);
           CredFree(pcred);
           return AesKey;
       }
@@ -293,13 +294,13 @@ namespace
           return NULL;
       }
       
-      if (BCryptGenRandom(NULL, AesKey, sizeof(AesKey), BCRYPT_USE_SYSTEM_PREFERRED_RNG) != ERROR_SUCCESS) {
+      if (BCryptGenRandom(NULL, AesKey, keySize, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != ERROR_SUCCESS) {
           return NULL;
       }
       CREDENTIALW cred = { 0 };
       cred.Type = CRED_TYPE_GENERIC;
       cred.TargetName = target_name.m_psz;
-      cred.CredentialBlobSize = sizeof(AesKey);
+      cred.CredentialBlobSize = keySize;
       cred.CredentialBlob = AesKey;
       cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
       ok = CredWriteW(&cred, 0);
@@ -307,13 +308,7 @@ namespace
           std::cerr << "Failed to write encryption key" << std::endl;
           return NULL;
       }
-      ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
-      if (ok) {
-          memcpy(AesKey, pcred->CredentialBlob, 16);
-          CredFree(pcred);
-          return AesKey;
-      }
-      return NULL;
+      return AesKey;
   }
 
   void FlutterSecureStorageWindowsPlugin::HandleMethodCall(
