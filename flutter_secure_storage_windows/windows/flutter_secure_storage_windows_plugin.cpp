@@ -489,7 +489,7 @@ namespace
       if (!PathExists(appSupportPath)) {
           MakePath(appSupportPath);
       }
-      fs = std::basic_ofstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary);
+      fs = std::basic_ofstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary|std::ios::trunc);
       fs.write(IVr, IVSize);
       fs.write(ciphertext, ciphertextSize);
       fs.close();
