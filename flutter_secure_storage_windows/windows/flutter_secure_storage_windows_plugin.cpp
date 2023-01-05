@@ -65,6 +65,8 @@ namespace
 
     // Gets the string name for the given int error code
     std::string GetErrorString(const DWORD &error_code);
+    // Get string name of ntstatus
+    std::string NtStatusToString(const CHAR* operation, NTSTATUS status);
 
     DWORD GetApplicationSupportPath(std::wstring& path);
 
@@ -175,6 +177,32 @@ namespace
     }
   }
 
+  std::string FlutterSecureStorageWindowsPlugin::NtStatusToString(const CHAR* operation, NTSTATUS status)
+  {
+      std::ostringstream oss;
+      oss << operation << ", 0x" << std::hex << status;
+
+      switch (status)
+      {
+      case 0xc0000000:
+          oss << " (STATUS_SUCCESS)";
+          break;
+      case 0xC0000008:
+          oss << " (STATUS_INVALID_HANDLE)";
+          break;
+      case 0xc000000d:
+          oss << " (STATUS_INVALID_PARAMETER)";
+          break;
+      case 0xc00000bb:
+          oss << " (STATUS_NOT_SUPPORTED)";
+          break;
+      case 0xC0000225:
+          oss << " (STATUS_NOT_FOUND)";
+          break;
+      }
+      return oss.str();
+  }
+
   DWORD FlutterSecureStorageWindowsPlugin::GetApplicationSupportPath(std::wstring &path)
   {
       std::wstring companyName;
@@ -272,20 +300,25 @@ namespace
 
   PBYTE FlutterSecureStorageWindowsPlugin::GetEncryptionKey()
   {
-      const size_t keySize = 16;
+      const size_t KEY_SIZE = 16;
       DWORD credError = 0;
       PBYTE AesKey;
       PCREDENTIALW pcred;
-      CA2W target_name(("key_"+ELEMENT_PREFERENCES_KEY_PREFIX).c_str());
+      CA2W target_name(("key_" + ELEMENT_PREFERENCES_KEY_PREFIX).c_str());
 
-      AesKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, keySize);
+      AesKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, KEY_SIZE);
       if (NULL == AesKey) {
           return NULL;
       }
 
       bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
       if (ok) {
-          memcpy(AesKey, pcred->CredentialBlob, pcred->CredentialBlobSize);
+          if (pcred->CredentialBlobSize != KEY_SIZE) {
+              CredFree(pcred);
+              CredDeleteW(target_name.m_psz, CRED_TYPE_GENERIC, 0);
+              goto NewKey;
+          }
+          memcpy(AesKey, pcred->CredentialBlob, KEY_SIZE);
           CredFree(pcred);
           return AesKey;
       }
@@ -293,16 +326,17 @@ namespace
       if (credError != ERROR_NOT_FOUND) {
           return NULL;
       }
-      
-      if (BCryptGenRandom(NULL, AesKey, keySize, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != ERROR_SUCCESS) {
+  NewKey:
+      if (BCryptGenRandom(NULL, AesKey, KEY_SIZE, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != ERROR_SUCCESS) {
           return NULL;
       }
       CREDENTIALW cred = { 0 };
       cred.Type = CRED_TYPE_GENERIC;
       cred.TargetName = target_name.m_psz;
-      cred.CredentialBlobSize = keySize;
+      cred.CredentialBlobSize = KEY_SIZE;
       cred.CredentialBlob = AesKey;
       cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
+
       ok = CredWriteW(&cred, 0);
       if (!ok) {
           std::cerr << "Failed to write encryption key" << std::endl;
@@ -407,117 +441,130 @@ namespace
 
   void FlutterSecureStorageWindowsPlugin::Write(const std::string &key, const std::string &val)
   {
-      BCRYPT_ALG_HANDLE algoHandle = NULL;
+      //The recommended size for AES-GCM IV is 12 bytes
+      const DWORD NONCE_SIZE = 12;
+      const DWORD KEY_SIZE = 16;
+
+      NTSTATUS status;
+      BCRYPT_ALG_HANDLE algo = NULL;
       BCRYPT_KEY_HANDLE keyHandle = NULL;
-      NTSTATUS status = STATUS_UNSUCCESSFUL;
-      DWORD sizeData = 0,
-          encryptionKeySize = 0,
-          IVSize = 0,
-          ciphertextSize = 0,
-          rawKeySize = 16,
-          plaintextSize = (DWORD)val.size();
-      PBYTE encryptionKey = NULL,
-          plaintext = NULL,
-          IV = NULL,
-          IVr = NULL,
-          ciphertext = NULL,
-          rawKey = GetEncryptionKey();
-
-      std::wstring appSupportPath;
+      DWORD bytesWritten = 0,
+          ciphertextSize = 0;
+      PBYTE ciphertext = NULL,
+          iv = (PBYTE)HeapAlloc(GetProcessHeap(), 0, NONCE_SIZE),
+          encryptionKey = GetEncryptionKey();
+      BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO authInfo{};
+      BCRYPT_AUTH_TAG_LENGTHS_STRUCT authTagLengths{};
       std::basic_ofstream<BYTE> fs;
+      std::wstring appSupportPath;
+      std::string error;
 
-      if (!NT_SUCCESS(status = BCryptOpenAlgorithmProvider(&algoHandle, BCRYPT_AES_ALGORITHM, NULL, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptOpenAlgorithmProvider\n", status);
-          goto Cleanup;
+      if (iv == NULL) {
+          error = "IV HeapAlloc Failed";
+          goto err;
       }
-      if (!NT_SUCCESS(status = BCryptGetProperty(algoHandle, BCRYPT_OBJECT_LENGTH, (PBYTE)&encryptionKeySize, sizeof(DWORD), &sizeData, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
-          goto Cleanup;
+      if (encryptionKey == NULL) {
+          error = "encryptionKey is NULL";
+          goto err;
       }
-      encryptionKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, encryptionKeySize);
-      if (NULL == encryptionKey) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      status = BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, NULL, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptOpenAlgorithmProvider", status);
+          goto err;
       }
-      if (!NT_SUCCESS(status = BCryptGetProperty(algoHandle, BCRYPT_BLOCK_LENGTH, (PBYTE)&IVSize, sizeof(DWORD), &sizeData, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
-          goto Cleanup;
+      status = BCryptSetProperty(algo, BCRYPT_CHAINING_MODE, (PUCHAR)BCRYPT_CHAIN_MODE_GCM, sizeof(BCRYPT_CHAIN_MODE_GCM), 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptSetProperty", status);
+          goto err;
       }
-      IV = (PBYTE)HeapAlloc(GetProcessHeap(), 0, IVSize);
-      if (NULL == IV) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      status = BCryptGetProperty(algo, BCRYPT_AUTH_TAG_LENGTH, (PBYTE)&authTagLengths, sizeof(BCRYPT_AUTH_TAG_LENGTHS_STRUCT), &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptGetProperty", status);
+          goto err;
       }
-      IVr = (PBYTE)HeapAlloc(GetProcessHeap(), 0, IVSize);
-      if (NULL == IVr) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      BCRYPT_INIT_AUTH_MODE_INFO(authInfo);
+      authInfo.pbNonce = (PUCHAR)HeapAlloc(GetProcessHeap(), 0, NONCE_SIZE);
+      if (authInfo.pbNonce == NULL) {
+          error = "pbNonce HeapAlloc Failed";
+          goto err;
       }
-      if (!NT_SUCCESS(status = BCryptGenRandom(NULL, IVr, IVSize, BCRYPT_USE_SYSTEM_PREFERRED_RNG))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGenRandom\n", status);
-          goto Cleanup;
+      authInfo.cbNonce = NONCE_SIZE;
+      status = BCryptGenRandom(NULL, iv, authInfo.cbNonce, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptGenRandom", status);
+          goto err;
       }
-      memcpy(IV, IVr, IVSize);
-      if (!NT_SUCCESS(status = BCryptSetProperty(algoHandle, BCRYPT_CHAINING_MODE, (PBYTE)BCRYPT_CHAIN_MODE_CBC, sizeof(BCRYPT_CHAIN_MODE_CBC), 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptSetProperty\n", status);
-          goto Cleanup;
+      //copy the original IV into the authInfo, we can't write the IV directly into the authInfo because it will change after calling BCryptEncrypt and we still need to write the IV to file
+      memcpy(authInfo.pbNonce, iv, authInfo.cbNonce);
+      //We do not use additional authenticated data
+      authInfo.pbAuthData = NULL;
+      authInfo.cbAuthData = 0;
+      //Make space for the authentication tag
+      authInfo.pbTag = (PUCHAR)HeapAlloc(GetProcessHeap(), 0, authTagLengths.dwMaxLength);
+      if (authInfo.pbTag == NULL) {
+          error = "pbTag HeapAlloc Failed";
+          goto err;
       }
-      if (!NT_SUCCESS(status = BCryptGenerateSymmetricKey(algoHandle, &keyHandle, encryptionKey, encryptionKeySize, rawKey, rawKeySize, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGenerateSymmetricKey\n", status);
-          goto Cleanup;
+      authInfo.cbTag = authTagLengths.dwMaxLength;
+      status = BCryptGenerateSymmetricKey(algo, &keyHandle, NULL, 0, encryptionKey, KEY_SIZE, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptGenerateSymmetricKey", status);
+          goto err;
       }
-      plaintext = (PBYTE)HeapAlloc(GetProcessHeap(), 0, plaintextSize);
-      if (NULL == plaintext) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      //First call to BCryptEncrypt to get size of ciphertext
+      status = BCryptEncrypt(keyHandle, (PUCHAR)val.c_str(), (ULONG)val.length() + 1, (PVOID)&authInfo, NULL, 0, NULL, 0, &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptEncrypt1", status);
+          goto err;
       }
-      memcpy(plaintext, val.c_str(), plaintextSize);
-      if (!NT_SUCCESS(status = BCryptEncrypt(keyHandle, plaintext, plaintextSize, NULL, IV, IVSize, NULL, 0, &ciphertextSize, BCRYPT_BLOCK_PADDING))) {
-          wprintf(L"**** Error 0x%x returned by BCryptEncrypt\n", status);
-          goto Cleanup;
-      }
+      ciphertextSize = bytesWritten;
       ciphertext = (PBYTE)HeapAlloc(GetProcessHeap(), 0, ciphertextSize);
-      if (NULL == ciphertext) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      if (ciphertext == NULL) {
+          error = "CipherText HeapAlloc failed";
+          goto err;
       }
-      if (!NT_SUCCESS(status = BCryptEncrypt(keyHandle, plaintext, plaintextSize, NULL, IV, IVSize, ciphertext, ciphertextSize, &sizeData, BCRYPT_BLOCK_PADDING))) {
-          wprintf(L"**** Error 0x%x returned by BCryptEncrypt\n", status);
-          goto Cleanup;
+      //Actual encryption
+      status = BCryptEncrypt(keyHandle, (PUCHAR)val.c_str(), (ULONG)val.length() + 1, (PVOID)&authInfo, NULL, 0, ciphertext, ciphertextSize, &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          error = NtStatusToString("BCryptEncrypt2", status);
+          goto err;
       }
       GetApplicationSupportPath(appSupportPath);
       if (!PathExists(appSupportPath)) {
           MakePath(appSupportPath);
       }
-      fs = std::basic_ofstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary|std::ios::trunc);
-      fs.write(IVr, IVSize);
+      fs = std::basic_ofstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary | std::ios::trunc);
+      if (!fs) {
+          error = "Failed to open output stream";
+          goto err;
+      }
+      fs.write(iv, NONCE_SIZE);
+      fs.write(authInfo.pbTag, authInfo.cbTag);
       fs.write(ciphertext, ciphertextSize);
       fs.close();
-  Cleanup:
-      if (algoHandle) {
-          BCryptCloseAlgorithmProvider(algoHandle, 0);
-      }
-      if (keyHandle) {
-          BCryptDestroyKey(keyHandle);
+      HeapFree(GetProcessHeap(), 0, iv);
+      HeapFree(GetProcessHeap(), 0, encryptionKey);
+      HeapFree(GetProcessHeap(), 0, authInfo.pbNonce);
+      HeapFree(GetProcessHeap(), 0, authInfo.pbTag);
+      HeapFree(GetProcessHeap(), 0, ciphertext);
+      return;
+  err:
+      if (iv) {
+          HeapFree(GetProcessHeap(), 0, iv);
       }
       if (encryptionKey) {
           HeapFree(GetProcessHeap(), 0, encryptionKey);
       }
+      if (authInfo.pbNonce) {
+          HeapFree(GetProcessHeap(), 0, authInfo.pbNonce);
+      }
+      if (authInfo.pbTag) {
+          HeapFree(GetProcessHeap(), 0, authInfo.pbTag);
+      }
       if (ciphertext) {
           HeapFree(GetProcessHeap(), 0, ciphertext);
       }
-      if (plaintext) {
-          HeapFree(GetProcessHeap(), 0, plaintext);
-      }
-      if (IV) {
-          HeapFree(GetProcessHeap(), 0, IV);
-      }
-      if (IVr) {
-          HeapFree(GetProcessHeap(), 0, IVr);
-      }
-      if (rawKey) {
-          HeapFree(GetProcessHeap(), 0, rawKey);
-      }
+      throw std::runtime_error(error);
     /*size_t len = 1 + strlen(val.c_str());
     CA2W keyw(key.c_str());
 
@@ -537,27 +584,31 @@ namespace
 
   std::optional<std::string> FlutterSecureStorageWindowsPlugin::Read(const std::string &key)
   {
-      BCRYPT_ALG_HANDLE algoHandle = NULL;
-      BCRYPT_KEY_HANDLE keyHandle = NULL;
-      NTSTATUS status = STATUS_UNSUCCESSFUL;
-      DWORD ciphertextSize = 0,
-          plaintextSize = 0,
-          encryptionKeySize = 0,
-          IVSize = 0,
-          sizeData = 0,
-          rawKeySize = 16;
-      PBYTE ciphertext = NULL,
-          plaintext = NULL,
-          encryptionKey = NULL,
-          IV = NULL,
-          rawKey = NULL;
+      const DWORD NONCE_SIZE = 12;
+      const DWORD KEY_SIZE = 16;
 
+      NTSTATUS status;
+      BCRYPT_ALG_HANDLE algo = NULL;
+      BCRYPT_KEY_HANDLE keyHandle = NULL;
+      BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO authInfo{};
+      BCRYPT_AUTH_TAG_LENGTHS_STRUCT authTagLengths{};
+
+      PBYTE encryptionKey = GetEncryptionKey(),
+          ciphertext = NULL,
+          fileBuffer = NULL,
+          plaintext = NULL;
+      DWORD plaintextSize = 0,
+          bytesWritten = 0,
+          ciphertextSize = 0;
       std::wstring appSupportPath;
       std::basic_ifstream<BYTE> fs;
-      PBYTE fileBuffer;
       std::streampos fileSize;
       std::optional<std::string> returnVal = std::nullopt;
 
+      if (encryptionKey == NULL) {
+          std::cerr << "encryptionKey is NULL" << std::endl;
+          goto cleanup;
+      }
       GetApplicationSupportPath(appSupportPath);
       if (!PathExists(appSupportPath)) {
           MakePath(appSupportPath);
@@ -566,7 +617,8 @@ namespace
       fs = std::basic_ifstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary);
       if (!fs.good()) {
           //TODO add backwards comp.
-          goto Cleanup;
+          std::cerr << "Filestream is bad" << std::endl;
+          goto cleanup;
       }
       fs.unsetf(std::ios::skipws);
       fs.seekg(0, std::ios::end);
@@ -574,103 +626,102 @@ namespace
       fs.seekg(0, std::ios::beg);
       fileBuffer = (PBYTE)HeapAlloc(GetProcessHeap(), 0, fileSize);
       if (NULL == fileBuffer) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+          std::cerr << "fileBuffer HeapAlloc failed" << std::endl;
+          goto cleanup;
       }
       fs.read(fileBuffer, fileSize);
       fs.close();
 
-      rawKey = GetEncryptionKey();
-      if (!NT_SUCCESS(status = BCryptOpenAlgorithmProvider(&algoHandle, BCRYPT_AES_ALGORITHM, NULL, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptOpenAlgorithmProvider\n", status);
-          goto Cleanup;
+      status = BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, NULL, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptOpenAlgorithmProvider", status) << std::endl;
+          goto cleanup;
       }
-      if (!NT_SUCCESS(status = BCryptGetProperty(algoHandle, BCRYPT_OBJECT_LENGTH, (PBYTE)&encryptionKeySize, sizeof(DWORD), &sizeData, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
-          goto Cleanup;
+      status = BCryptSetProperty(algo, BCRYPT_CHAINING_MODE, (PUCHAR)BCRYPT_CHAIN_MODE_GCM, sizeof(BCRYPT_CHAIN_MODE_GCM), 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptOpenAlgorithmProvider", status) << std::endl;
+          goto cleanup;
       }
-      encryptionKey = (PBYTE)HeapAlloc(GetProcessHeap(), 0, encryptionKeySize);
-      if (NULL == encryptionKey) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      status = BCryptGetProperty(algo, BCRYPT_AUTH_TAG_LENGTH, (PBYTE)&authTagLengths, sizeof(BCRYPT_AUTH_TAG_LENGTHS_STRUCT), &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptGetProperty", status) << std::endl;
+          goto cleanup;
       }
-      if (!NT_SUCCESS(status = BCryptGetProperty(algoHandle, BCRYPT_BLOCK_LENGTH, (PBYTE)&IVSize, sizeof(DWORD), &sizeData, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGetProperty\n", status);
-          goto Cleanup;
+
+      BCRYPT_INIT_AUTH_MODE_INFO(authInfo);
+      authInfo.pbNonce = (PUCHAR)HeapAlloc(GetProcessHeap(), 0, NONCE_SIZE);
+      if (authInfo.pbNonce == NULL) {
+          std::cerr << "pbNonce HeapAlloc Failed" << std::endl;
+          goto cleanup;
       }
-      IV = (PBYTE)HeapAlloc(GetProcessHeap(), 0, IVSize);
-      if (NULL == IV) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      authInfo.cbNonce = NONCE_SIZE;
+      //Check if file is at least long enough for iv and authentication tag
+      if (fileSize <= static_cast<long long>(NONCE_SIZE) + authTagLengths.dwMaxLength) {
+          std::cerr << "File is too small" << std::endl;
+          goto cleanup;
       }
-      if (IVSize > fileSize) {
-          wprintf(L"**** invalid fileSize\n");
-          goto Cleanup;
+      authInfo.pbTag = (PUCHAR)HeapAlloc(GetProcessHeap(), 0, authTagLengths.dwMaxLength);
+      if (authInfo.pbTag == NULL) {
+          std::cerr << "pbTag HeapAlloc Failed" << std::endl;
+          goto cleanup;
       }
-      memcpy(IV, fileBuffer, IVSize);
-      if (!NT_SUCCESS(status = BCryptSetProperty(algoHandle, BCRYPT_CHAINING_MODE, (PBYTE)BCRYPT_CHAIN_MODE_CBC, sizeof(BCRYPT_CHAIN_MODE_CBC), 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptSetProperty\n", status);
-          goto Cleanup;
-      }
-      if (!NT_SUCCESS(status = BCryptGenerateSymmetricKey(algoHandle, &keyHandle, encryptionKey, encryptionKeySize, rawKey, rawKeySize, 0))) {
-          wprintf(L"**** Error 0x%x returned by BCryptGenerateSymmetricKey\n", status);
-          goto Cleanup;
-      }
-      ciphertextSize = (DWORD)fileSize - IVSize;
+      ciphertextSize = (DWORD)fileSize - NONCE_SIZE - authTagLengths.dwMaxLength;
       ciphertext = (PBYTE)HeapAlloc(GetProcessHeap(), 0, ciphertextSize);
-      if (NULL == ciphertext) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+      if (ciphertext == NULL) {
+          std::cerr << "ciphertext HeapAlloc failed" << std::endl;
+          goto cleanup;
       }
-      memcpy(ciphertext, &fileBuffer[IVSize], ciphertextSize);
-      if (!NT_SUCCESS(status = BCryptDecrypt(keyHandle, ciphertext, ciphertextSize, NULL, IV, IVSize, NULL, 0, &plaintextSize, BCRYPT_BLOCK_PADDING))) {
-          wprintf(L"**** Error 0x%x returned by BCryptDecrypt1\n", status);
-          goto Cleanup;
+      //Copy different parts needed for decryption from filebuffer
+#pragma warning(push)
+#pragma warning(disable:6385)
+      memcpy(authInfo.pbNonce, fileBuffer, NONCE_SIZE);
+#pragma warning(pop)
+      memcpy(authInfo.pbTag, &fileBuffer[NONCE_SIZE], authTagLengths.dwMaxLength);
+      memcpy(ciphertext, &fileBuffer[NONCE_SIZE + authTagLengths.dwMaxLength], ciphertextSize);
+      authInfo.cbTag = authTagLengths.dwMaxLength;
+
+      status = BCryptGenerateSymmetricKey(algo, &keyHandle, NULL, 0, encryptionKey, KEY_SIZE, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptGenerateSymmetricKey", status) << std::endl;
+          goto cleanup;
       }
+      //First call is to determine size of plaintext
+      status = BCryptDecrypt(keyHandle, ciphertext, ciphertextSize, (PVOID)&authInfo, NULL, 0, NULL, 0, &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptDecrypt1", status) << std::endl;
+          goto cleanup;
+      }
+      plaintextSize = bytesWritten;
       plaintext = (PBYTE)HeapAlloc(GetProcessHeap(), 0, plaintextSize);
       if (NULL == plaintext) {
-          wprintf(L"**** memory allocation failed\n");
-          goto Cleanup;
+          std::cerr << "plaintext HeapAlloc failed" << std::endl;
+          goto cleanup;
       }
-      memset(plaintext, 0, plaintextSize);
-      if (!NT_SUCCESS(status = BCryptDecrypt(keyHandle, ciphertext, ciphertextSize, NULL, IV, IVSize, plaintext, plaintextSize, &sizeData, BCRYPT_BLOCK_PADDING))) {
-          wprintf(L"**** Error 0x%x returned by BCryptDecrypt2\n", status);
-          goto Cleanup;
+      //Actuual decryption
+      status = BCryptDecrypt(keyHandle, ciphertext, ciphertextSize, (PVOID)&authInfo, NULL, 0, plaintext, plaintextSize, &bytesWritten, 0);
+      if (!BCRYPT_SUCCESS(status)) {
+          std::cerr << NtStatusToString("BCryptDecrypt2", status) << std::endl;
+          goto cleanup;
       }
       returnVal = (char*)plaintext;
-  Cleanup:
-      if (algoHandle)
-      {
-          BCryptCloseAlgorithmProvider(algoHandle, 0);
-      }
-
-      if (keyHandle)
-      {
-          BCryptDestroyKey(keyHandle);
-      }
-
-      if (ciphertext)
-      {
-          HeapFree(GetProcessHeap(), 0, ciphertext);
-      }
-
-      if (plaintext)
-      {
-          HeapFree(GetProcessHeap(), 0, plaintext);
-      }
-
-      if (encryptionKey)
-      {
+  cleanup:
+      if (encryptionKey) {
           HeapFree(GetProcessHeap(), 0, encryptionKey);
       }
-
-      if (IV)
-      {
-          HeapFree(GetProcessHeap(), 0, IV);
+      if (ciphertext) {
+          HeapFree(GetProcessHeap(), 0, ciphertext);
       }
-
-      if (rawKey) {
-          HeapFree(GetProcessHeap(), 0, rawKey);
+      if (plaintext) {
+          HeapFree(GetProcessHeap(), 0, plaintext);
+      }
+      if (fileBuffer) {
+          HeapFree(GetProcessHeap(), 0, fileBuffer);
+      }
+      if (authInfo.pbNonce) {
+          HeapFree(GetProcessHeap(), 0, authInfo.pbNonce);
+      }
+      if (authInfo.pbTag) {
+          HeapFree(GetProcessHeap(), 0, authInfo.pbTag);
       }
       return returnVal;
     /*
