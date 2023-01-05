@@ -25,9 +25,6 @@
 #include <string>
 #include <regex>
 
-#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
-#define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
-
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "bcrypt.lib")
 
@@ -617,7 +614,7 @@ namespace
       fs = std::basic_ifstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary);
       if (!fs.good()) {
           //TODO add backwards comp.
-          std::cerr << "Filestream is bad" << std::endl;
+          std::cerr << "Filestream is bad (check if key exists)" << std::endl;
           goto cleanup;
       }
       fs.unsetf(std::ios::skipws);
