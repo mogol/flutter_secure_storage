@@ -562,21 +562,6 @@ namespace
           HeapFree(GetProcessHeap(), 0, ciphertext);
       }
       throw std::runtime_error(error);
-    /*size_t len = 1 + strlen(val.c_str());
-    CA2W keyw(key.c_str());
-
-    CREDENTIALW cred = {0};
-    cred.Type = CRED_TYPE_GENERIC;
-    cred.TargetName = keyw.m_psz;
-    cred.CredentialBlobSize = (DWORD)len;
-    cred.CredentialBlob = (LPBYTE)val.c_str();
-    cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
-
-    bool ok = CredWriteW(&cred, 0);
-    if (!ok)
-    {
-      throw GetLastError();
-    }*/
   }
 
   std::optional<std::string> FlutterSecureStorageWindowsPlugin::Read(const std::string &key)
@@ -613,8 +598,16 @@ namespace
       //Read full file into a buffer
       fs = std::basic_ifstream<BYTE>(appSupportPath + L"\\" + std::wstring(key.begin(), key.end()) + L".secure", std::ios::binary);
       if (!fs.good()) {
-          //TODO add backwards comp.
-          std::cerr << "Filestream is bad (check if key exists)" << std::endl;
+          //Backwards comp.
+          PCREDENTIALW pcred;
+          CA2W target_name(key.c_str());
+          bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
+          if (ok)
+          {
+              auto val = std::string((char*)pcred->CredentialBlob);
+              CredFree(pcred);
+              returnVal = val;
+          }
           goto cleanup;
       }
       fs.unsetf(std::ios::skipws);
@@ -721,22 +714,6 @@ namespace
           HeapFree(GetProcessHeap(), 0, authInfo.pbTag);
       }
       return returnVal;
-    /*
-    PCREDENTIALW pcred;
-    CA2W target_name(key.c_str());
-    bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
-
-    if (ok)
-    {
-      auto val = std::string((char *)pcred->CredentialBlob);
-      CredFree(pcred);
-      return val;
-    }
-
-    auto error = GetLastError();
-    if (error == ERROR_NOT_FOUND)
-      return std::nullopt;
-    throw error;*/
   }
 
   flutter::EncodableMap FlutterSecureStorageWindowsPlugin::ReadAll()
@@ -769,37 +746,32 @@ namespace
               creds[key] = val.value();
               continue;
           }
-          //Delete file if we can't read it? 
       } while (FindNextFile(hFile, &searchRes) != 0);
 
-      return creds;
-    /*PCREDENTIALW* pcreds;
+    //Backwards comp.
+    PCREDENTIALW* pcreds;
     DWORD cred_count = 0;
 
     bool ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
     if (!ok)
     {
-      auto error = GetLastError();
-      if (error == ERROR_NOT_FOUND)
-        return flutter::EncodableMap();
-      throw error;
+        return creds;
     }
-
-    flutter::EncodableMap creds;
-
     for (DWORD i = 0; i < cred_count; i++)
     {
       auto pcred = pcreds[i];
       std::string target_name = CW2A(pcred->TargetName);
       auto val = std::string((char*)pcred->CredentialBlob);
       auto key = this->RemoveKeyPrefix(target_name);
-
-      creds[key] = val;
+      //If the key exists then data was already read from a file, which implies that the data read from the credential system is outdated
+      if (creds.find(key) == creds.end()) {
+          creds[key] = val;
+      }
     }
 
     CredFree(pcreds);
 
-    return creds;*/
+    return creds;
   }
 
   void FlutterSecureStorageWindowsPlugin::Delete(const std::string &key)
@@ -810,11 +782,13 @@ namespace
       BOOL ok = DeleteFile((appSupportPath + L"\\" + wstr + L".secure").c_str());
       if (!ok) {
           DWORD error = GetLastError();
-          if (error != ERROR_NOT_FOUND) {
+          if (error != ERROR_FILE_NOT_FOUND) {
               throw error;
           }
       }
-    /*bool ok = CredDeleteW(wstr.c_str(), CRED_TYPE_GENERIC, 0);
+
+    //Backwards comp.
+    ok = CredDeleteW(wstr.c_str(), CRED_TYPE_GENERIC, 0);
     if (!ok)
     {
       auto error = GetLastError();
@@ -824,7 +798,7 @@ namespace
         return;
 
       throw error;
-    }*/
+    }
   }
 
   void FlutterSecureStorageWindowsPlugin::DeleteAll()
@@ -846,10 +820,15 @@ namespace
           std::wstring fileName(searchRes.cFileName);
           BOOL ok = DeleteFile((appSupportPath + L"\\" + fileName).c_str());
           if (!ok) {
-              throw GetLastError();
+              DWORD error = GetLastError();
+              if (error != ERROR_FILE_NOT_FOUND) {
+                  throw error;
+              }
           }
       } while (FindNextFile(hFile, &searchRes) != 0);
-    /*PCREDENTIALW* pcreds;
+
+    //Backwards comp.
+    PCREDENTIALW* pcreds;
     DWORD cred_count = 0;
     
     bool read_ok = CredEnumerateW(CREDENTIAL_FILTER.m_psz, 0, &cred_count, &pcreds);
@@ -874,7 +853,7 @@ namespace
       }
     }
 
-    CredFree(pcreds);*/
+    CredFree(pcreds);
   }
 
   bool FlutterSecureStorageWindowsPlugin::ContainsKey(const std::string &key)
@@ -883,19 +862,19 @@ namespace
       GetApplicationSupportPath(appSupportPath);
       std::wstring wstr = std::wstring(key.begin(), key.end());
       if (INVALID_FILE_ATTRIBUTES == GetFileAttributes((appSupportPath + L"\\" + wstr + L".secure").c_str())) {
-          return false;
+          //Backwards comp.
+          PCREDENTIALW pcred;
+          CA2W target_name(key.c_str());
+
+          bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
+          if (ok) return true;
+
+          auto error = GetLastError();
+          if (error == ERROR_NOT_FOUND)
+              return false;
+          throw error;
       }
       return true;
-    /*PCREDENTIALW pcred;
-    CA2W target_name(key.c_str());
-
-    bool ok = CredReadW(target_name.m_psz, CRED_TYPE_GENERIC, 0, &pcred);
-    if (ok) return true;
-
-    auto error = GetLastError();
-    if (error == ERROR_NOT_FOUND)
-      return false;
-    throw error;*/
   }
 } // namespace
 
