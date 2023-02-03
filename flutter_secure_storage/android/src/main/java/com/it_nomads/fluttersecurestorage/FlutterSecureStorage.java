@@ -33,6 +33,7 @@ public class FlutterSecureStorage {
     private SharedPreferences preferences;
     private StorageCipher storageCipher;
     private StorageCipherFactory storageCipherFactory;
+    private Boolean failedToUseEncryptedSharedPreferences = false;
 
     public FlutterSecureStorage(Context context) {
         applicationContext = context.getApplicationContext();
@@ -47,6 +48,9 @@ public class FlutterSecureStorage {
 
     @SuppressWarnings({"ConstantConditions"})
     private boolean getUseEncryptedSharedPreferences() {
+        if (failedToUseEncryptedSharedPreferences) {
+            return false;
+        }
         return options.containsKey("encryptedSharedPreferences") && options.get("encryptedSharedPreferences").equals("true") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
@@ -155,6 +159,7 @@ public class FlutterSecureStorage {
             } catch (Exception e) {
                 Log.e(TAG, "EncryptedSharedPreferences initialization failed", e);
                 preferences = nonEncryptedPreferences;
+                failedToUseEncryptedSharedPreferences = true;
             }
         } else {
             preferences = nonEncryptedPreferences;
