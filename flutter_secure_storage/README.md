@@ -109,8 +109,8 @@ parts:
       - libsecret-1-dev
       - libjsoncpp-dev
     stage-packages:
-      - libsecret-1-dev
-      - libjsoncpp1-dev
+      - libsecret-1-0
+      - libjsoncpp-dev
 ```
 
 ## Configure Windows Version
