@@ -14,9 +14,9 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
 
 SPEC CHECKSUMS:
-  flutter_secure_storage_macos: 75c8cadfdba05ca007c0fa4ea0c16e5cf85e521b
-  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  flutter_secure_storage_macos: d56e2d218c1130b262bef8b4a7d64f88d7f9c9ea
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
 
-PODFILE CHECKSUM: 69608711ca93a0af5aac7e2f834b34cf2422afce
+PODFILE CHECKSUM: ce7dbe26c78bfc7ba46736094c1e2d25982870fa
 
 COCOAPODS: 1.11.2

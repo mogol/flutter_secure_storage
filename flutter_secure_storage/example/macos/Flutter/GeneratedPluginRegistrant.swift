@@ -8,5 +8,5 @@ import Foundation
 import flutter_secure_storage_macos
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  SwiftFlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "SwiftFlutterSecureStoragePlugin"))
+  FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
 }
