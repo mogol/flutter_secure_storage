@@ -1,3 +1,15 @@
+## 8.0.0
+Breaking changes:
+* [macOS] The minimum macOS version supported is now 10.14.
+
+Other changes:
+* [Android] Fixed an issue when Encrypted Shared Preferences failed, the fallback would not handle the data correctly.
+* [Windows] Write encrypted data to files instead of the windows credential system.
+* [Linux] Fixed an issue with memory management.
+
+## 7.0.2
+[macOS] Fix issue with plugin name.
+
 ## 7.0.1
 [Android] Reverted double initialization of the SharedPreferences because this will break mixed usage of secureSharedPreference on Android.
 
