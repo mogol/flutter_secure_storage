@@ -18,21 +18,30 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        switch (call.method) {
-        case "read":
-            read(call, result)
-        case "write":
-            write(call, result)
-        case "delete":
-            delete(call, result)
-        case "deleteAll":
-            deleteAll(call, result)
-        case "readAll":
-            readAll(call, result)
-        case "containsKey":
-            containsKey(call, result)
-        default:
-            result(FlutterMethodNotImplemented)
+        
+        func handleResult(_ value: Any?) {
+            DispatchQueue.main.async {
+                result(value)
+            }
+        }
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            switch (call.method) {
+            case "read":
+                self.read(call, handleResult)
+            case "write":
+                self.write(call, handleResult)
+            case "delete":
+                self.delete(call, handleResult)
+            case "deleteAll":
+                self.deleteAll(call, handleResult)
+            case "readAll":
+                self.readAll(call, handleResult)
+            case "containsKey":
+                self.containsKey(call, handleResult)
+            default:
+                handleResult(FlutterMethodNotImplemented)
+            }
         }
     }
     
