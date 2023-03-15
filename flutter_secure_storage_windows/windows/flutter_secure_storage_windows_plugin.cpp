@@ -297,7 +297,7 @@ namespace
 
   PBYTE FlutterSecureStorageWindowsPlugin::GetEncryptionKey()
   {
-      const size_t KEY_SIZE = 16;
+      const size_t KEY_SIZE = 32;
       DWORD credError = 0;
       PBYTE AesKey;
       PCREDENTIALW pcred;
@@ -440,7 +440,7 @@ namespace
   {
       //The recommended size for AES-GCM IV is 12 bytes
       const DWORD NONCE_SIZE = 12;
-      const DWORD KEY_SIZE = 16;
+      const DWORD KEY_SIZE = 32;
 
       NTSTATUS status;
       BCRYPT_ALG_HANDLE algo = NULL;

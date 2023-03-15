@@ -14,7 +14,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class StorageCipher18Implementation implements StorageCipher {
-    private static final int keySize = 16;
+    private static final int keySize = 32;
     private static final String KEY_ALGORITHM = "AES";
     private static final String SHARED_PREFERENCES_NAME = "FlutterSecureKeyStorage";
     private final Cipher cipher;
