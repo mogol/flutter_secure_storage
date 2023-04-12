@@ -5,7 +5,6 @@
 #include <cstring>
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
-#include <json/json.h>
 #include <libsecret/secret.h>
 #include <sys/utsname.h>
 

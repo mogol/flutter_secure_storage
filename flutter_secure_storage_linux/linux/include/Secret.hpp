@@ -1,6 +1,5 @@
 #include "FHashTable.hpp"
 #include "json.hpp"
-#include <json/json.h>
 #include <libsecret/secret.h>
 #include <memory>
 
@@ -56,24 +55,6 @@ public:
   bool storeToKeyring(nlohmann::json value) {
     const std::string output = value.dump();
     g_autoptr(GError) err = nullptr;
-    bool result = secret_password_storev_sync(
-        &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
-        output.c_str(), nullptr, &err);
-
-    if (err) {
-      throw err->message;
-    }
-
-    return result;
-  }
-
-  bool storeToKeyring(Json::Value value) {
-    Json::StreamWriterBuilder builder;
-    const std::string output = Json::writeString(builder, value);
-    g_autoptr(GError) err = nullptr;
-
-    builder["indentation"] = "";
-
     bool result = secret_password_storev_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
         output.c_str(), nullptr, &err);
