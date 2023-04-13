@@ -20,7 +20,6 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 target_include_directories(${PLUGIN_NAME} INTERFACE
 "${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories(${LIBSECRET_INCLUDE_DIRS})
-include_directories(${JSONCPP_INCLUDE_DIRS})
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
