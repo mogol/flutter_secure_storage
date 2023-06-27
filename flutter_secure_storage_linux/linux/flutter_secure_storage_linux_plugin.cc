@@ -1,10 +1,10 @@
 #include "include/flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h"
 #include "include/Secret.hpp"
+#include "include/json.hpp"
 
 #include <cstring>
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
-#include <json/json.h>
 #include <libsecret/secret.h>
 #include <sys/utsname.h>
 
@@ -41,18 +41,18 @@ FlValue *read(const gchar *key)
 FlValue *readAll()
 {
   FlValue *result = fl_value_new_map();
-  Json::Value data = keyring.readFromKeyring();
-  for (auto each : data.getMemberNames())
+  nlohmann::json data = keyring.readFromKeyring();
+  for (auto each : data.items())
   {
-    fl_value_set_string_take(result, each.c_str(),
-                             fl_value_new_string(data[each].asCString()));
+    fl_value_set_string_take(result, each.key().c_str(),
+                             fl_value_new_string(std::string(each.value()).c_str()));
   }
   return result;
 }
 
 FlValue* containsKey(const gchar* key) {
-  Json::Value data = keyring.readFromKeyring();
-  return fl_value_new_bool(data.isMember(key));
+  nlohmann::json data = keyring.readFromKeyring();
+  return fl_value_new_bool(data.contains(key));
 }
 
 // Called when a method call is received from Flutter.

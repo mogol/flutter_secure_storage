@@ -1,5 +1,5 @@
 #include "FHashTable.hpp"
-#include <json/json.h>
+#include "json.hpp"
 #include <libsecret/secret.h>
 #include <memory>
 
@@ -28,37 +28,33 @@ public:
   }
 
   bool addItem(const char *key, const char *value) {
-    Json::Value root = readFromKeyring();
+    nlohmann::json root = readFromKeyring();
     root[key] = value;
-    return this->storeToKeyring(root);
+    return storeToKeyring(root);
   }
 
   std::string getItem(const char *key) {
     std::string result;
-    Json::Value root = readFromKeyring();
-    Json::Value resultJson = root[key];
-    if (resultJson.isString()) {
-      result = resultJson.asString();
+    nlohmann::json root = readFromKeyring();
+    nlohmann::json value = root[key];
+    if(value.is_string()){
+      result = value.get<std::string>();
       return result;
     }
     return "";
   }
 
   void deleteItem(const char *key) {
-    Json::Value root = readFromKeyring();
-    root.removeMember(key);
-    this->storeToKeyring(root);
+    nlohmann::json root = readFromKeyring();
+    root.erase(key);
+    storeToKeyring(root);
   }
 
-  bool deleteKeyring() { return this->storeToKeyring(Json::Value()); }
+  bool deleteKeyring() { return this->storeToKeyring(nlohmann::json()); }
 
-  bool storeToKeyring(Json::Value value) {
-    Json::StreamWriterBuilder builder;
-    const std::string output = Json::writeString(builder, value);
+  bool storeToKeyring(nlohmann::json value) {
+    const std::string output = value.dump();
     g_autoptr(GError) err = nullptr;
-
-    builder["indentation"] = "";
-
     bool result = secret_password_storev_sync(
         &the_schema, m_attributes.getGHashTable(), nullptr, label.c_str(),
         output.c_str(), nullptr, &err);
@@ -70,10 +66,8 @@ public:
     return result;
   }
 
-  Json::Value readFromKeyring() {
-    Json::Value root;
-    Json::CharReaderBuilder charBuilder;
-    std::unique_ptr<Json::CharReader> reader(charBuilder.newCharReader());
+  nlohmann::json readFromKeyring() {
+    nlohmann::json value;
     g_autoptr(GError) err = nullptr;
 
     secret_autofree gchar *result = secret_password_lookupv_sync(
@@ -82,13 +76,9 @@ public:
     if (err) {
       throw err->message;
     }
-
-    if (result != nullptr && strcmp(result, "") != 0 &&
-        reader->parse(result, result + strlen(result), &root, NULL)) {
-      return root;
+    if(result != NULL && strcmp(result, "") != 0){
+      value = nlohmann::json::parse(result);
     }
-
-    this->storeToKeyring(root);
-    return root;
+    return value;
   }
 };
