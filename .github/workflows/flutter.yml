@@ -35,8 +35,8 @@ jobs:
       # Use the community Action to install Flutter
       - uses: subosito/flutter-action@v2.8.0
       - name: Format - Android & iOS
-        run: flutter format -n --set-exit-if-changed .
+        run: dart format --set-exit-if-changed .
         working-directory: ./flutter_secure_storage
       - name: Format - Platform Interface
-        run: flutter format -n --set-exit-if-changed .
+        run: dart format --set-exit-if-changed .
         working-directory: ./flutter_secure_storage_platform_interface
