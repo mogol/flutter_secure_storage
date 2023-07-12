@@ -26,6 +26,10 @@ android {
         namespace("com.it_nomads.fluttersecurestorage")
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileSdkVersion 33
 
     compileOptions {
