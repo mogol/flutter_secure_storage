@@ -42,33 +42,18 @@ void main() {
 
     final log = <MethodCall>[];
 
-    //Used for Flutter 2.3 and later
-    // handler(MethodCall methodCall) async {
-    //   log.add(methodCall);
+    Future<bool?>? handler(MethodCall methodCall) async {
+      log.add(methodCall);
 
-    //   if (methodCall.method == 'containsKey') {
-    //     return true;
-    //   }
-
-    //   return null;
-    // }
-
-    // TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-    //     .setMockMethodCallHandler(channel, handler);
-
-    //Remove this and replace with above when 2.3 goes stable
-    channel.setMockMethodCallHandler((call) async {
-      log.add(call);
-
-      if (call.method == 'containsKey') {
+      if (methodCall.method == 'containsKey') {
         return true;
       }
 
-      // Return null explicitly instead of relying on the implicit null
-      // returned by the method channel if no return statement is specified.
-
       return null;
-    });
+    }
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, handler);
 
     final storage = MethodChannelFlutterSecureStorage();
     const options = <String, String>{};
