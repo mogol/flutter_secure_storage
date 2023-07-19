@@ -4,14 +4,14 @@ class FHashTable {
   GHashTable *m_hashTable;
   public:
 
-  FHashTable() { m_hashTable = g_hash_table_new(g_str_hash, nullptr); }
+  FHashTable() { m_hashTable = g_hash_table_new_full(g_str_hash, nullptr, g_free, g_free); }
 
   GHashTable* getGHashTable(){
     return m_hashTable;
   }
 
   bool insert(const char *key, const char *value) {
-    return g_hash_table_insert(m_hashTable, (void *)key, (void *)value);
+    return g_hash_table_insert(m_hashTable, (void *)g_strdup(key), (void *)g_strdup(value));
   }
 
   const char *get(const char *key) {

@@ -1,3 +1,6 @@
+## 1.1.3
+Fixed a memory management issue
+
 ## 1.1.2
 Updated flutter_secure_storage_platform_interface to latest version.
 

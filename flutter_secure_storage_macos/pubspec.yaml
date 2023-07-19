@@ -1,7 +1,7 @@
 name: flutter_secure_storage_macos
 description: macOS implementation of flutter_secure_storage
 repository: https://github.com/mogol/flutter_secure_storage
-version: 2.0.1
+version: 3.0.0
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -17,4 +17,4 @@ flutter:
     implements: flutter_secure_storage
     platforms:
       macos:
-        pluginClass: SwiftFlutterSecureStoragePlugin
+        pluginClass: FlutterSecureStoragePlugin
