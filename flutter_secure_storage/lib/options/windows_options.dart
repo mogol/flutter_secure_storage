@@ -1,4 +1,4 @@
-part of flutter_secure_storage;
+part of '../flutter_secure_storage.dart';
 
 /// Specific options for Windows platform.
 class WindowsOptions extends Options {
