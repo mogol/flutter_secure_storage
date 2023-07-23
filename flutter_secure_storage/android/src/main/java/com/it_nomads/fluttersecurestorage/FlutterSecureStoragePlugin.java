@@ -185,14 +185,22 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                 Log.i("Creating sharedPrefs", e.getLocalizedMessage());
             } catch (Exception e) {
                 if (resetOnError) {
-                    secureStorage.deleteAll();
-                    result.success("Data has been reset");
+                    try {
+                        secureStorage.deleteAll();
+                        result.success("Data has been reset");
+                    } catch (Exception ex) {
+                        handleException(ex);
+                    }
                 } else {
-                    StringWriter stringWriter = new StringWriter();
-                    e.printStackTrace(new PrintWriter(stringWriter));
-                    result.error("Exception encountered", call.method, stringWriter.toString());
+                    handleException(e);
                 }
             }
+        }
+
+        private void handleException(Exception e) {
+            StringWriter stringWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(stringWriter));
+            result.error("Exception encountered", call.method, stringWriter.toString());
         }
     }
 }
