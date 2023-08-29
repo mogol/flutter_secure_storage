@@ -90,7 +90,7 @@ void main() {
             arguments: <String, Object>{
               'key': key,
               'value': 'test',
-              'options': options
+              'options': options,
             },
           ),
         ],
@@ -116,7 +116,7 @@ void main() {
             arguments: <String, Object>{
               'key': key,
               'value': 'test',
-              'options': options
+              'options': options,
             },
           ),
           isMethodCall(
@@ -158,7 +158,7 @@ void main() {
             arguments: <String, Object>{
               'key': key,
               'value': 'test',
-              'options': options
+              'options': options,
             },
           ),
           isMethodCall(
