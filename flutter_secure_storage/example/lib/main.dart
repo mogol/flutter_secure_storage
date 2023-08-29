@@ -108,7 +108,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   child: Text('Delete all'),
                 ),
               ],
-            )
+            ),
           ],
         ),
         body: Column(
@@ -193,6 +193,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
 
         break;
       case _ItemActions.edit:
+        if (!context.mounted) return;
         final result = await showDialog<String>(
           context: context,
           builder: (context) => _EditItemWidget(item.value),
@@ -208,6 +209,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
         }
         break;
       case _ItemActions.containsKey:
+        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result = await _storage.containsKey(key: key);
         if (!mounted) return;
@@ -219,6 +221,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
         );
         break;
       case _ItemActions.read:
+        if (!context.mounted) return;
         final key = await _displayTextInputDialog(context, item.key);
         final result =
             await _storage.read(key: key, aOptions: _getAndroidOptions());
@@ -247,7 +250,7 @@ class ItemsWidgetState extends State<ItemsWidget> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('OK'),
-            )
+            ),
           ],
           content: TextField(
             controller: controller,
