@@ -48,6 +48,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.it_nomads.fluttersecurestorageexample'
 }
 
 flutter {
