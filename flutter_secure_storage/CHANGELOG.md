@@ -1,3 +1,6 @@
+## 8.1.0
+* [Android] Upgraded to Gradle 8.
+
 ## 8.0.0
 Breaking changes:
 * [macOS] The minimum macOS version supported is now 10.14.
