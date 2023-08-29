@@ -1,5 +1,6 @@
 ## 8.1.0
 * [Android] Upgraded to Gradle 8.
+* [Android] Fixed resetOnError not working.
 
 ## 8.0.0
 Breaking changes:
