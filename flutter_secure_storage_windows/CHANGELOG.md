@@ -1,3 +1,7 @@
+## 2.1.0
+- Changed PathNotFoundException to FileSystemException to be backwards compatible with Flutter SDK 2.12.0
+- Applied lint suggestions
+
 ## 2.0.0
 Write encrypted data to files instead of the windows credential system.
 

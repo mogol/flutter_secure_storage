@@ -21,11 +21,11 @@ void main() {
     final directory = await getApplicationSupportDirectory();
     if (directory.existsSync()) {
       directory
-          .listSync(recursive: false, followLinks: false)
+          .listSync(followLinks: false)
           .whereType<File>()
           .where((f) =>
               path.basename(f.path) == encryptedJsonFileName ||
-              f.path.endsWith('.secure'))
+              f.path.endsWith('.secure'),)
           .forEach((f) => f.deleteSync());
     }
   }
@@ -447,7 +447,7 @@ void main() {
               readCalled++;
               return deleteAllCalled > 0
                   ? null
-                  : call.arguments['key'] == oldKey
+                  : (call.arguments as Map<String, dynamic>)['key'] == oldKey
                       ? oldValue
                       : null;
             case 'readAll':
@@ -738,7 +738,7 @@ void main() {
           switch (call.method) {
             case 'containsKey':
               containsKeyCalled++;
-              return deleteCalled > 0 ? false : call.arguments['key'] == key;
+              return deleteCalled > 0 && (call.arguments as Map<String, dynamic>)['key'] == key;
             case 'delete':
               deleteCalled++;
               return null;
@@ -775,7 +775,7 @@ void main() {
           switch (call.method) {
             case 'containsKey':
               containsKeyCalled++;
-              return call.arguments['key'] == key;
+              return (call.arguments as Map<String, dynamic>)['key'] == key;
             default:
               fail('Unexpected method call: ${call.method}');
           }

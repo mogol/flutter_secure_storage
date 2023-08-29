@@ -10,8 +10,6 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:win32/win32.dart';
-// ignore: implementation_imports
-import 'package:win32/src/win32/crypt32.g.dart';
 
 @visibleForTesting
 extension OptionsExtension on Map<String, String> {
@@ -50,7 +48,7 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
     }
 
     if (options.useBackwardCompatibility) {
-      return await _backwardCompatible.containsKey(key: key, options: options);
+      return _backwardCompatible.containsKey(key: key, options: options);
     }
 
     return false;
@@ -196,7 +194,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
     late final Uint8List encryptedText;
     try {
       encryptedText = await file.readAsBytes();
-    } on PathNotFoundException catch (e) {
+    } on FileSystemException catch (e) {
       // Another process has been deleted a file or parent directory
       // since previous File.exists() call.
       // We can ignore it.
@@ -299,7 +297,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
     return {
       for (final e
           in decoded.entries.where((x) => x.key is String && x.value is String))
-        e.key as String: e.value as String
+        e.key as String: e.value as String,
     };
   }
 
@@ -359,7 +357,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
                 .writeAsBytes(encryptedText, flush: true);
             // If success, finish loop.
             break;
-          } on PathNotFoundException catch (e) {
+          } on FileSystemException catch (e) {
             // Another process has been deleted a file or parent directory
             // since previous File.create() call.
             // We will retry writing.
@@ -386,7 +384,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
     if (await file.exists()) {
       try {
         await file.delete();
-      } on PathNotFoundException catch (e) {
+      } on FileSystemException catch (e) {
         // Another process has been deleted a file or parent directory
         // since previous File.exists() call.
         // We can ignore it.

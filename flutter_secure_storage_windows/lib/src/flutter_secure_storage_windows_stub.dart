@@ -14,12 +14,12 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
 
   @override
   Future<bool> containsKey(
-          {required String key, required Map<String, String> options}) =>
+          {required String key, required Map<String, String> options,}) =>
       Future.value(false);
 
   @override
   Future<void> delete(
-          {required String key, required Map<String, String> options}) =>
+          {required String key, required Map<String, String> options,}) =>
       Future.value();
 
   @override
@@ -28,8 +28,8 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
 
   @override
   Future<String?> read(
-          {required String key, required Map<String, String> options}) =>
-      Future.value(null);
+          {required String key, required Map<String, String> options,}) =>
+      Future.value();
 
   @override
   Future<Map<String, String>> readAll({required Map<String, String> options}) =>
@@ -39,6 +39,6 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
   Future<void> write(
           {required String key,
           required String value,
-          required Map<String, String> options}) =>
+          required Map<String, String> options,}) =>
       Future.value();
 }
