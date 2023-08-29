@@ -129,7 +129,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "8.1.0"
+    version: "9.0.0"
   flutter_secure_storage_linux:
     dependency: "direct overridden"
     description:
@@ -164,7 +164,7 @@ packages:
       path: "../../flutter_secure_storage_windows"
       relative: true
     source: path
-    version: "2.1.0"
+    version: "3.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -581,10 +581,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: a6f0236dbda0f63aa9a25ad1ff9a9d8a4eaaa5012da0dc59d21afdb1dc361ca4
+      sha256: "9e82a402b7f3d518fb9c02d0e9ae45952df31b9bf34d77baf19da2de03fc2aaa"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.4"
+    version: "5.0.7"
   xdg_directories:
     dependency: transitive
     description:
