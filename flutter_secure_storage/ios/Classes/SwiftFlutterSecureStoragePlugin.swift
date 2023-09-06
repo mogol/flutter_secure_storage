@@ -53,7 +53,17 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         }
         
         let response = flutterSecureStorageManager.read(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
-        result(response.value)
+      
+        if let oSStatus = response.status {
+            let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: oSStatus)
+            if error == nil {
+                result(response.value)
+            } else {
+                result(error)
+            }
+        } else {
+            result(response.value)
+        }
     }
     
     private func write(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -75,7 +85,12 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         
         let response = flutterSecureStorageManager.write(key: values.key!, value: values.value!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable, accessibility: values.accessibility)
         
-        result(response)
+        let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
+        if error == nil {
+            result(response)
+        } else {
+            result(error)
+        }
     }
     
     private func delete(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -87,23 +102,42 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
         
         let response = flutterSecureStorageManager.delete(key: values.key!, groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
         
-        result(response)
+        let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
+        if error == nil {
+            result(response)
+        } else {
+            result(error)
+        }
     }
     
     private func deleteAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let values = parseCall(call)
         
         let response = flutterSecureStorageManager.deleteAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
-        
-        result(response)
+        let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: response)
+       
+        if error == nil {
+            result(response)
+        } else {
+            result(error)
+        }
     }
     
     private func readAll(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let values = parseCall(call)
         
         let response = flutterSecureStorageManager.readAll(groupId: values.groupId, accountName: values.accountName, synchronizable: values.synchronizable)
-        
-        result(response.value);
+       
+        if let oSStatus = response.status {
+            let error = SecureStorageError.fromOSStatus(key: values.key, oSStatus: oSStatus)
+            if error == nil {
+                result(response.value)
+            } else {
+                result(error)
+            }
+        } else {
+            result(response.value)
+        }
     }
     
     private func containsKey(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
