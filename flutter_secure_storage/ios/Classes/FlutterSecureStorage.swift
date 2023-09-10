@@ -79,7 +79,12 @@ class FlutterSecureStorage{
         var value: String? = nil
         
         if (status == noErr) {
-            value = String(data: ref as! Data, encoding: .utf8)
+            guard let result = unarchivingData(data: ref as! Data)else{
+                return FlutterSecureStorageResponse(status: status, value: value)
+            }
+            
+            value = result
+            
         }
         return FlutterSecureStorageResponse(status: status, value: value)
     }
@@ -120,18 +125,19 @@ class FlutterSecureStorage{
             }
         }
         
+        let archivedValue = archivingData(data: value)
         let keyExists = containsKey(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable)
         var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, returnData: nil)
         if (keyExists) {
             let update: [CFString: Any?] = [
-                kSecValueData: value.data(using: String.Encoding.utf8),
+                kSecValueData: archivedValue,
                 kSecAttrAccessible: attrAccessible,
                 kSecAttrSynchronizable: synchronizable
             ]
             
             return SecItemUpdate(keychainQuery as CFDictionary, update as CFDictionary)
         } else {
-            keychainQuery[kSecValueData] = value.data(using: String.Encoding.utf8)
+            keychainQuery[kSecValueData] = archivedValue
             keychainQuery[kSecAttrAccessible] = attrAccessible
             
             return SecItemAdd(keychainQuery as CFDictionary, nil)
@@ -141,6 +147,20 @@ class FlutterSecureStorage{
     struct FlutterSecureStorageResponse {
         var status: OSStatus?
         var value: Any?
+    }
+    
+    
+    /// archiver that makes data hiden in keychain
+    private func archivingData(data : Any) -> NSData {
+        return NSKeyedArchiver.archivedData(withRootObject: data) as NSData
+    }
+    
+    /// unarchiver that retrive hiden data in keychaink
+    private func unarchivingData(data : Any?) -> String? {
+        if let unarchivedObject = data{
+            return NSKeyedUnarchiver.unarchiveObject(with: unarchivedObject as! Data) as? String
+        }
+        return nil
     }
 }
 
