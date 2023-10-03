@@ -9,7 +9,7 @@ jobs:
         - uses: actions/setup-java@v3
           with:
             distribution: 'temurin'
-            java-version: '11'
+            java-version: '17'
         - name: "Run Flutter Driver tests API 18"
           uses: reactivecircus/android-emulator-runner@v2
           with:
