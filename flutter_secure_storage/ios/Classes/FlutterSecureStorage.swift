@@ -151,16 +151,25 @@ class FlutterSecureStorage{
     
     
     /// archiver that makes data hiden in keychain
-    private func archivingData(data : Any) -> NSData {
-        return NSKeyedArchiver.archivedData(withRootObject: data) as NSData
+    private func archivingData(data : Any) -> NSData? {
+        do{
+            return try NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: true) as NSData
+        }catch{
+            return NSData(data: Data())
+        }
     }
     
     /// unarchiver that retrive hiden data in keychaink
     private func unarchivingData(data : Any?) -> String? {
         if let unarchivedObject = data{
-            return NSKeyedUnarchiver.unarchiveObject(with: unarchivedObject as! Data) as? String
+            do{
+                return try NSKeyedUnarchiver.unarchivedObject(ofClass: NSString.self, from: unarchivedObject as! Data) as String?
+            }catch{
+                return String()
+            }
         }
         return nil
     }
 }
+
 
