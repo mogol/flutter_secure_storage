@@ -189,18 +189,12 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         secureStorage.deleteAll();
                         result.success("Data has been reset");
                     } catch (Exception ex) {
-                        handleException(ex);
+                        throw new RuntimeException(ex);
                     }
                 } else {
-                    handleException(e);
+                    throw new RuntimeException(e);
                 }
             }
-        }
-
-        private void handleException(Exception e) {
-            StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error("Exception encountered", call.method, stringWriter.toString());
         }
     }
 }
