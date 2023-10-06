@@ -21,8 +21,8 @@ flutter:
         default_package: flutter_secure_storage_macos
       web:
         default_package: flutter_secure_storage_web
-      # windows:
-      #   default_package: flutter_secure_storage_windows
+      windows:
+        default_package: flutter_secure_storage_windows
 
 dependencies:
   flutter:
@@ -35,7 +35,7 @@ dependencies:
   flutter_secure_storage_macos: ^3.0.0
   flutter_secure_storage_platform_interface: ^1.0.1
   flutter_secure_storage_web: ^1.1.1
-  # flutter_secure_storage_windows: ^3.0.0
+  flutter_secure_storage_windows: ^3.0.0
   meta: ^1.3.0
 
 dev_dependencies:
@@ -50,4 +50,4 @@ platforms:
   linux:
   macos:
   web:
-  # windows:
+  windows:
