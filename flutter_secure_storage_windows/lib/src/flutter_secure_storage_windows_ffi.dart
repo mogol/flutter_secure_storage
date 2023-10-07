@@ -150,6 +150,13 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
       _backwardCompatible.delete(key: key, options: options);
     }
   }
+
+  @override
+  Future<bool> isCupertinoProtectedDataAvailable() => Future.value(true);
+
+  @override
+  Stream<bool> get onCupertinoProtectedDataAvailabilityChanged =>
+      Stream.value(true);
 }
 
 @visibleForTesting

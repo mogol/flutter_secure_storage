@@ -13,13 +13,17 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
   }
 
   @override
-  Future<bool> containsKey(
-          {required String key, required Map<String, String> options,}) =>
+  Future<bool> containsKey({
+    required String key,
+    required Map<String, String> options,
+  }) =>
       Future.value(false);
 
   @override
-  Future<void> delete(
-          {required String key, required Map<String, String> options,}) =>
+  Future<void> delete({
+    required String key,
+    required Map<String, String> options,
+  }) =>
       Future.value();
 
   @override
@@ -27,8 +31,10 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
       Future.value();
 
   @override
-  Future<String?> read(
-          {required String key, required Map<String, String> options,}) =>
+  Future<String?> read({
+    required String key,
+    required Map<String, String> options,
+  }) =>
       Future.value();
 
   @override
@@ -36,9 +42,17 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
       Future.value({});
 
   @override
-  Future<void> write(
-          {required String key,
-          required String value,
-          required Map<String, String> options,}) =>
+  Future<void> write({
+    required String key,
+    required String value,
+    required Map<String, String> options,
+  }) =>
       Future.value();
+
+  @override
+  Future<bool> isCupertinoProtectedDataAvailable() => Future.value(true);
+
+  @override
+  Stream<bool> get onCupertinoProtectedDataAvailabilityChanged =>
+      Stream.value(true);
 }

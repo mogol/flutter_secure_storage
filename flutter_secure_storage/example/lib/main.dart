@@ -17,7 +17,7 @@ class ItemsWidget extends StatefulWidget {
   ItemsWidgetState createState() => ItemsWidgetState();
 }
 
-enum _Actions { deleteAll }
+enum _Actions { deleteAll, isProtectedDataAvailable }
 
 enum _ItemActions { delete, edit, containsKey, read }
 
@@ -54,6 +54,10 @@ class ItemsWidgetState extends State<ItemsWidget> {
       aOptions: _getAndroidOptions(),
     );
     _readAll();
+  }
+
+  Future<void> _isProtectedDataAvailable() async {
+    await _storage.isCupertinoProtectedDataAvailable();
   }
 
   Future<void> _addNewItem() async {
@@ -99,6 +103,9 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   case _Actions.deleteAll:
                     _deleteAll();
                     break;
+                  case _Actions.isProtectedDataAvailable:
+                    _isProtectedDataAvailable();
+                    break;
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<_Actions>>[
@@ -106,6 +113,11 @@ class ItemsWidgetState extends State<ItemsWidget> {
                   key: Key('delete_all'),
                   value: _Actions.deleteAll,
                   child: Text('Delete all'),
+                ),
+                const PopupMenuItem(
+                  key: Key('is_protected_data_available'),
+                  value: _Actions.isProtectedDataAvailable,
+                  child: Text('IsProtectedDataAvailable'),
                 ),
               ],
             ),
