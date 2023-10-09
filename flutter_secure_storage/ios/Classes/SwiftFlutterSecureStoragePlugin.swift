@@ -15,7 +15,7 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin, FlutterSt
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.it_nomads.com/flutter_secure_storage", binaryMessenger: registrar.messenger())
-        let eventChannel = FlutterEventChannel("plugins.it_nomads.com/flutter_secure_storage/events", binaryMessenger: registrar.messenger())
+        let eventChannel = FlutterEventChannel(name: "plugins.it_nomads.com/flutter_secure_storage/events", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterSecureStoragePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         registrar.addApplicationDelegate(instance)
