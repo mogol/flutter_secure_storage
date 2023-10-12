@@ -31,6 +31,15 @@ public class FlutterSecureStoragePlugin: NSObject, FlutterPlugin {
             readAll(call, result)
         case "containsKey":
             containsKey(call, result)
+        case "isProtectedDataAvailable":
+            // NSApplication is not thread safe
+            DispatchQueue.main.async {
+                if #available(macOS 12.0, *) {
+                    result(NSApplication.shared.isProtectedDataAvailable)
+                } else {
+                    result(true)
+                }
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

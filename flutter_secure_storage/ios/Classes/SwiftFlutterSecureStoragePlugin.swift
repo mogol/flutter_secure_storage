@@ -6,15 +6,20 @@
 //
 
 import Flutter
+import UIKit
 
-public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
+public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     
     private let flutterSecureStorageManager: FlutterSecureStorage = FlutterSecureStorage()
-    
+    private var secStoreAvailabilitySink: FlutterEventSink?
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.it_nomads.com/flutter_secure_storage", binaryMessenger: registrar.messenger())
+        let eventChannel = FlutterEventChannel(name: "plugins.it_nomads.com/flutter_secure_storage/events", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterSecureStoragePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
+        registrar.addApplicationDelegate(instance)
+        eventChannel.setStreamHandler(instance)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -38,10 +43,42 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin {
                 self.readAll(call, handleResult)
             case "containsKey":
                 self.containsKey(call, handleResult)
+            case "isProtectedDataAvailable":
+                // UIApplication is not thread safe
+                DispatchQueue.main.async {
+                    result(UIApplication.shared.isProtectedDataAvailable)
+                }
             default:
                 handleResult(FlutterMethodNotImplemented)
             }
         }
+    }
+
+    public func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
+        guard let sink = secStoreAvailabilitySink else {
+            return
+        }
+
+        sink(true)
+    }
+
+    public func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
+        guard let sink = secStoreAvailabilitySink else {
+            return
+        }
+
+        sink(false)
+    }
+
+    public func onListen(withArguments arguments: Any?,
+                         eventSink: @escaping FlutterEventSink) -> FlutterError? {
+        self.secStoreAvailabilitySink = eventSink
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.secStoreAvailabilitySink = nil
+        return nil
     }
     
     private func read(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
