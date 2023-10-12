@@ -239,8 +239,20 @@ namespace
               if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\CompanyName"), &queryVal, &queryLen) != 0) {
                   companyName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
               }
+              else if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904b0\\CompanyName"), &queryVal, &queryLen) != 0) {
+                  companyName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
+              }
+              else {
+                  companyName = L"placeholder_company";
+              }
               if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904e4\\ProductName"), &queryVal, &queryLen) != 0) {
                   productName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
+              }
+              else if (VerQueryValue(infoBuffer, TEXT("\\StringFileInfo\\040904b0\\ProductName"), &queryVal, &queryLen) != 0) {
+                  productName = SanitizeDirString(std::wstring((const TCHAR*)queryVal));
+              }
+              else {
+                  productName = L"placeholder_product";
               }
           }
           stream << appdataPath << "\\" << companyName << "\\" << productName;
@@ -255,10 +267,14 @@ namespace
 
   std::wstring FlutterSecureStorageWindowsPlugin::SanitizeDirString(std::wstring string)
   {
-      std::wstring sanitizedString = std::regex_replace(string,std::wregex(L"[<>:\"/\\\\|?*]"),L"_");
-      rtrim(sanitizedString);
-      sanitizedString = std::regex_replace(sanitizedString, std::wregex(L"[.]+$"), L"");
-      return sanitizedString;
+      std::wstring illegalChars = L"\\/:?\"<>|";
+      for (auto it = string.begin(); it < string.end(); ++it) {
+          if (illegalChars.find(*it) != std::wstring::npos) {
+              *it = L'_';
+          }
+      }
+      rtrim(string);
+      return string;
   }
 
   bool FlutterSecureStorageWindowsPlugin::PathExists(const std::wstring& path)
