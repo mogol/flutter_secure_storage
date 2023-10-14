@@ -145,13 +145,13 @@ class FlutterSecureStorage{
             return FlutterSecureStorageResponse(status: err.status, value: nil)
         }
 
-        var attrAccessible = parseAccessibleAttr(accessibility: accessibility);
+        let attrAccessible = parseAccessibleAttr(accessibility: accessibility);
         var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: accessibility, returnData: nil)
 
         if (keyExists) {
             
 
-            let update: [CFString: Any?] = [
+            var update: [CFString: Any?] = [
                 kSecValueData: value.data(using: String.Encoding.utf8),
                 kSecAttrAccessible: attrAccessible,
                 kSecAttrSynchronizable: synchronizable
