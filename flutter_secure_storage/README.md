@@ -57,7 +57,7 @@ This allows us to be able to fetch secure values while the app is backgrounded, 
 An example:
 
 ```dart
-final options = IOSOptions(accessibility: IOSAccessibility.first_unlock);
+final options = IOSOptions(accessibility: KeychainAccessibility.first_unlock);
 await storage.write(key: key, value: value, iOptions: options);
 ```
 
