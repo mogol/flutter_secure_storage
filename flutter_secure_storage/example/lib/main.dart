@@ -22,7 +22,7 @@ enum _Actions { deleteAll, isProtectedDataAvailable }
 enum _ItemActions { delete, edit, containsKey, read }
 
 class ItemsWidgetState extends State<ItemsWidget> {
-  final _storage = FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
   final _accountNameController =
       TextEditingController(text: 'flutter_secure_storage_service');
 

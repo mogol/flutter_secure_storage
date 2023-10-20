@@ -21,6 +21,8 @@ part './options/web_options.dart';
 
 part './options/windows_options.dart';
 
+final Map<String, List<ValueChanged<String?>>> _listeners = {};
+
 class FlutterSecureStorage {
   final IOSOptions iOptions;
   final AndroidOptions aOptions;
@@ -29,7 +31,7 @@ class FlutterSecureStorage {
   final WebOptions webOptions;
   final MacOsOptions mOptions;
 
-  FlutterSecureStorage({
+  const FlutterSecureStorage({
     this.iOptions = IOSOptions.defaultOptions,
     this.aOptions = AndroidOptions.defaultOptions,
     this.lOptions = LinuxOptions.defaultOptions,
@@ -42,8 +44,6 @@ class FlutterSecureStorage {
 
   FlutterSecureStoragePlatform get _platform =>
       FlutterSecureStoragePlatform.instance;
-
-  final Map<String, List<ValueChanged<String?>>> _listeners = {};
 
   ///Register [listener] for [key] with the [value] injected for the listener.
   ///The [listener] will still be called when you delete the [key] with the injected [value] as null.
