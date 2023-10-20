@@ -8,12 +8,20 @@ import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 
 part './options/android_options.dart';
+
 part './options/apple_options.dart';
+
 part './options/ios_options.dart';
+
 part './options/linux_options.dart';
+
 part './options/macos_options.dart';
+
 part './options/web_options.dart';
+
 part './options/windows_options.dart';
+
+final Map<String, List<ValueChanged<String?>>> _listeners = {};
 
 class FlutterSecureStorage {
   final IOSOptions iOptions;
@@ -33,8 +41,45 @@ class FlutterSecureStorage {
   });
 
   static const UNSUPPORTED_PLATFORM = 'unsupported_platform';
+
   FlutterSecureStoragePlatform get _platform =>
       FlutterSecureStoragePlatform.instance;
+
+  ///Register [listener] for [key] with the [value] injected for the listener.
+  ///The [listener] will still be called when you delete the [key] with the injected [value] as null.
+  ///This listener will be added to the list of registered listeners for that [key].
+  void registerListener({
+    required String key,
+    required ValueChanged<String?> listener,
+  }) {
+    _listeners[key] = [..._listeners[key] ?? [], listener];
+  }
+
+  ///Unregister listener for [Key].
+  ///The other registered listeners for [key] will be remained.
+  void unregisterListener({
+    required String key,
+    required ValueChanged<String?> listener,
+  }) {
+    final listenersForKey = _listeners[key];
+
+    if (listenersForKey == null || listenersForKey.isEmpty) {
+      return;
+    }
+
+    listenersForKey.remove(listener);
+    _listeners[key] = listenersForKey;
+  }
+
+  ///Unregister all listeners for [key].
+  void unregisterAllListenersForKey({required String key}) {
+    _listeners.remove(key);
+  }
+
+  ///Unregister all listeners for all keys.
+  void unregisterAllListeners() {
+    _listeners.clear();
+  }
 
   /// Encrypts and saves the [key] with the given [value].
   ///
@@ -58,31 +103,36 @@ class FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) =>
-      value == null
-          ? _platform.delete(
-              key: key,
-              options: _selectOptions(
-                iOptions,
-                aOptions,
-                lOptions,
-                webOptions,
-                mOptions,
-                wOptions,
-              ),
-            )
-          : _platform.write(
-              key: key,
-              value: value,
-              options: _selectOptions(
-                iOptions,
-                aOptions,
-                lOptions,
-                webOptions,
-                mOptions,
-                wOptions,
-              ),
-            );
+  }) async {
+    if (value == null) {
+      _platform.delete(
+        key: key,
+        options: _selectOptions(
+          iOptions,
+          aOptions,
+          lOptions,
+          webOptions,
+          mOptions,
+          wOptions,
+        ),
+      );
+    } else {
+      _platform.write(
+        key: key,
+        value: value,
+        options: _selectOptions(
+          iOptions,
+          aOptions,
+          lOptions,
+          webOptions,
+          mOptions,
+          wOptions,
+        ),
+      );
+    }
+
+    _callListenersForKey(key, value);
+  }
 
   /// Decrypts and returns the value for the given [key] or null if [key] is not in the storage.
   ///
@@ -166,18 +216,32 @@ class FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) =>
-      _platform.delete(
-        key: key,
-        options: _selectOptions(
-          iOptions,
-          aOptions,
-          lOptions,
-          webOptions,
-          mOptions,
-          wOptions,
-        ),
-      );
+  }) async {
+    _platform.delete(
+      key: key,
+      options: _selectOptions(
+        iOptions,
+        aOptions,
+        lOptions,
+        webOptions,
+        mOptions,
+        wOptions,
+      ),
+    );
+
+    _callListenersForKey(key);
+  }
+
+  void _callListenersForKey(String key, [String? value]) {
+    final listenersForKey = _listeners[key];
+    if (listenersForKey == null || listenersForKey.isEmpty) {
+      return;
+    }
+
+    for (final listener in listenersForKey) {
+      listener(value);
+    }
+  }
 
   /// Decrypts and returns all keys with associated values.
   ///
@@ -223,17 +287,24 @@ class FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) =>
-      _platform.deleteAll(
-        options: _selectOptions(
-          iOptions,
-          aOptions,
-          lOptions,
-          webOptions,
-          mOptions,
-          wOptions,
-        ),
-      );
+  }) async {
+    _platform.deleteAll(
+      options: _selectOptions(
+        iOptions,
+        aOptions,
+        lOptions,
+        webOptions,
+        mOptions,
+        wOptions,
+      ),
+    );
+
+    _listeners.forEach((key, listeners) {
+      for (final listener in listeners) {
+        listener(null);
+      }
+    });
+  }
 
   /// Select correct options based on current platform
   Map<String, String> _selectOptions(
