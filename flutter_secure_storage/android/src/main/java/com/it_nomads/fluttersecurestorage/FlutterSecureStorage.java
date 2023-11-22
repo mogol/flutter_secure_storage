@@ -60,7 +60,7 @@ public class FlutterSecureStorage {
         return options.containsKey("encryptedSharedPreferences") && options.get("encryptedSharedPreferences").equals("true") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
-    boolean containsKey(String key) {
+    public boolean containsKey(String key) {
         ensureInitialized();
         return preferences.contains(key);
     }
