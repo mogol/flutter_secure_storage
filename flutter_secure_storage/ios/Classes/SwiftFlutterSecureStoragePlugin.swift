@@ -155,8 +155,12 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin, FlutterSt
         case .failure(let err):
             var errorMessage = ""
 
-            if let errMsg = SecCopyErrorMessageString(err.status, nil) as? String {
-                errorMessage = "Code: \(err.status), Message: \(errMsg)"
+            if #available(iOS 11.3, *) {
+                if let errMsg = SecCopyErrorMessageString(err.status, nil) {
+                    errorMessage = "Code: \(err.status), Message: \(errMsg)"
+                } else {
+                    errorMessage = "Unknown security result code: \(err.status)"
+                }
             } else {
                 errorMessage = "Unknown security result code: \(err.status)"
             }
@@ -196,8 +200,12 @@ public class SwiftFlutterSecureStoragePlugin: NSObject, FlutterPlugin, FlutterSt
             } else {
                 var errorMessage = ""
 
-                if let errMsg = SecCopyErrorMessageString(status, nil) as? String {
-                    errorMessage = "Code: \(status), Message: \(errMsg)"
+                if #available(iOS 11.3, *) {
+                    if let errMsg = SecCopyErrorMessageString(status, nil) {
+                        errorMessage = "Code: \(status), Message: \(errMsg)"
+                    } else {
+                        errorMessage = "Unknown security result code: \(status)"
+                    }
                 } else {
                     errorMessage = "Unknown security result code: \(status)"
                 }
