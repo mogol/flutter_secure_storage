@@ -89,6 +89,11 @@ class FlutterSecureStorage{
             &ref
         )
         
+        if (status == errSecItemNotFound) {
+            // readAll() returns all elements, so return nil if the items does not exist
+            return FlutterSecureStorageResponse(status: errSecSuccess, value: nil)
+        }
+
         var results: [String: String] = [:]
         
         if (status == noErr) {
@@ -123,7 +128,12 @@ class FlutterSecureStorage{
     internal func deleteAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
         let keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: nil, returnData: nil)
         let status = SecItemDelete(keychainQuery as CFDictionary)
-
+        
+        if (status == errSecItemNotFound) {
+            // deleteAll() deletes all items, so return nil if the items does not exist
+            return FlutterSecureStorageResponse(status: errSecSuccess, value: nil)
+        }
+        
         return FlutterSecureStorageResponse(status: status, value: nil)
     }
     
