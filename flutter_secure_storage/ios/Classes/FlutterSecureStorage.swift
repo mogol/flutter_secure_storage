@@ -9,30 +9,24 @@ import Foundation
 
 class FlutterSecureStorage{
     private func parseAccessibleAttr(accessibility: String?) -> CFString {
-        var attrAccessible: CFString = kSecAttrAccessibleWhenUnlocked
-        if (accessibility != nil) {
-            switch accessibility {
-            case "passcode":
-                attrAccessible = kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-                break;
-            case "unlocked":
-                attrAccessible = kSecAttrAccessibleWhenUnlocked
-                break
-            case "unlocked_this_device":
-                attrAccessible = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-                break
-            case "first_unlock":
-                attrAccessible = kSecAttrAccessibleAfterFirstUnlock
-                break
-            case "first_unlock_this_device":
-                attrAccessible = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-                break
-            default:
-                attrAccessible = kSecAttrAccessibleWhenUnlocked
-            }
+        guard let accessibility = accessibility else {
+            return kSecAttrAccessibleWhenUnlocked
         }
-
-        return attrAccessible
+        
+        switch accessibility {
+        case "passcode":
+            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+        case "unlocked":
+            return kSecAttrAccessibleWhenUnlocked
+        case "unlocked_this_device":
+            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        case "first_unlock":
+            return kSecAttrAccessibleAfterFirstUnlock
+        case "first_unlock_this_device":
+            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        default:
+            return kSecAttrAccessibleWhenUnlocked
+        }
     }
 
     private func baseQuery(key: String?, groupId: String?, accountName: String?, synchronizable: Bool?, accessibility: String?, returnData: Bool?) -> Dictionary<CFString, Any> {
@@ -89,6 +83,11 @@ class FlutterSecureStorage{
             &ref
         )
         
+        if (status == errSecItemNotFound) {
+            // readAll() returns all elements, so return nil if the items does not exist
+            return FlutterSecureStorageResponse(status: errSecSuccess, value: nil)
+        }
+
         var results: [String: String] = [:]
         
         if (status == noErr) {
@@ -123,7 +122,12 @@ class FlutterSecureStorage{
     internal func deleteAll(groupId: String?, accountName: String?, synchronizable: Bool?) -> FlutterSecureStorageResponse {
         let keychainQuery = baseQuery(key: nil, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: nil, returnData: nil)
         let status = SecItemDelete(keychainQuery as CFDictionary)
-
+        
+        if (status == errSecItemNotFound) {
+            // deleteAll() deletes all items, so return nil if the items does not exist
+            return FlutterSecureStorageResponse(status: errSecSuccess, value: nil)
+        }
+        
         return FlutterSecureStorageResponse(status: status, value: nil)
     }
     
@@ -148,8 +152,8 @@ class FlutterSecureStorage{
         var keychainQuery = baseQuery(key: key, groupId: groupId, accountName: accountName, synchronizable: synchronizable, accessibility: accessibility, returnData: nil)
 
         if (keyExists) {
-            var attrAccessible = parseAccessibleAttr(accessibility: accessibility);
-
+            let attrAccessible = parseAccessibleAttr(accessibility: accessibility)
+            
             let update: [CFString: Any?] = [
                 kSecValueData: value.data(using: String.Encoding.utf8),
                 kSecAttrAccessible: attrAccessible,
