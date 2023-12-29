@@ -129,6 +129,7 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
             boolean resetOnError = false;
             try {
                 secureStorage.options = (Map<String, Object>) ((Map<String, Object>) call.arguments).get("options");
+                secureStorage.ensureOptions();
                 resetOnError = secureStorage.getResetOnError();
                 switch (call.method) {
                     case "write": {
@@ -189,12 +190,18 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                         secureStorage.deleteAll();
                         result.success("Data has been reset");
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        handleException(ex);
                     }
                 } else {
-                    throw new RuntimeException(e);
+                    handleException(e);
                 }
             }
+        }
+
+        private void handleException(Exception e) {
+            StringWriter stringWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(stringWriter));
+            result.error("Exception encountered", call.method, stringWriter.toString());
         }
     }
 }
