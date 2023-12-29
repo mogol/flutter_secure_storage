@@ -131,19 +131,22 @@ public class FlutterSecureStorage {
         editor.apply();
     }
 
+   protected void ensureOptions(){
+       if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
+           SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
+       }
+
+       if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
+           ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
+       }
+    }
     @SuppressWarnings({"ConstantConditions"})
     private void ensureInitialized() {
         // Check if already initialized.
         // TODO: Disable for now because this will break mixed usage of secureSharedPreference
 //        if (preferences != null) return;
 
-        if (options.containsKey("sharedPreferencesName") && !((String) options.get("sharedPreferencesName")).isEmpty()) {
-            SHARED_PREFERENCES_NAME = (String) options.get("sharedPreferencesName");
-        }
-
-        if (options.containsKey("preferencesKeyPrefix") && !((String) options.get("preferencesKeyPrefix")).isEmpty()) {
-            ELEMENT_PREFERENCES_KEY_PREFIX = (String) options.get("preferencesKeyPrefix");
-        }
+        ensureOptions();
 
         SharedPreferences nonEncryptedPreferences = applicationContext.getSharedPreferences(
                 SHARED_PREFERENCES_NAME,
