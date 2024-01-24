@@ -53,7 +53,7 @@ public:
       root.erase(key);
       storeToKeyring(root);
     } catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        return;
     }
   }
 
