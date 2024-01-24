@@ -45,12 +45,16 @@ public:
   }
 
   void deleteItem(const char *key) {
-    nlohmann::json root = readFromKeyring();
-    if (root.is_null()) {
+    try {
+      nlohmann::json root = readFromKeyring();
+      if (root.is_null()) {
+          return;
+      }
+      root.erase(key);
+      storeToKeyring(root);
+    } catch (const std::exception& e) {
         return;
     }
-    root.erase(key);
-    storeToKeyring(root);
   }
 
   bool deleteKeyring() { return this->storeToKeyring(nlohmann::json()); }
