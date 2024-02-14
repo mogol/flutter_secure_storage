@@ -1,3 +1,6 @@
+## 3.0.0+1
+- Fix 'LocalFree' compilation error
+
 ## 3.0.0
 - Migrated to win32 package replacing C.
 - Changed PathNotFoundException to FileSystemException to be backwards compatible with Flutter SDK 2.12.0
