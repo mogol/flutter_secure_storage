@@ -257,7 +257,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
           );
         } finally {
           if (plainTextBlob.ref.pbData.address != NULL) {
-            if (LocalFree(plainTextBlob.ref.pbData).address != NULL) {
+            if (LocalFree(plainTextBlob.ref.pbData.address) != NULL) {
               debugPrint(
                 'load: Failed to LocalFree with: 0x${GetLastError().toHexString(32)}',
               );
@@ -375,7 +375,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
         }
       } finally {
         if (encryptedTextBlob.ref.pbData.address != NULL) {
-          if (LocalFree(encryptedTextBlob.ref.pbData).address != NULL) {
+          if (LocalFree(encryptedTextBlob.ref.pbData.address) != NULL) {
             debugPrint(
               'save: Failed to LocalFree with: 0x${GetLastError().toHexString(32)}',
             );
