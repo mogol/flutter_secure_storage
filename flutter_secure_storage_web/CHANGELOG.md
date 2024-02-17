@@ -1,3 +1,6 @@
+## 1.1.3
+- Allow newer `js` versions to be used with this package
+
 ## 1.1.2
 - Update Dart SDK Constraint to support <4.0.0 instead of <3.0.0.
 
