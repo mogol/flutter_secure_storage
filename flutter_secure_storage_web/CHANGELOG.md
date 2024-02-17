@@ -1,4 +1,5 @@
-## 1.1.3
+## 1.2.0
+- Migrate away from `html` to `web`
 - Allow newer `js` versions to be used with this package
 
 ## 1.1.2

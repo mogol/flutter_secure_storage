@@ -18,12 +18,12 @@
 library common;
 
 import 'dart:convert' show jsonDecode;
-import 'dart:html';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:flutter_secure_storage_web/src/jsonwebkey.dart' show JsonWebKey;
 import 'package:js/js.dart';
+import 'package:web/web.dart' hide JsonWebKey;
 
 export 'jsonwebkey.dart' show JsonWebKey;
 
