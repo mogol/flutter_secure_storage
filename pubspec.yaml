@@ -1,0 +1,8 @@
+name: flutter_secure_storage_root
+
+environment:
+  sdk: '>=2.15.0 <4.0.0'
+
+dev_dependencies:
+  flutter_lints: ^3.0.1
+  melos: ^4.0.0
