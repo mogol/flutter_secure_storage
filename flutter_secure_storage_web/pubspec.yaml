@@ -13,7 +13,7 @@ dependencies:
   flutter_secure_storage_platform_interface: ^1.0.1
   flutter_web_plugins:
     sdk: flutter
-  js: ^0.6.3
+  js: ^0.7.1
 
 dev_dependencies:
   lint: ^2.0.0
