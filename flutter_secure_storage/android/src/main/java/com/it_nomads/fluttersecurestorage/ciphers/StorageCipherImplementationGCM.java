@@ -20,7 +20,7 @@ public class StorageCipherImplementationGCM implements StorageCipher {
     private static final String KEY_ALGORITHM = "AES";
     private static final String SHARED_PREFERENCES_KEY = "AESVGhpcyBpcyB0aGUga2V5IGZvciBhIHNlY3VyZSBzdG9yYWdlIEFFUyBLZXkK";
     // The typo'd name v9 stored the wrapped AES key under before v10 fixed it.
-    private static final String LEGACY_V9_KEY = "VGhpcyBpcyB0aGUga2V5IGZvcihBIHNlY3XyZZBzdG9yYWdlIEFFUyBLZXkK";
+    static final String LEGACY_V9_KEY = "VGhpcyBpcyB0aGUga2V5IGZvcihBIHNlY3XyZZBzdG9yYWdlIEFFUyBLZXkK";
 
     static final String WRAPPED_KEY_PREF = SHARED_PREFERENCES_KEY;
     static final String WRAPPED_KEY_ALGORITHM = KEY_ALGORITHM;
