@@ -177,6 +177,41 @@ public class BiometricNamespaceKeyRecoveryTest {
         assertTrue(plainKeyPrefs.contains(APP_KEY_PREF));
     }
 
+    @Test
+    public void movesAppKeyFromNamespacedLocationBackToPlainOne() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(256, new SecureRandom());
+        SecretKey oldKeystoreKey = keyGenerator.generateKey();
+        SecretKey newKeystoreKey = keyGenerator.generateKey();
+        byte[] appKey = new byte[32];
+        new SecureRandom().nextBytes(appKey);
+
+        // Simulate what StorageCipherImplementationAES23 already stored at the
+        // namespaced location (the app previously had storageNamespace set).
+        Cipher seedCipher = encryptCipher(oldKeystoreKey);
+        byte[] iv = seedCipher.getIV();
+        byte[] wrapped = seedCipher.doFinal(appKey);
+        namespacedKeyPrefs.edit()
+                .putString(APP_KEY_PREF, android.util.Base64.encodeToString(wrapped, android.util.Base64.DEFAULT))
+                .commit();
+        storeData();
+
+        FlutterSecureStorageConfig config = plainConfig();
+        assertTrue(BiometricNamespaceKeyRecovery.isRecoveryNeeded(context, config));
+
+        Cipher oldCipher = decryptCipher(oldKeystoreKey, iv);
+        byte[] decrypted = BiometricNamespaceKeyRecovery.decryptSourceAppKey(context, config, oldCipher);
+        assertArrayEquals(appKey, decrypted);
+
+        Cipher newCipher = encryptCipher(newKeystoreKey);
+        BiometricNamespaceKeyRecovery.storeTargetAppKey(context, config, newCipher, decrypted);
+
+        assertTrue(plainKeyPrefs.contains(APP_KEY_PREF));
+        // Old copy is left in place, same as LegacyNamespaceKeyRecovery.
+        assertTrue(namespacedKeyPrefs.contains(APP_KEY_PREF));
+        assertFalse(BiometricNamespaceKeyRecovery.isRecoveryNeeded(context, config));
+    }
+
     @Test(expected = Exception.class)
     public void decryptThrowsWhenSourceHasNoAppKey() throws Exception {
         storeData();
