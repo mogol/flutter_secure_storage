@@ -39,6 +39,7 @@ public final class UpgradeInspector {
     static final String REASON_MISSING_KEY_MATERIAL = "missingKeyMaterial";
     static final String REASON_DECRYPT_FAILED = "decryptFailed";
     static final String REASON_AUTHENTICATION_REQUIRED = "authenticationRequired";
+    static final String REASON_PENDING_NAMESPACE_RECOVERY = "pendingNamespaceRecovery";
 
     // Keys the Jetpack Security EncryptedSharedPreferences (Tink) backend
     // writes into the data prefs file. v11 removed that backend.
@@ -143,10 +144,25 @@ public final class UpgradeInspector {
                 Context.MODE_PRIVATE
         );
 
-        if (!hasRsaKeyStoreEntry(context, config)
-                || keyPrefs.getString(GCM_WRAPPED_KEY, null) == null) {
-            return unreadable(config, REASON_MISSING_KEY_MATERIAL, entryCount,
-                    "Stored data is orphaned: the key needed to decrypt it is gone.");
+        if (!hasRsaKeyStoreEntry(context, config) || keyPrefs.getString(GCM_WRAPPED_KEY, null) == null) {
+            // Not at the current namespace location, but initialize() relocates the
+            // key from the pre-switch location via LegacyNamespaceKeyRecovery before
+            // this could ever be a real loss - check there before reporting one.
+            FlutterSecureStorageConfig altConfig = alternateNamespaceConfig(config);
+            SharedPreferences altKeyPrefs = context.getSharedPreferences(
+                    altConfig.getEffectiveKeyStoragePrefsName(), Context.MODE_PRIVATE);
+            boolean pendingNamespaceRecovery = hasRsaKeyStoreEntry(context, altConfig)
+                    && altKeyPrefs.getString(GCM_WRAPPED_KEY, null) != null;
+            if (!pendingNamespaceRecovery) {
+                return unreadable(config, REASON_MISSING_KEY_MATERIAL, entryCount,
+                        "Stored data is orphaned: the key needed to decrypt it is gone.");
+            }
+            // The key is one initialize() call away from being relocated; a trial
+            // decrypt against the current (not-yet-recovered) location would fail
+            // and misreport this as data loss, so don't attempt it.
+            return status(STATE_OK, REASON_PENDING_NAMESPACE_RECOVERY, entryCount, false,
+                    "Key material is at the pre-namespace-switch location; the next "
+                            + "initialize() call will relocate it automatically.");
         }
 
         try {
@@ -187,6 +203,14 @@ public final class UpgradeInspector {
             count++;
         }
         return count;
+    }
+
+    // The config describing the other side of a sharedPreferencesName <->
+    // storageNamespace switch, i.e. where the key currently lives if one is
+    // pending. Mirrors LegacyNamespaceKeyRecovery's own source/target split.
+    private static FlutterSecureStorageConfig alternateNamespaceConfig(FlutterSecureStorageConfig config) {
+        String name = config.getEffectiveDataPrefsName();
+        return config.hasStorageNamespace() ? config.withoutStorageNamespace() : config.withStorageNamespace(name);
     }
 
     // Whether the RSA-OAEP key that decrypts non-biometric data is still in
