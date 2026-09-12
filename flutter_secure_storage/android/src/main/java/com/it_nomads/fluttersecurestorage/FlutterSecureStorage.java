@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.it_nomads.fluttersecurestorage.ciphers.BiometricNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.KeyCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.LegacyNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
@@ -131,6 +132,22 @@ public class FlutterSecureStorage {
         }
         this.config = config;
 
+        // A biometric-protected app key needs live authentication to move, unlike the
+        // RSA/AES-GCM case below, so it's recovered first as its own async step.
+        recoverBiometricNamespaceKeyIfNeeded(config, new SecurePreferencesCallback<>() {
+            @Override
+            public void onSuccess(Void unused) {
+                continueInitialize(config, callback);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
+    }
+
+    private void continueInitialize(FlutterSecureStorageConfig config, SecurePreferencesCallback<Void> callback) {
         SharedPreferences dataPreferences = context.getSharedPreferences(
                 config.getEffectiveDataPrefsName(),
                 Context.MODE_PRIVATE
@@ -154,6 +171,72 @@ public class FlutterSecureStorage {
                 callback.onError(e);
             }
         });
+    }
+
+    /**
+     * Moves the biometric app key to the new namespace/legacy location when the app
+     * switched between sharedPreferencesName and storageNamespace, if needed. A no-op
+     * (immediate success) when recovery isn't needed - the common case for every app
+     * that isn't using biometric-protected storage.
+     * <p>
+     * Unlike the RSA case, the wrapping key here lives in the Android Keystore and
+     * requires live authentication to use, so this takes two BiometricPrompt round
+     * trips: one to decrypt the app key at the old location, one to re-encrypt it at
+     * the new one.
+     */
+    private void recoverBiometricNamespaceKeyIfNeeded(FlutterSecureStorageConfig config,
+                                                       SecurePreferencesCallback<Void> callback) {
+        if (!BiometricNamespaceKeyRecovery.isRecoveryNeeded(context, config)) {
+            callback.onSuccess(null);
+            return;
+        }
+
+        try {
+            Log.i(TAG, "Namespace change detected for biometric-protected data; authenticating to relocate the key...");
+            Cipher oldCipher = BiometricNamespaceKeyRecovery.sourceKeyCipher(context, config).getCipher(context);
+
+            authenticateUser(oldCipher, new SecurePreferencesCallback<>() {
+                @Override
+                public void onSuccess(BiometricPrompt.AuthenticationResult unused) {
+                    try {
+                        byte[] appKey = BiometricNamespaceKeyRecovery.decryptSourceAppKey(context, config, oldCipher);
+                        Cipher newCipher = BiometricNamespaceKeyRecovery.targetKeyCipher(context, config).getCipher(context);
+
+                        authenticateUser(newCipher, new SecurePreferencesCallback<>() {
+                            @Override
+                            public void onSuccess(BiometricPrompt.AuthenticationResult unused2) {
+                                try {
+                                    BiometricNamespaceKeyRecovery.storeTargetAppKey(context, config, newCipher, appKey);
+                                    Log.i(TAG, "Biometric app key relocated for the new storage namespace.");
+                                    callback.onSuccess(null);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Failed to store relocated biometric app key", e);
+                                    callback.onError(e);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "Authentication failed while relocating biometric app key (new location)", e);
+                                callback.onError(e);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to decrypt biometric app key during relocation", e);
+                        callback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.e(TAG, "Authentication failed while relocating biometric app key (old location)", e);
+                    callback.onError(e);
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to begin biometric app key relocation", e);
+            callback.onError(e);
+        }
     }
 
     private void initializeStorageCipher(NamespacedConfigSource configSource, SecurePreferencesCallback<Void> callback) {
