@@ -119,6 +119,35 @@ public class StorageCipherFactoryTest {
     }
 
     // -------------------------------------------------------------------------
+    // getSavedKeyAlgorithm / getCurrentKeyAlgorithm — must reflect what the
+    // factory actually resolved, not whatever the constructor most recently
+    // wrote to configSource as a side effect (a caller re-reading
+    // configSource afterwards would otherwise see the just-written CURRENT
+    // value and mistake it for the true saved one - see FlutterSecureStorage
+    // .migrateData(), which used to do exactly that).
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void getSavedKeyAlgorithm_noMarkers_isDefaultNotCurrent() {
+        StorageCipherFactory f = factory("AES_GCM_NoPadding", "AES_GCM_NoPadding");
+
+        // The constructor just wrote "AES_GCM_NoPadding" as the marker (no markers existed),
+        // but the true saved algorithm must still read as the assumed default (OAEP).
+        assertEquals(KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding, f.getSavedKeyAlgorithm());
+        assertEquals(KeyCipherAlgorithm.AES_GCM_NoPadding, f.getCurrentKeyAlgorithm());
+    }
+
+    @Test
+    public void getSavedKeyAlgorithm_withMarkers_matchesMarkers() {
+        saveAlgorithms("RSA_ECB_OAEPwithSHA_256andMGF1Padding", "AES_GCM_NoPadding");
+
+        StorageCipherFactory f = factory("AES_GCM_NoPadding", "AES_GCM_NoPadding");
+
+        assertEquals(KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding, f.getSavedKeyAlgorithm());
+        assertEquals(KeyCipherAlgorithm.AES_GCM_NoPadding, f.getCurrentKeyAlgorithm());
+    }
+
+    // -------------------------------------------------------------------------
     // changedKeyAlgorithm
     // -------------------------------------------------------------------------
 

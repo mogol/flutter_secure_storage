@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 
 import com.it_nomads.fluttersecurestorage.ciphers.BiometricNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.KeyCipher;
+import com.it_nomads.fluttersecurestorage.ciphers.KeyCipherAlgorithm;
 import com.it_nomads.fluttersecurestorage.ciphers.LegacyNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipherFactory;
@@ -325,17 +326,17 @@ public class FlutterSecureStorage {
 
         try {
             // Determine if this is a biometric migration
-            String savedStorageAlg = StorageCipherFactory.readSavedKeyAlgorithm(configSource);
-            String currentStorageAlg = config.getPrefOptionStorageCipherAlgorithm();
+            KeyCipherAlgorithm savedKeyAlg = storageCipherFactory.getSavedKeyAlgorithm();
+            KeyCipherAlgorithm currentKeyAlg = storageCipherFactory.getCurrentKeyAlgorithm();
 
-            boolean fromBiometric = isBiometricAlgorithm(savedStorageAlg);
-            boolean toBiometric = isBiometricAlgorithm(currentStorageAlg);
+            boolean fromBiometric = isBiometricAlgorithm(savedKeyAlg);
+            boolean toBiometric = isBiometricAlgorithm(currentKeyAlg);
 
             if (fromBiometric || toBiometric) {
-                Log.i(TAG, "Detected biometric migration: FROM=" + savedStorageAlg + ", TO=" + currentStorageAlg);
+                Log.i(TAG, "Detected biometric migration: FROM=" + savedKeyAlg + ", TO=" + currentKeyAlg);
                 migrateBiometric(configSource, dataSource, fromBiometric, toBiometric, callback);
             } else {
-                Log.i(TAG, "Detected non-biometric migration: FROM=" + savedStorageAlg + ", TO=" + currentStorageAlg);
+                Log.i(TAG, "Detected non-biometric migration: FROM=" + savedKeyAlg + ", TO=" + currentKeyAlg);
                 // Route to backup-protected migration if flag is enabled
                 if (config.shouldMigrateWithBackup()) {
                     Log.i(TAG, "Using migration WITH BACKUP protection");
@@ -470,10 +471,10 @@ public class FlutterSecureStorage {
     }
 
     /**
-     * Checks if a storage cipher algorithm name indicates biometric authentication.
+     * Checks if a key cipher algorithm indicates biometric/Keystore-resident authentication.
      */
-    private boolean isBiometricAlgorithm(String algorithmName) {
-        return algorithmName != null && algorithmName.contains("BIOMETRIC");
+    private boolean isBiometricAlgorithm(KeyCipherAlgorithm algorithm) {
+        return algorithm == KeyCipherAlgorithm.AES_GCM_NoPadding;
     }
 
     /**
