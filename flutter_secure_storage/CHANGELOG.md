@@ -1,3 +1,21 @@
+## 10.3.6
+
+### Android
+- Fixed a fresh install with two non-namespaced instances — one using `AndroidOptions.biometric()`, one not — permanently losing the biometric instance's data: the non-biometric instance's own first-time initialization could silently destroy the biometric instance's KeyStore key.
+
+## 10.3.5
+
+### Android
+- Fixed a race where one `FlutterSecureStorage` instance completing an algorithm migration could delete a legacy key that a sibling, non-namespaced instance was still relying on.
+- Fixed namespace-switch recovery occasionally relocating the wrong (but validly-shaped) key when multiple non-namespaced instances shared the same legacy key storage file; a recovered key is now verified against real data before being trusted.
+- Fixed a crash (and subsequent data wipe) on the very first launch of a fresh `AndroidOptions.biometric()` store on a non-namespaced instance.
+
+## 10.3.4
+
+### Android
+- Fixed data loss when switching between `sharedPreferencesName` and `storageNamespace` with the same name after upgrading directly from v9.2.4 (skipping v10.0–v10.2): the wrapped key's old location and algorithm weren't recognized, so the store appeared empty.
+- Fixed the same namespace switch losing data for `AndroidOptions.biometric()` stores: the biometric app key is now relocated as part of the switch.
+
 ## 10.3.3
 
 ### Android
