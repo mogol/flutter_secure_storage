@@ -1,3 +1,9 @@
+## 10.3.4
+
+### Android
+- Fixed data loss when switching between `sharedPreferencesName` and `storageNamespace` with the same name after upgrading directly from v9.2.4 (skipping v10.0–v10.2): the wrapped key's old location and algorithm weren't recognized, so the store appeared empty.
+- Fixed the same namespace switch losing data for `AndroidOptions.biometric()` stores: the biometric app key is now relocated as part of the switch.
+
 ## 10.3.3
 
 ### Android

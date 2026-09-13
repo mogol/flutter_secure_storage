@@ -183,4 +183,89 @@ public class LegacyNamespaceKeyRecoveryTest {
         assertFalse(LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(), failing));
         assertNull(plainKeyPrefs.getString(WRAPPED, null));
     }
+
+    // -------------------------------------------------------------------------
+    // public entry point: falls back from OAEP to legacy PKCS1
+    // -------------------------------------------------------------------------
+
+    /** Only unwraps bytes it wrapped itself; mimics a real algorithm mismatch. */
+    private static class AlgorithmBoundKeyCipher implements KeyCipher {
+        private final String algorithmTag;
+
+        AlgorithmBoundKeyCipher(String algorithmTag) {
+            this.algorithmTag = algorithmTag;
+        }
+
+        @Override
+        public byte[] wrap(Key key) {
+            return (algorithmTag + ":" + Base64.encodeToString(key.getEncoded(), Base64.NO_WRAP))
+                    .getBytes();
+        }
+
+        @Override
+        public Key unwrap(byte[] wrappedKey, String algorithm) throws Exception {
+            String wrapped = new String(wrappedKey);
+            String prefix = algorithmTag + ":";
+            if (!wrapped.startsWith(prefix)) {
+                throw new Exception("BAD_DECRYPT: wrong RSA algorithm for wrapped key");
+            }
+            byte[] raw = Base64.decode(wrapped.substring(prefix.length()), Base64.NO_WRAP);
+            return new SecretKeySpec(raw, algorithm);
+        }
+
+        @Override public Cipher getCipher(Context context) { return null; }
+        @Override public void deleteKey() {}
+    }
+
+    @Test
+    public void fallsBackToNextProviderWhenFirstUnwrapFails() {
+        AlgorithmBoundKeyCipher oaepCipher = new AlgorithmBoundKeyCipher("OAEP");
+        AlgorithmBoundKeyCipher pkcs1Cipher = new AlgorithmBoundKeyCipher("PKCS1");
+        byte[] wrapped = pkcs1Cipher.wrap(new SecretKeySpec(new byte[]{1, 2, 3}, "AES"));
+        storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
+        storeData();
+
+        boolean recovered = LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(),
+                c -> oaepCipher, c -> pkcs1Cipher);
+
+        assertTrue(recovered);
+        assertArrayEquals(decode(namespacedKeyPrefs), decode(plainKeyPrefs));
+    }
+
+    // -------------------------------------------------------------------------
+    // true v9.2.4 installs: wrapped key stored under AES18's legacy name, not
+    // the v10+ GCM name recoverIfNeeded originally only looked for.
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void adoptsLegacyV9KeyNameAndKeepsItUnderTheSameName() {
+        String legacyName = StorageCipherImplementationAES18.WRAPPED_KEY_PREF;
+        plainKeyPrefs.edit().putString(legacyName, "QUJD").commit();
+        storeData();
+
+        assertTrue(run(namespacedConfig()));
+
+        assertEquals("QUJD", plainKeyPrefs.getString(legacyName, null));
+        assertArrayEquals(
+                Base64.decode(plainKeyPrefs.getString(legacyName, null), Base64.DEFAULT),
+                Base64.decode(namespacedKeyPrefs.getString(legacyName, null), Base64.DEFAULT));
+        // Must not also write it under the unrelated v10+ GCM name.
+        assertNull(namespacedKeyPrefs.getString(WRAPPED, null));
+    }
+
+    @Test
+    public void failsWhenNoProviderCanUnwrap() {
+        AlgorithmBoundKeyCipher oaepCipher = new AlgorithmBoundKeyCipher("OAEP");
+        AlgorithmBoundKeyCipher pkcs1Cipher = new AlgorithmBoundKeyCipher("PKCS1");
+        AlgorithmBoundKeyCipher unrelatedCipher = new AlgorithmBoundKeyCipher("SOMETHING_ELSE");
+        byte[] wrapped = unrelatedCipher.wrap(new SecretKeySpec(new byte[]{1, 2, 3}, "AES"));
+        storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
+        storeData();
+
+        boolean recovered = LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(),
+                c -> oaepCipher, c -> pkcs1Cipher);
+
+        assertFalse(recovered);
+        assertNull(plainKeyPrefs.getString(WRAPPED, null));
+    }
 }
