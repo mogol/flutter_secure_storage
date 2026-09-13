@@ -1,8 +1,8 @@
 ## 10.3.4
 
 ### Android
-- Fixed data loss when switching between `sharedPreferencesName` and `storageNamespace` with the same name after upgrading directly from v9.2.4 (skipping v10.0 to v10.2)
-- Fixed the same namespace switch losing data for `AndroidOptions.biometric()` stores
+- Fixed data loss when switching between `sharedPreferencesName` and `storageNamespace` with the same name after upgrading directly from v9.2.4 (skipping v10.0 to v10.2).
+- Fixed the same namespace switch losing data for `AndroidOptions.biometric()` stores.
 - Fixed a race where one `FlutterSecureStorage` instance completing an algorithm migration could delete a legacy key that a sibling, non-namespaced instance was still relying on.
 - Fixed namespace-switch recovery occasionally relocating the wrong key when multiple non-namespaced instances shared the same legacy key storage file.
 - Fixed a crash (and subsequent data wipe) on the very first launch of a fresh `AndroidOptions.biometric()` store on a non-namespaced instance.
