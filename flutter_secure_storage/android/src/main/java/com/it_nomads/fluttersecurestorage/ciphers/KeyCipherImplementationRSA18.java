@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
 import com.it_nomads.fluttersecurestorage.FlutterSecureStorageConfig;
 
@@ -24,6 +25,7 @@ import javax.security.auth.x500.X500Principal;
 
 class KeyCipherImplementationRSA18 implements KeyCipher {
 
+    private static final String TAG = "RSACipher18";
     private static final String KEYSTORE_PROVIDER_ANDROID = "AndroidKeyStore";
     private static final String TYPE_RSA = "RSA";
     protected final String keyAlias;
@@ -120,9 +122,23 @@ class KeyCipherImplementationRSA18 implements KeyCipher {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
         ks.load(null);
 
-        Key privateKey = ks.getKey(keyAlias, null);
+        Key existingKey = ks.getKey(keyAlias, null);
+        if (existingKey != null && !(existingKey instanceof PrivateKey)) {
+            // KeyCipherImplementationAES23 (biometric) uses this exact same alias formula with
+            // no distinguishing suffix, so a sibling instance using biometric storage can leave a
+            // SecretKey here instead of a PrivateKey. A SecretKey entry has no certificate, so the
+            // stale null-cert check below would otherwise treat this as "no key yet" and silently
+            // regenerate over it - destroying the sibling's key. Treat the wrong type explicitly
+            // instead: replace it with a fresh RSA key pair.
+            Log.w(TAG, "Alias " + keyAlias + " holds a " + existingKey.getClass().getSimpleName()
+                    + ", not a PrivateKey - replacing it with a fresh RSA key pair");
+            ks.deleteEntry(keyAlias);
+            createKeys(context);
+            return;
+        }
+
         Certificate cert = ks.getCertificate(keyAlias);
-        if (privateKey == null || cert == null) {
+        if (existingKey == null || cert == null) {
             createKeys(context);
         }
     }

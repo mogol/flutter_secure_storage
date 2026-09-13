@@ -472,6 +472,26 @@ public class FlutterSecureStorage {
     }
 
     /**
+     * Whether there is any of this instance's own encrypted data in dataSource. Used to decide
+     * whether an ASSUMED (not real) saved algorithm's KeyCipher needs to be constructed at all:
+     * when there are no markers, "saved algorithm" is only a guess (the legacy default), and on a
+     * non-namespaced store that guessed KeyCipher's Keystore alias is shared with every other
+     * non-namespaced instance in the app (see canSafelyDeleteOldKey's docs). Constructing it when
+     * there's nothing to decrypt is not just wasteful - if a sibling instance is using a
+     * different algorithm whose implementation happens to resolve to that same alias (e.g.
+     * KeyCipherImplementationRSA18 and KeyCipherImplementationAES23 both use the bare,
+     * no-suffix alias), constructing the guessed cipher clobbers the sibling's real key.
+     */
+    private boolean hasAnyEncryptedData(SharedPreferences dataSource) {
+        for (Map.Entry<String, ?> entry : dataSource.getAll().entrySet()) {
+            if (entry.getValue() instanceof String && entry.getKey().contains(config.getSharedPreferencesKeyPrefix())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Migrates data from old cipher algorithm to new cipher algorithm.
      * Handles both biometric and non-biometric migration paths.
      *
@@ -661,26 +681,32 @@ public class FlutterSecureStorage {
         Log.i(TAG, "Starting non-biometric migration (no authentication required)...");
 
         try {
-            // Step 1: Get saved cipher (old algorithm, no auth needed)
-            Log.d(TAG, "Step 1/6: Initializing saved cipher...");
-            StorageCipher savedCipher = storageCipherFactory.getSavedStorageCipher(context, null);
+            Map<String, String> decryptedCache;
+            if (storageCipherFactory.assumedSavedAlgorithms() && !hasAnyEncryptedData(dataSource)) {
+                Log.d(TAG, "Steps 1-3/6: Nothing stored under the assumed legacy algorithm; skipping old-key handling.");
+                decryptedCache = new HashMap<>();
+            } else {
+                // Step 1: Get saved cipher (old algorithm, no auth needed)
+                Log.d(TAG, "Step 1/6: Initializing saved cipher...");
+                StorageCipher savedCipher = storageCipherFactory.getSavedStorageCipher(context, null);
 
-            // Step 2: Decrypt all data with old cipher
-            Log.d(TAG, "Step 2/6: Decrypting all data with saved cipher...");
-            Map<String, String> decryptedCache = decryptAllWithSavedCipher(dataSource, savedCipher);
+                // Step 2: Decrypt all data with old cipher
+                Log.d(TAG, "Step 2/6: Decrypting all data with saved cipher...");
+                decryptedCache = decryptAllWithSavedCipher(dataSource, savedCipher);
 
-            // Step 3: Delete OLD RSA key from Android KeyStore
-            // Critical: Must delete before creating new RSA key to avoid key collision
-            Log.d(TAG, "Step 3/6: Deleting old RSA key from Android KeyStore...");
-            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
-                try {
-                    KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
-                    savedKeyCipher.deleteKey();
+                // Step 3: Delete OLD RSA key from Android KeyStore
+                // Critical: Must delete before creating new RSA key to avoid key collision
+                Log.d(TAG, "Step 3/6: Deleting old RSA key from Android KeyStore...");
+                if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
+                    try {
+                        KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
+                        savedKeyCipher.deleteKey();
 
-                    savedCipher.deleteKey(context);
-                    Log.d(TAG, "Old key deleted from KeyStore");
-                } catch (Exception deleteError) {
-                    Log.w(TAG, "Failed to delete old key from KeyStore (may not exist)", deleteError);
+                        savedCipher.deleteKey(context);
+                        Log.d(TAG, "Old key deleted from KeyStore");
+                    } catch (Exception deleteError) {
+                        Log.w(TAG, "Failed to delete old key from KeyStore (may not exist)", deleteError);
+                    }
                 }
             }
 
@@ -875,23 +901,29 @@ public class FlutterSecureStorage {
     private void migrateFromNonBiometricToBiometric(NamespacedConfigSource configSource, SharedPreferences dataSource,
                                                     SecurePreferencesCallback<Void> callback) {
         try {
-            // Step 1: Decrypt with OLD non-biometric cipher (no auth)
-            Log.d(TAG, "Step 1/6: Decrypting all data with saved non-biometric cipher...");
-            StorageCipher savedCipher = storageCipherFactory.getSavedStorageCipher(context, null);
-            Map<String, String> decryptedCache = decryptAllWithSavedCipher(dataSource, savedCipher);
+            Map<String, String> decryptedCache;
+            if (storageCipherFactory.assumedSavedAlgorithms() && !hasAnyEncryptedData(dataSource)) {
+                Log.d(TAG, "Steps 1-2/6: Nothing stored under the assumed legacy algorithm; skipping old-key handling.");
+                decryptedCache = new HashMap<>();
+            } else {
+                // Step 1: Decrypt with OLD non-biometric cipher (no auth)
+                Log.d(TAG, "Step 1/6: Decrypting all data with saved non-biometric cipher...");
+                StorageCipher savedCipher = storageCipherFactory.getSavedStorageCipher(context, null);
+                decryptedCache = decryptAllWithSavedCipher(dataSource, savedCipher);
 
-            // Step 2: Delete OLD RSA key from Android KeyStore
-            // Critical: Must delete before creating new biometric AES key to avoid key type collision
-            Log.d(TAG, "Step 2/6: Deleting old RSA key from Android KeyStore...");
-            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
-                try {
-                    KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
-                    savedKeyCipher.deleteKey();
+                // Step 2: Delete OLD RSA key from Android KeyStore
+                // Critical: Must delete before creating new biometric AES key to avoid key type collision
+                Log.d(TAG, "Step 2/6: Deleting old RSA key from Android KeyStore...");
+                if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
+                    try {
+                        KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
+                        savedKeyCipher.deleteKey();
 
-                    savedCipher.deleteKey(context);
-                    Log.d(TAG, "Old key deleted from KeyStore");
-                } catch (Exception deleteError) {
-                    Log.w(TAG, "Failed to delete old key from KeyStore (may not exist)", deleteError);
+                        savedCipher.deleteKey(context);
+                        Log.d(TAG, "Old key deleted from KeyStore");
+                    } catch (Exception deleteError) {
+                        Log.w(TAG, "Failed to delete old key from KeyStore (may not exist)", deleteError);
+                    }
                 }
             }
 
