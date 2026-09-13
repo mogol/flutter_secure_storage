@@ -14,10 +14,12 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.security.Key;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -37,6 +39,7 @@ public class LegacyNamespaceKeyRecoveryTest {
     private static final String WRAPPED = StorageCipherImplementationGCM.WRAPPED_KEY_PREF;
     // Default FlutterSecureStorageConfig key prefix.
     private static final String KEY_PREFIX = "VGhpcyBpcyB0aGUgcHJlZml4IGZvciBhIHNlY3VyZSBzdG9yYWdlCg";
+    private static final String SAMPLE_KEY_BASE64 = "AAECAwQFBgcICQoLDA0ODw==";
 
     private Context context;
     private SharedPreferences plainKeyPrefs;
@@ -84,6 +87,26 @@ public class LegacyNamespaceKeyRecoveryTest {
         dataPrefs.edit().putString(KEY_PREFIX + "_token", "ciphertext").commit();
     }
 
+    /**
+     * Stores a real AES/GCM-encrypted entry so the recovery's decrypt-verification step can
+     * actually succeed against it, for tests that expect recovery to succeed. The key bytes must
+     * match what the test's fake KeyCipher unwraps the stored wrapped key to.
+     */
+    private void storeEncryptedData(byte[] aesKeyBytes) throws Exception {
+        SecretKeySpec key = new SecretKeySpec(aesKeyBytes, "AES");
+        byte[] iv = new byte[12];
+        new SecureRandom().nextBytes(iv);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
+        byte[] payload = cipher.doFinal("secret-value".getBytes());
+        byte[] combined = new byte[iv.length + payload.length];
+        System.arraycopy(iv, 0, combined, 0, iv.length);
+        System.arraycopy(payload, 0, combined, iv.length, payload.length);
+        dataPrefs.edit()
+                .putString(KEY_PREFIX + "_token", Base64.encodeToString(combined, Base64.DEFAULT))
+                .commit();
+    }
+
     private boolean run(FlutterSecureStorageConfig config) {
         return LegacyNamespaceKeyRecovery.recoverIfNeeded(context, config, fakeProvider);
     }
@@ -97,20 +120,20 @@ public class LegacyNamespaceKeyRecoveryTest {
     // -------------------------------------------------------------------------
 
     @Test
-    public void recoversNamespacedKeyIntoPlainLocation() {
-        storeKey(namespacedKeyPrefs, "QUJD");
-        storeData();
+    public void recoversNamespacedKeyIntoPlainLocation() throws Exception {
+        storeKey(namespacedKeyPrefs, SAMPLE_KEY_BASE64);
+        storeEncryptedData(Base64.decode(SAMPLE_KEY_BASE64, Base64.DEFAULT));
 
         assertTrue(run(plainConfig()));
 
         assertArrayEquals(decode(namespacedKeyPrefs), decode(plainKeyPrefs));
-        assertEquals("QUJD", namespacedKeyPrefs.getString(WRAPPED, null));
+        assertEquals(SAMPLE_KEY_BASE64, namespacedKeyPrefs.getString(WRAPPED, null));
     }
 
     @Test
     public void recoverDoesNothingWhenPlainKeyAlreadyPresent() {
         storeKey(plainKeyPrefs, "existing");
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, SAMPLE_KEY_BASE64);
         storeData();
 
         assertFalse(run(plainConfig()));
@@ -130,19 +153,19 @@ public class LegacyNamespaceKeyRecoveryTest {
     // -------------------------------------------------------------------------
 
     @Test
-    public void adoptsPlainKeyIntoNamespacedLocation() {
-        storeKey(plainKeyPrefs, "QUJD");
-        storeData();
+    public void adoptsPlainKeyIntoNamespacedLocation() throws Exception {
+        storeKey(plainKeyPrefs, SAMPLE_KEY_BASE64);
+        storeEncryptedData(Base64.decode(SAMPLE_KEY_BASE64, Base64.DEFAULT));
 
         assertTrue(run(namespacedConfig()));
 
         assertArrayEquals(decode(plainKeyPrefs), decode(namespacedKeyPrefs));
-        assertEquals("QUJD", plainKeyPrefs.getString(WRAPPED, null));
+        assertEquals(SAMPLE_KEY_BASE64, plainKeyPrefs.getString(WRAPPED, null));
     }
 
     @Test
     public void adoptDoesNothingWhenNamespacedKeyAlreadyPresent() {
-        storeKey(plainKeyPrefs, "QUJD");
+        storeKey(plainKeyPrefs, SAMPLE_KEY_BASE64);
         storeKey(namespacedKeyPrefs, "existing");
         storeData();
 
@@ -156,16 +179,16 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void doesNothingWhenDataPrefsAreEmpty() {
-        storeKey(plainKeyPrefs, "QUJD");
+        storeKey(plainKeyPrefs, SAMPLE_KEY_BASE64);
 
         assertFalse(run(namespacedConfig()));
         assertNull(namespacedKeyPrefs.getString(WRAPPED, null));
     }
 
     @Test
-    public void isIdempotent() {
-        storeKey(namespacedKeyPrefs, "QUJD");
-        storeData();
+    public void isIdempotent() throws Exception {
+        storeKey(namespacedKeyPrefs, SAMPLE_KEY_BASE64);
+        storeEncryptedData(Base64.decode(SAMPLE_KEY_BASE64, Base64.DEFAULT));
 
         assertTrue(run(plainConfig()));
         String afterFirst = plainKeyPrefs.getString(WRAPPED, null);
@@ -182,7 +205,7 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void rethrowsVirtualMachineError() {
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, SAMPLE_KEY_BASE64);
         storeData();
         LegacyNamespaceKeyRecovery.KeyCipherProvider oom = c -> {
             throw new OutOfMemoryError("boom");
@@ -198,13 +221,34 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void leavesTargetUntouchedWhenUnwrapFails() {
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, SAMPLE_KEY_BASE64);
         storeData();
         LegacyNamespaceKeyRecovery.KeyCipherProvider failing = c -> {
             throw new IllegalStateException("no key");
         };
 
         assertFalse(LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(), failing));
+        assertNull(plainKeyPrefs.getString(WRAPPED, null));
+    }
+
+    // -------------------------------------------------------------------------
+    // Bug B, found on a real device (10.x line, ported here as a hardening
+    // check): the shared plain key file can in principle hold a different
+    // instance's own, perfectly valid key under this same preference name -
+    // v11.x has only one candidate name and algorithm (no legacy PKCS1/CBC
+    // support), so there's no alternate to fall back to, but a wrong key must
+    // still be rejected rather than relocated.
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void rejectsAWrongButValidlyShapedKey() throws Exception {
+        byte[] wrongKey = new byte[16];
+        java.util.Arrays.fill(wrongKey, (byte) 0xFF);
+        storeKey(namespacedKeyPrefs, Base64.encodeToString(wrongKey, Base64.DEFAULT));
+        // Real data is encrypted with a DIFFERENT key than the one stored above.
+        storeEncryptedData(Base64.decode(SAMPLE_KEY_BASE64, Base64.DEFAULT));
+
+        assertFalse(run(plainConfig()));
         assertNull(plainKeyPrefs.getString(WRAPPED, null));
     }
 }

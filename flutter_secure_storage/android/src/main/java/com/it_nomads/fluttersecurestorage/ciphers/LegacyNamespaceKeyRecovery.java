@@ -8,7 +8,13 @@ import android.util.Log;
 import com.it_nomads.fluttersecurestorage.FlutterSecureStorageConfig;
 
 import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Moves the wrapped AES key when an app switches between sharedPreferencesName
@@ -16,11 +22,25 @@ import java.util.Map;
  * place; the data prefs file and algorithm markers already line up, so copying
  * the key across is enough. The source copy is left in place so switching back
  * keeps working. Non-biometric RSA-OAEP + AES-GCM only.
+ * <p>
+ * Every non-namespaced FlutterSecureStorage instance in an app shares the same
+ * plain key-storage file (namespace is the only thing that isolates it), so
+ * in principle a sibling instance's own wrapped key could sit under the same
+ * preference name. A candidate is only trusted once it's confirmed to
+ * actually decrypt this instance's own stored data, not just because it
+ * unwrapped without throwing.
  */
 public final class LegacyNamespaceKeyRecovery {
 
     private static final String TAG = "LegacyNamespaceKeyRecovery";
     private static final String KEY_STORAGE_PREFIX = "FlutterSecureKeyStorage";
+    // StorageCipherImplementationGCM wraps a 16-byte AES key. Some RSA/OAEP unwrap
+    // implementations don't reliably throw on a mismatch, so a wrong-key attempt can silently
+    // "succeed" with garbage; checking the result is actually AES-key-shaped catches that.
+    private static final int AES_KEY_SIZE_BYTES = 16;
+    private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
+    private static final int GCM_IV_SIZE = 12;
+    private static final int GCM_TAG_BITS = 128;
 
     /** Test seam. */
     interface KeyCipherProvider {
@@ -70,6 +90,17 @@ public final class LegacyNamespaceKeyRecovery {
                     Base64.DEFAULT);
             Key aesKey = keyCiphers.forConfig(sourceConfig)
                     .unwrap(wrapped, StorageCipherImplementationGCM.WRAPPED_KEY_ALGORITHM);
+            byte[] encodedAesKey = aesKey.getEncoded();
+            if (encodedAesKey == null || encodedAesKey.length != AES_KEY_SIZE_BYTES) {
+                throw new Exception("Unwrapped key is not AES-key-shaped ("
+                        + (encodedAesKey == null ? "null" : encodedAesKey.length + " bytes")
+                        + "); likely belongs to a different instance");
+            }
+            if (!keyDecryptsOwnData(context, name, config.getSharedPreferencesKeyPrefix(), encodedAesKey)) {
+                throw new Exception("Unwrapped key does not decrypt this instance's own data; "
+                        + "likely a different instance's key under the same preference name");
+            }
+
             byte[] rewrapped = keyCiphers.forConfig(targetConfig).wrap(aesKey);
 
             target.edit()
@@ -95,13 +126,48 @@ public final class LegacyNamespaceKeyRecovery {
     // Guards against pulling an unrelated instance's key into an empty store.
     private static boolean hasEncryptedData(Context context, String dataPrefsName,
                                             FlutterSecureStorageConfig config) {
+        return sampleEncryptedValue(context, dataPrefsName, config.getSharedPreferencesKeyPrefix()) != null;
+    }
+
+    /** True if the given raw AES key decrypts a real stored entry of this instance's own data. */
+    private static boolean keyDecryptsOwnData(Context context, String dataPrefsName, String keyPrefix,
+                                              byte[] rawAesKey) {
+        String sample = sampleEncryptedValue(context, dataPrefsName, keyPrefix);
+        if (sample == null) {
+            return false;
+        }
+        byte[] ciphertext;
+        try {
+            ciphertext = Base64.decode(sample, 0);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        if (ciphertext.length <= GCM_IV_SIZE) {
+            return false;
+        }
+        try {
+            byte[] iv = Arrays.copyOfRange(ciphertext, 0, GCM_IV_SIZE);
+            byte[] payload = Arrays.copyOfRange(ciphertext, GCM_IV_SIZE, ciphertext.length);
+            Cipher cipher = Cipher.getInstance(GCM_TRANSFORMATION);
+            AlgorithmParameterSpec spec = new GCMParameterSpec(GCM_TAG_BITS, iv);
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(rawAesKey, "AES"), spec);
+            cipher.doFinal(payload);
+            return true;
+        } catch (Throwable e) {
+            if (e instanceof VirtualMachineError) {
+                throw (VirtualMachineError) e;
+            }
+            return false;
+        }
+    }
+
+    private static String sampleEncryptedValue(Context context, String dataPrefsName, String keyPrefix) {
         SharedPreferences dataPrefs = context.getSharedPreferences(dataPrefsName, Context.MODE_PRIVATE);
-        String keyPrefix = config.getSharedPreferencesKeyPrefix();
         for (Map.Entry<String, ?> entry : dataPrefs.getAll().entrySet()) {
             if (entry.getValue() instanceof String && entry.getKey().contains(keyPrefix)) {
-                return true;
+                return (String) entry.getValue();
             }
         }
-        return false;
+        return null;
     }
 }

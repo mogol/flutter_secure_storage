@@ -501,7 +501,7 @@ public class FlutterSecureStorage {
             // Step 3: Delete OLD RSA key from Android KeyStore
             // Critical: Must delete before creating new RSA key to avoid key collision
             Log.d(TAG, "Step 3/6: Deleting old RSA key from Android KeyStore...");
-            if (storageCipherFactory.changedKeyAlgorithm()) {
+            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                 try {
                     KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                     savedKeyCipher.deleteKey();
@@ -549,6 +549,20 @@ public class FlutterSecureStorage {
         storageCipherFactory.storeCurrentAlgorithms(editor);
         editor.commit();
         Log.d(TAG, "Algorithm markers updated to current");
+    }
+
+    /**
+     * Whether the saved (old) key's Keystore alias is safe to delete after migrating off it.
+     * The alias is derived only from storageNamespace (see
+     * FlutterSecureStorageConfig.getKeyAliasSuffix()), not from sharedPreferencesName, so every
+     * FlutterSecureStorage instance that hasn't set storageNamespace shares the exact same alias.
+     * Deleting it as soon as one instance finishes migrating can permanently orphan a sibling
+     * instance that hasn't migrated yet and still needs that same key to read its own data. A
+     * namespaced alias is derived from that unique namespace, so it's never shared and safe to
+     * delete.
+     */
+    private boolean canSafelyDeleteOldKey() {
+        return config.hasStorageNamespace();
     }
 
     /**
@@ -636,7 +650,7 @@ public class FlutterSecureStorage {
                         // Step 3: Delete OLD biometric AES key from Android KeyStore
                         // Critical: Must delete before creating new RSA key to avoid key type collision
                         Log.d(TAG, "Step 3/6: Deleting old biometric AES key from Android KeyStore...");
-                        if (storageCipherFactory.changedKeyAlgorithm()) {
+                        if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                             try {
                                 KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                                 savedKeyCipher.deleteKey();
@@ -698,7 +712,7 @@ public class FlutterSecureStorage {
             // Step 2: Delete OLD RSA key from Android KeyStore
             // Critical: Must delete before creating new biometric AES key to avoid key type collision
             Log.d(TAG, "Step 2/6: Deleting old RSA key from Android KeyStore...");
-            if (storageCipherFactory.changedKeyAlgorithm()) {
+            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                 try {
                     KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                     savedKeyCipher.deleteKey();
@@ -793,7 +807,7 @@ public class FlutterSecureStorage {
                         // Step 3: Delete OLD biometric AES key from Android KeyStore
                         // Critical: Must delete before creating new biometric AES key to avoid key collision
                         Log.d(TAG, "Step 3/7: Deleting old biometric AES key from Android KeyStore...");
-                        if (storageCipherFactory.changedKeyAlgorithm()) {
+                        if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                             try {
                                 KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                                 savedKeyCipher.deleteKey();
@@ -1345,7 +1359,7 @@ public class FlutterSecureStorage {
                 updateAlgorithmMarkers(configSource);
 
                 // Delete OLD RSA keys from Android KeyStore
-                if (storageCipherFactory.changedKeyAlgorithm()) {
+                if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                     try {
                         KeyCipher savedKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                         savedKeyCipher.deleteKey();
@@ -1490,7 +1504,7 @@ public class FlutterSecureStorage {
 
                             // Step 7: Delete OLD biometric AES key from Android KeyStore
                             Log.d(TAG, "Step 7/7: Deleting old biometric AES key from Android KeyStore...");
-                            if (storageCipherFactory.changedKeyAlgorithm()) {
+                            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                                 try {
                                     KeyCipher oldKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                                     oldKeyCipher.deleteKey();
@@ -1583,7 +1597,7 @@ public class FlutterSecureStorage {
 
                             // Step 7: Delete OLD RSA key from Android KeyStore
                             Log.d(TAG, "Step 7/7: Deleting old RSA key from Android KeyStore...");
-                            if (storageCipherFactory.changedKeyAlgorithm()) {
+                            if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                                 try {
                                     KeyCipher oldKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                                     oldKeyCipher.deleteKey();
@@ -1702,7 +1716,7 @@ public class FlutterSecureStorage {
 
                                         // Step 8: Delete OLD biometric AES key from Android KeyStore
                                         Log.d(TAG, "Step 8/8: Deleting old biometric AES key from Android KeyStore...");
-                                        if (storageCipherFactory.changedKeyAlgorithm()) {
+                                        if (storageCipherFactory.changedKeyAlgorithm() && canSafelyDeleteOldKey()) {
                                             try {
                                                 KeyCipher oldKeyCipher = storageCipherFactory.getSavedKeyCipher(context);
                                                 oldKeyCipher.deleteKey();
