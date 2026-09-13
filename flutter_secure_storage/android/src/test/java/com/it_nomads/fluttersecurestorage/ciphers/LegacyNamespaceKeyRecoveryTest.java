@@ -97,19 +97,19 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void recoversNamespacedKeyIntoPlainLocation() {
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeData();
 
         assertTrue(run(plainConfig()));
 
         assertArrayEquals(decode(namespacedKeyPrefs), decode(plainKeyPrefs));
-        assertEquals("QUJD", namespacedKeyPrefs.getString(WRAPPED, null));
+        assertEquals("AAECAwQFBgcICQoLDA0ODw==", namespacedKeyPrefs.getString(WRAPPED, null));
     }
 
     @Test
     public void recoverDoesNothingWhenPlainKeyAlreadyPresent() {
         storeKey(plainKeyPrefs, "existing");
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeData();
 
         assertFalse(run(plainConfig()));
@@ -130,18 +130,18 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void adoptsPlainKeyIntoNamespacedLocation() {
-        storeKey(plainKeyPrefs, "QUJD");
+        storeKey(plainKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeData();
 
         assertTrue(run(namespacedConfig()));
 
         assertArrayEquals(decode(plainKeyPrefs), decode(namespacedKeyPrefs));
-        assertEquals("QUJD", plainKeyPrefs.getString(WRAPPED, null));
+        assertEquals("AAECAwQFBgcICQoLDA0ODw==", plainKeyPrefs.getString(WRAPPED, null));
     }
 
     @Test
     public void adoptDoesNothingWhenNamespacedKeyAlreadyPresent() {
-        storeKey(plainKeyPrefs, "QUJD");
+        storeKey(plainKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeKey(namespacedKeyPrefs, "existing");
         storeData();
 
@@ -155,7 +155,7 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void doesNothingWhenDataPrefsAreEmpty() {
-        storeKey(plainKeyPrefs, "QUJD");
+        storeKey(plainKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
 
         assertFalse(run(namespacedConfig()));
         assertNull(namespacedKeyPrefs.getString(WRAPPED, null));
@@ -163,7 +163,7 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void isIdempotent() {
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeData();
 
         assertTrue(run(plainConfig()));
@@ -174,7 +174,7 @@ public class LegacyNamespaceKeyRecoveryTest {
 
     @Test
     public void leavesTargetUntouchedWhenUnwrapFails() {
-        storeKey(namespacedKeyPrefs, "QUJD");
+        storeKey(namespacedKeyPrefs, "AAECAwQFBgcICQoLDA0ODw==");
         storeData();
         LegacyNamespaceKeyRecovery.KeyCipherProvider failing = c -> {
             throw new IllegalStateException("no key");
@@ -221,7 +221,7 @@ public class LegacyNamespaceKeyRecoveryTest {
     public void fallsBackToNextProviderWhenFirstUnwrapFails() {
         AlgorithmBoundKeyCipher oaepCipher = new AlgorithmBoundKeyCipher("OAEP");
         AlgorithmBoundKeyCipher pkcs1Cipher = new AlgorithmBoundKeyCipher("PKCS1");
-        byte[] wrapped = pkcs1Cipher.wrap(new SecretKeySpec(new byte[]{1, 2, 3}, "AES"));
+        byte[] wrapped = pkcs1Cipher.wrap(new SecretKeySpec(new byte[16], "AES"));
         storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
         storeData();
 
@@ -240,12 +240,12 @@ public class LegacyNamespaceKeyRecoveryTest {
     @Test
     public void adoptsLegacyV9KeyNameAndKeepsItUnderTheSameName() {
         String legacyName = StorageCipherImplementationAES18.WRAPPED_KEY_PREF;
-        plainKeyPrefs.edit().putString(legacyName, "QUJD").commit();
+        plainKeyPrefs.edit().putString(legacyName, "AAECAwQFBgcICQoLDA0ODw==").commit();
         storeData();
 
         assertTrue(run(namespacedConfig()));
 
-        assertEquals("QUJD", plainKeyPrefs.getString(legacyName, null));
+        assertEquals("AAECAwQFBgcICQoLDA0ODw==", plainKeyPrefs.getString(legacyName, null));
         assertArrayEquals(
                 Base64.decode(plainKeyPrefs.getString(legacyName, null), Base64.DEFAULT),
                 Base64.decode(namespacedKeyPrefs.getString(legacyName, null), Base64.DEFAULT));
@@ -258,7 +258,76 @@ public class LegacyNamespaceKeyRecoveryTest {
         AlgorithmBoundKeyCipher oaepCipher = new AlgorithmBoundKeyCipher("OAEP");
         AlgorithmBoundKeyCipher pkcs1Cipher = new AlgorithmBoundKeyCipher("PKCS1");
         AlgorithmBoundKeyCipher unrelatedCipher = new AlgorithmBoundKeyCipher("SOMETHING_ELSE");
-        byte[] wrapped = unrelatedCipher.wrap(new SecretKeySpec(new byte[]{1, 2, 3}, "AES"));
+        byte[] wrapped = unrelatedCipher.wrap(new SecretKeySpec(new byte[16], "AES"));
+        storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
+        storeData();
+
+        boolean recovered = LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(),
+                c -> oaepCipher, c -> pkcs1Cipher);
+
+        assertFalse(recovered);
+        assertNull(plainKeyPrefs.getString(WRAPPED, null));
+    }
+
+    // -------------------------------------------------------------------------
+    // observed on a real device: RSA/OAEP unwrap of PKCS1 ciphertext with an
+    // unrelated, already-existing OAEP key didn't throw - it just returned
+    // garbage. A wrong-algorithm attempt must be caught even when it doesn't
+    // throw, or the garbage gets committed as if it were the real key.
+    // -------------------------------------------------------------------------
+
+    /** Never throws; returns garbage-sized "key" material for the wrong algorithm. */
+    private static class SilentlyWrongSizeKeyCipher implements KeyCipher {
+        private final String algorithmTag;
+
+        SilentlyWrongSizeKeyCipher(String algorithmTag) {
+            this.algorithmTag = algorithmTag;
+        }
+
+        @Override
+        public byte[] wrap(Key key) {
+            return (algorithmTag + ":" + Base64.encodeToString(key.getEncoded(), Base64.NO_WRAP))
+                    .getBytes();
+        }
+
+        @Override
+        public Key unwrap(byte[] wrappedKey, String algorithm) {
+            String wrapped = new String(wrappedKey);
+            String prefix = algorithmTag + ":";
+            if (!wrapped.startsWith(prefix)) {
+                // Wrong algorithm, but doesn't throw - returns something AES-labeled
+                // and the wrong size instead, like the real provider quirk did.
+                return new SecretKeySpec(new byte[3], algorithm);
+            }
+            byte[] raw = Base64.decode(wrapped.substring(prefix.length()), Base64.NO_WRAP);
+            return new SecretKeySpec(raw, algorithm);
+        }
+
+        @Override public Cipher getCipher(Context context) { return null; }
+        @Override public void deleteKey() {}
+    }
+
+    @Test
+    public void fallsBackWhenFirstProviderSilentlyReturnsWrongSizedKey() {
+        SilentlyWrongSizeKeyCipher oaepCipher = new SilentlyWrongSizeKeyCipher("OAEP");
+        SilentlyWrongSizeKeyCipher pkcs1Cipher = new SilentlyWrongSizeKeyCipher("PKCS1");
+        byte[] wrapped = pkcs1Cipher.wrap(new SecretKeySpec(new byte[16], "AES"));
+        storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
+        storeData();
+
+        boolean recovered = LegacyNamespaceKeyRecovery.recoverIfNeeded(context, plainConfig(),
+                c -> oaepCipher, c -> pkcs1Cipher);
+
+        assertTrue(recovered);
+        assertArrayEquals(decode(namespacedKeyPrefs), decode(plainKeyPrefs));
+    }
+
+    @Test
+    public void failsWhenEveryProviderSilentlyReturnsWrongSizedKey() {
+        SilentlyWrongSizeKeyCipher oaepCipher = new SilentlyWrongSizeKeyCipher("OAEP");
+        SilentlyWrongSizeKeyCipher pkcs1Cipher = new SilentlyWrongSizeKeyCipher("PKCS1");
+        SilentlyWrongSizeKeyCipher unrelatedCipher = new SilentlyWrongSizeKeyCipher("SOMETHING_ELSE");
+        byte[] wrapped = unrelatedCipher.wrap(new SecretKeySpec(new byte[16], "AES"));
         storeKey(namespacedKeyPrefs, Base64.encodeToString(wrapped, Base64.DEFAULT));
         storeData();
 

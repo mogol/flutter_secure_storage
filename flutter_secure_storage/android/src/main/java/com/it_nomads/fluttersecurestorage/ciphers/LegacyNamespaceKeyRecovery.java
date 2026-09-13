@@ -36,6 +36,12 @@ public final class LegacyNamespaceKeyRecovery {
             StorageCipherImplementationAES18.WRAPPED_KEY_PREF,
             StorageCipherImplementationGCM.LEGACY_V9_KEY,
     };
+    // Both StorageCipherImplementationGCM and StorageCipherImplementationAES18 wrap a 16-byte
+    // AES key. Some RSA/OAEP unwrap implementations don't reliably throw on a padding mismatch
+    // (observed unwrapping real PKCS1 ciphertext with an unrelated, already-existing OAEP key
+    // without an exception), so a wrong-algorithm attempt can silently "succeed" with garbage.
+    // Checking the result is actually AES-key-shaped catches that before it's trusted.
+    private static final int AES_KEY_SIZE_BYTES = 16;
 
     /** Test seam. */
     interface KeyCipherProvider {
@@ -99,6 +105,12 @@ public final class LegacyNamespaceKeyRecovery {
             byte[] wrapped = Base64.decode(source.getString(sourceKeyPrefName, null), Base64.DEFAULT);
             Key aesKey = keyCiphers.forConfig(sourceConfig)
                     .unwrap(wrapped, StorageCipherImplementationGCM.WRAPPED_KEY_ALGORITHM);
+            byte[] encodedAesKey = aesKey.getEncoded();
+            if (encodedAesKey == null || encodedAesKey.length != AES_KEY_SIZE_BYTES) {
+                throw new Exception("Unwrapped key is not AES-key-shaped ("
+                        + (encodedAesKey == null ? "null" : encodedAesKey.length + " bytes")
+                        + "); likely the wrong RSA algorithm");
+            }
             byte[] rewrapped = keyCiphers.forConfig(targetConfig).wrap(aesKey);
 
             target.edit()
