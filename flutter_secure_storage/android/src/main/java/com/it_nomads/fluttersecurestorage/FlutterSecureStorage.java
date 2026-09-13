@@ -472,15 +472,10 @@ public class FlutterSecureStorage {
     }
 
     /**
-     * Whether there is any of this instance's own encrypted data in dataSource. Used to decide
-     * whether an ASSUMED (not real) saved algorithm's KeyCipher needs to be constructed at all:
-     * when there are no markers, "saved algorithm" is only a guess (the legacy default), and on a
-     * non-namespaced store that guessed KeyCipher's Keystore alias is shared with every other
-     * non-namespaced instance in the app (see canSafelyDeleteOldKey's docs). Constructing it when
-     * there's nothing to decrypt is not just wasteful - if a sibling instance is using a
-     * different algorithm whose implementation happens to resolve to that same alias (e.g.
-     * KeyCipherImplementationRSA18 and KeyCipherImplementationAES23 both use the bare,
-     * no-suffix alias), constructing the guessed cipher clobbers the sibling's real key.
+     * Whether dataSource has any of this instance's own encrypted entries. When there are no
+     * markers, the saved algorithm is only a guess, and its KeyCipher can share a Keystore alias
+     * with a sibling instance on a different algorithm. Skip constructing it when there's nothing
+     * to decrypt, so a guess never clobbers a sibling's real key.
      */
     private boolean hasAnyEncryptedData(SharedPreferences dataSource) {
         for (Map.Entry<String, ?> entry : dataSource.getAll().entrySet()) {
@@ -504,14 +499,9 @@ public class FlutterSecureStorage {
         Log.i(TAG, "Starting data migration from saved to current cipher algorithms...");
 
         try {
-            // Determine if this is a biometric migration. "Biometric" is a property of the KEY
-            // cipher (AES_GCM_NoPadding always maps to the Keystore-resident, prompt-capable
-            // KeyCipherImplementationAES23), not the storage cipher - both biometric and
-            // non-biometric installs use the same storage cipher name. Read these off the
-            // factory's own resolved fields, not a fresh configSource read: the factory's
-            // constructor writes the CURRENT markers into configSource as a side effect
-            // whenever none existed yet, so a re-read afterwards no longer reflects "no markers
-            // existed" - it reflects that just-written current value instead.
+            // "Biometric" is a property of the key cipher, not the storage cipher, so read the
+            // key algorithms off the factory's resolved fields rather than a fresh configSource
+            // read, which would see the CURRENT markers the factory just wrote there.
             KeyCipherAlgorithm savedKeyAlg = storageCipherFactory.getSavedKeyAlgorithm();
             KeyCipherAlgorithm currentKeyAlg = storageCipherFactory.getCurrentKeyAlgorithm();
 
@@ -657,11 +647,7 @@ public class FlutterSecureStorage {
     }
 
     /**
-     * Checks if a key cipher algorithm is the Keystore-resident, biometric-capable one
-     * (AES_GCM_NoPadding). Previously compared algorithm name strings for a literal "BIOMETRIC"
-     * substring, which every current marker (biometric or not) fails: that substring only ever
-     * appeared in the pre-v10.1 "..._BIOMETRIC" name, and KeyCipherAlgorithm.fromString() already
-     * normalizes that legacy name to AES_GCM_NoPadding before this ever sees it.
+     * Checks if a key cipher algorithm is the Keystore-resident, biometric-capable one.
      */
     private boolean isBiometricAlgorithm(KeyCipherAlgorithm algorithm) {
         return algorithm == KeyCipherAlgorithm.AES_GCM_NoPadding;
@@ -750,13 +736,8 @@ public class FlutterSecureStorage {
 
     /**
      * Whether the saved (old) key's Keystore alias is safe to delete after migrating off it.
-     * The alias is derived only from storageNamespace (see
-     * FlutterSecureStorageConfig.getKeyAliasSuffix()), not from sharedPreferencesName, so every
-     * FlutterSecureStorage instance that hasn't set storageNamespace - including every instance
-     * from a pre-storageNamespace (v9.x) install - shares the exact same alias. Deleting it as
-     * soon as one instance finishes migrating can permanently orphan a sibling instance that
-     * hasn't migrated yet and still needs that same key to read its own data. A namespaced alias
-     * is derived from that unique namespace, so it's never shared and safe to delete.
+     * Every instance without a storageNamespace shares the same alias, so deleting it can orphan
+     * a sibling instance that hasn't migrated yet. A namespaced alias is never shared.
      */
     private boolean canSafelyDeleteOldKey() {
         return config.hasStorageNamespace();

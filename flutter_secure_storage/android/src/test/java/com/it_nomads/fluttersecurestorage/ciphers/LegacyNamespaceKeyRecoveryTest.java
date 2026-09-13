@@ -87,9 +87,8 @@ public class LegacyNamespaceKeyRecoveryTest {
     }
 
     /**
-     * Stores a real AES/GCM-encrypted entry so the recovery's decrypt-verification step can
-     * actually succeed against it, for tests that expect recovery to succeed. The key bytes must
-     * match what the test's fake KeyCipher unwraps the stored wrapped key to.
+     * Stores a real AES/GCM-encrypted entry so the decrypt-verification step can succeed
+     * against it. The key bytes must match what the fake KeyCipher unwraps to.
      */
     private void storeEncryptedData(byte[] aesKeyBytes) throws Exception {
         SecretKeySpec key = new SecretKeySpec(aesKeyBytes, "AES");
@@ -277,11 +276,9 @@ public class LegacyNamespaceKeyRecoveryTest {
     }
 
     // -------------------------------------------------------------------------
-    // Bug B, found on a real device: the shared plain key file can hold more
-    // than one instance's wrapped-key entry (namespace is the only thing that
-    // isolates it). A sibling instance's own, perfectly valid key under the
-    // v10+ GCM name must not be mistaken for this instance's real key just
-    // because it's the first name checked and unwraps without throwing.
+    // A sibling instance's valid key under the v10+ GCM name must not be
+    // mistaken for this instance's real key just because it unwraps without
+    // throwing.
     // -------------------------------------------------------------------------
 
     @Test
@@ -289,7 +286,7 @@ public class LegacyNamespaceKeyRecoveryTest {
         String legacyName = StorageCipherImplementationAES18.WRAPPED_KEY_PREF;
         byte[] siblingKey = new byte[16];
         Arrays.fill(siblingKey, (byte) 0xFF);
-        // A different instance's own, real, valid key - just not this one's.
+        // A different instance's own, real, valid key, just not this one's.
         storeKey(plainKeyPrefs, Base64.encodeToString(siblingKey, Base64.DEFAULT));
         // This instance's real (legacy-named) key.
         plainKeyPrefs.edit().putString(legacyName, "AAECAwQFBgcICQoLDA0ODw==").commit();
@@ -322,10 +319,8 @@ public class LegacyNamespaceKeyRecoveryTest {
     }
 
     // -------------------------------------------------------------------------
-    // observed on a real device: RSA/OAEP unwrap of PKCS1 ciphertext with an
-    // unrelated, already-existing OAEP key didn't throw - it just returned
-    // garbage. A wrong-algorithm attempt must be caught even when it doesn't
-    // throw, or the garbage gets committed as if it were the real key.
+    // A wrong-algorithm unwrap can return garbage instead of throwing, so it
+    // must be caught by checking the result, not just the exception.
     // -------------------------------------------------------------------------
 
     /** Never throws; returns garbage-sized "key" material for the wrong algorithm. */
@@ -347,7 +342,7 @@ public class LegacyNamespaceKeyRecoveryTest {
             String wrapped = new String(wrappedKey);
             String prefix = algorithmTag + ":";
             if (!wrapped.startsWith(prefix)) {
-                // Wrong algorithm, but doesn't throw - returns something AES-labeled
+                // Wrong algorithm, but doesn't throw, returns something AES-labeled
                 // and the wrong size instead, like the real provider quirk did.
                 return new SecretKeySpec(new byte[3], algorithm);
             }

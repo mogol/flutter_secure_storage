@@ -46,12 +46,8 @@ class KeyCipherImplementationAES23 implements KeyCipher {
     }
 
     /**
-     * RSA_ECB_PKCS1Padding (KeyCipherImplementationRSA18) uses this exact same alias formula with
-     * no distinguishing suffix, so switching a store between that algorithm and this one can leave
-     * a leftover key of the wrong type under this alias - a PrivateKey where a SecretKey is
-     * expected. Treat that the same as "no key yet" rather than trying to use it (which would
-     * throw deep inside Cipher.init with a confusing provider error): delete it and generate a
-     * fresh symmetric key instead.
+     * KeyCipherImplementationRSA18 uses this exact same alias, so a leftover PrivateKey can end
+     * up here. Treat that as "no key yet" and generate a fresh symmetric key instead.
      */
     private void ensureSymmetricKeyAtAlias() throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
@@ -61,7 +57,7 @@ class KeyCipherImplementationAES23 implements KeyCipher {
             generateSymmetricKey();
         } else if (!(existingKey instanceof SecretKey)) {
             Log.w(TAG, "Alias " + keyAlias + " holds a " + existingKey.getClass().getSimpleName()
-                    + ", not a SecretKey - replacing it with a fresh symmetric key");
+                    + ", not a SecretKey, replacing it with a fresh symmetric key");
             ks.deleteEntry(keyAlias);
             generateSymmetricKey();
         }

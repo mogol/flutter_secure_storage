@@ -27,17 +27,11 @@ import javax.crypto.spec.SecretKeySpec;
  * installs that never went through the v10.0.0 OAEP migration), tried in that
  * order since OAEP is the common case.
  * <p>
- * Every non-namespaced FlutterSecureStorage instance in an app shares the same
- * plain key-storage file (namespace is the only thing that isolates it), so
- * that file can hold more than one instance's wrapped-key entry at once - e.g.
- * one instance's freshly-migrated current key alongside another's still-legacy
- * one. Every known preference name present is tried, and a candidate is only
- * trusted once it's confirmed to actually decrypt this instance's own stored
- * data; a valid-looking key that belongs to a different instance is rejected
- * the same as a wrong-algorithm unwrap failure. The entry is kept under
- * whichever preference name it was already stored under - v9.2.4 and v10+
- * each read a different name, and whichever storage cipher decrypts the data
- * later needs to find it under the name it looks for.
+ * Every non-namespaced instance shares the same plain key-storage file, so it can hold more
+ * than one instance's wrapped-key entry. Every known preference name is tried, and a candidate
+ * is only trusted once it's confirmed to decrypt this instance's own data. The entry is kept
+ * under whichever preference name it was already stored under, since v9.2.4 and v10+ each read
+ * a different name.
  */
 public final class LegacyNamespaceKeyRecovery {
 
@@ -52,14 +46,10 @@ public final class LegacyNamespaceKeyRecovery {
             StorageCipherImplementationAES18.WRAPPED_KEY_PREF,
             StorageCipherImplementationGCM.LEGACY_V9_KEY,
     };
-    // Both StorageCipherImplementationGCM and StorageCipherImplementationAES18 wrap a 16-byte
-    // AES key. Some RSA/OAEP unwrap implementations don't reliably throw on a padding mismatch
-    // (observed unwrapping real PKCS1 ciphertext with an unrelated, already-existing OAEP key
-    // without an exception), so a wrong-algorithm attempt can silently "succeed" with garbage.
-    // Checking the result is actually AES-key-shaped catches that before it's trusted.
+    // A wrong-algorithm unwrap can silently "succeed" with garbage instead of throwing, so the
+    // result is checked against the real key size (both storage ciphers wrap a 16-byte AES key).
     private static final int AES_KEY_SIZE_BYTES = 16;
-    // The two storage-cipher formats a recovered key might need to decrypt: first N bytes are
-    // the IV, the rest is the ciphertext (GCM appends its auth tag; CBC needs PKCS7 unpadding).
+    // The two storage-cipher formats a recovered key might need to decrypt.
     private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
     private static final int GCM_IV_SIZE = 12;
     private static final int GCM_TAG_BITS = 128;

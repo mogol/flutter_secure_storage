@@ -141,11 +141,9 @@ public class StorageCipherFactory {
     }
 
     /**
-     * The saved key algorithm this factory resolved at construction time. Prefer this over
-     * re-reading readSavedKeyAlgorithm(configSource) afterwards: the constructor writes the
-     * CURRENT algorithm markers into configSource as a side effect whenever none existed yet
-     * (see storeCurrentAlgorithms above), so a caller-side re-read after construction sees that
-     * write instead of the true "no markers" state this field already captured correctly.
+     * The saved key algorithm resolved at construction time. Prefer this over re-reading
+     * readSavedKeyAlgorithm(configSource) afterwards, since the constructor may have already
+     * written the current markers there.
      */
     public KeyCipherAlgorithm getSavedKeyAlgorithm() {
         return savedKeyAlgorithm;
