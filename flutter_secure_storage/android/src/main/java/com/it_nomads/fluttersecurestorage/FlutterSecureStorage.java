@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 
 import com.it_nomads.fluttersecurestorage.ciphers.BiometricNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.KeyCipher;
+import com.it_nomads.fluttersecurestorage.ciphers.KeyCipherAlgorithm;
 import com.it_nomads.fluttersecurestorage.ciphers.LegacyNamespaceKeyRecovery;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipher;
 import com.it_nomads.fluttersecurestorage.ciphers.StorageCipherFactory;
@@ -483,18 +484,25 @@ public class FlutterSecureStorage {
         Log.i(TAG, "Starting data migration from saved to current cipher algorithms...");
 
         try {
-            // Determine if this is a biometric migration
-            String savedStorageAlg = StorageCipherFactory.readSavedKeyAlgorithm(configSource);
-            String currentStorageAlg = config.getPrefOptionStorageCipherAlgorithm();
+            // Determine if this is a biometric migration. "Biometric" is a property of the KEY
+            // cipher (AES_GCM_NoPadding always maps to the Keystore-resident, prompt-capable
+            // KeyCipherImplementationAES23), not the storage cipher - both biometric and
+            // non-biometric installs use the same storage cipher name. Read these off the
+            // factory's own resolved fields, not a fresh configSource read: the factory's
+            // constructor writes the CURRENT markers into configSource as a side effect
+            // whenever none existed yet, so a re-read afterwards no longer reflects "no markers
+            // existed" - it reflects that just-written current value instead.
+            KeyCipherAlgorithm savedKeyAlg = storageCipherFactory.getSavedKeyAlgorithm();
+            KeyCipherAlgorithm currentKeyAlg = storageCipherFactory.getCurrentKeyAlgorithm();
 
-            boolean fromBiometric = isBiometricAlgorithm(savedStorageAlg);
-            boolean toBiometric = isBiometricAlgorithm(currentStorageAlg);
+            boolean fromBiometric = isBiometricAlgorithm(savedKeyAlg);
+            boolean toBiometric = isBiometricAlgorithm(currentKeyAlg);
 
             if (fromBiometric || toBiometric) {
-                Log.i(TAG, "Detected biometric migration: FROM=" + savedStorageAlg + ", TO=" + currentStorageAlg);
+                Log.i(TAG, "Detected biometric migration: FROM=" + savedKeyAlg + ", TO=" + currentKeyAlg);
                 migrateBiometric(configSource, dataSource, fromBiometric, toBiometric, callback);
             } else {
-                Log.i(TAG, "Detected non-biometric migration: FROM=" + savedStorageAlg + ", TO=" + currentStorageAlg);
+                Log.i(TAG, "Detected non-biometric migration: FROM=" + savedKeyAlg + ", TO=" + currentKeyAlg);
                 // Route to backup-protected migration if flag is enabled
                 if (config.shouldMigrateWithBackup()) {
                     Log.i(TAG, "Using migration WITH BACKUP protection");
@@ -629,10 +637,14 @@ public class FlutterSecureStorage {
     }
 
     /**
-     * Checks if a storage cipher algorithm name indicates biometric authentication.
+     * Checks if a key cipher algorithm is the Keystore-resident, biometric-capable one
+     * (AES_GCM_NoPadding). Previously compared algorithm name strings for a literal "BIOMETRIC"
+     * substring, which every current marker (biometric or not) fails: that substring only ever
+     * appeared in the pre-v10.1 "..._BIOMETRIC" name, and KeyCipherAlgorithm.fromString() already
+     * normalizes that legacy name to AES_GCM_NoPadding before this ever sees it.
      */
-    private boolean isBiometricAlgorithm(String algorithmName) {
-        return algorithmName != null && algorithmName.contains("BIOMETRIC");
+    private boolean isBiometricAlgorithm(KeyCipherAlgorithm algorithm) {
+        return algorithm == KeyCipherAlgorithm.AES_GCM_NoPadding;
     }
 
     /**
