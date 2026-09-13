@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 class KeyCipherImplementationAES23 implements KeyCipher {
@@ -41,10 +42,23 @@ class KeyCipherImplementationAES23 implements KeyCipher {
         this.context = context;
         this.config = config;
         keyAlias = createKeyAlias(context);
+        ensureSymmetricKeyAtAlias();
+    }
+
+    /**
+     * KeyCipherImplementationRSA18 uses this exact same alias, so a leftover PrivateKey can end
+     * up here. Treat that as "no key yet" and generate a fresh symmetric key instead.
+     */
+    private void ensureSymmetricKeyAtAlias() throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
         ks.load(null);
-        Key privateKey = ks.getKey(keyAlias, null);
-        if (privateKey == null) {
+        Key existingKey = ks.getKey(keyAlias, null);
+        if (existingKey == null) {
+            generateSymmetricKey();
+        } else if (!(existingKey instanceof SecretKey)) {
+            Log.w(TAG, "Alias " + keyAlias + " holds a " + existingKey.getClass().getSimpleName()
+                    + ", not a SecretKey, replacing it with a fresh symmetric key");
+            ks.deleteEntry(keyAlias);
             generateSymmetricKey();
         }
     }
@@ -75,16 +89,11 @@ class KeyCipherImplementationAES23 implements KeyCipher {
 
     @Override
     public Cipher getCipher(Context context) throws Exception {
+        ensureSymmetricKeyAtAlias();
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
         ks.load(null);
         Key key = ks.getKey(keyAlias, null);
-        if (key == null) {
-            generateSymmetricKey();  // Generate if it doesn't exist
-            key = ks.getKey(keyAlias, null);
-            return getEncryptionCipher(context, key); // `context` needs to be stored in the class
-        }
-
-        return getEncryptionCipher(context, key); // `context` needs to be stored in the class
+        return getEncryptionCipher(context, key);
     }
 
     public Cipher getEncryptionCipher(Context context, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {

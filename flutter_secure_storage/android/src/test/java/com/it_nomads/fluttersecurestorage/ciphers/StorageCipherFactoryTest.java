@@ -235,6 +235,31 @@ public class StorageCipherFactoryTest {
     }
 
     // -------------------------------------------------------------------------
+    // getSavedKeyAlgorithm / getCurrentKeyAlgorithm, must reflect what the
+    // factory resolved, not a later re-read of configSource
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void getSavedKeyAlgorithm_noMarkers_isLegacyDefaultNotCurrent() {
+        StorageCipherFactory f = factory("AES_GCM_NoPadding", "AES_GCM_NoPadding");
+
+        // The constructor just wrote "AES_GCM_NoPadding" as the marker (no markers existed),
+        // but the true saved algorithm must still read as the assumed legacy default.
+        assertEquals(KeyCipherAlgorithm.RSA_ECB_PKCS1Padding, f.getSavedKeyAlgorithm());
+        assertEquals(KeyCipherAlgorithm.AES_GCM_NoPadding, f.getCurrentKeyAlgorithm());
+    }
+
+    @Test
+    public void getSavedKeyAlgorithm_withMarkers_matchesMarkers() {
+        saveAlgorithms("RSA_ECB_PKCS1Padding", "AES_CBC_PKCS7Padding");
+
+        StorageCipherFactory f = factory("AES_GCM_NoPadding", "AES_GCM_NoPadding");
+
+        assertEquals(KeyCipherAlgorithm.RSA_ECB_PKCS1Padding, f.getSavedKeyAlgorithm());
+        assertEquals(KeyCipherAlgorithm.AES_GCM_NoPadding, f.getCurrentKeyAlgorithm());
+    }
+
+    // -------------------------------------------------------------------------
     // createStorageCipher — exercises the three dispatch branches
     // -------------------------------------------------------------------------
 

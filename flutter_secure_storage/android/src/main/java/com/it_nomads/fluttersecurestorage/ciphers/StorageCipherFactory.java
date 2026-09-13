@@ -140,6 +140,19 @@ public class StorageCipherFactory {
         return savedKeyAlgorithm.keyCipher.apply(context, config);
     }
 
+    /**
+     * The saved key algorithm resolved at construction time. Prefer this over re-reading
+     * readSavedKeyAlgorithm(configSource) afterwards, since the constructor may have already
+     * written the current markers there.
+     */
+    public KeyCipherAlgorithm getSavedKeyAlgorithm() {
+        return savedKeyAlgorithm;
+    }
+
+    public KeyCipherAlgorithm getCurrentKeyAlgorithm() {
+        return currentKeyAlgorithm;
+    }
+
     public void storeCurrentAlgorithms(SharedPreferences.Editor editor) {
         editor.putString(ELEMENT_PREFERENCES_ALGORITHM_KEY, currentKeyAlgorithm.name());
         editor.putString(ELEMENT_PREFERENCES_ALGORITHM_STORAGE, currentStorageAlgorithm.name());
