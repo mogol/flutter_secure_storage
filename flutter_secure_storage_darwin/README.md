@@ -31,6 +31,22 @@ If you have set your application up to use App Groups then you will need to add 
 
 If you are configuring this value through XCode then the string you set in the Keychain Sharing section would simply read "aoeu" with XCode appending the `$(AppIdentifierPrefix)` when it saves the configuration.
 
+### macOS: Keychain Sharing requires provisioning
+
+Adding `keychain-access-groups` enables Keychain Sharing, which requires a provisioning profile. On a free (non-Program) Apple Developer account, Xcode responds by embedding a machine-specific development provisioning profile, so the built app will only launch on the Mac that built it, and can't be distributed to other Macs (for example as a signed `.app`/`.dmg` outside the App Store).
+
+If your app doesn't actually need Keychain Sharing (no App Group, no sharing items with another app of yours), you can avoid the entitlement entirely by disabling the data protection keychain on macOS instead:
+
+```dart
+final storage = Platform.isMacOS
+    ? const FlutterSecureStorage(
+        mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+      )
+    : const FlutterSecureStorage();
+```
+
+This falls back to the legacy (non-data-protection) Keychain, which doesn't require `keychain-access-groups` or a provisioning profile.
+
 ## Usage
 
 Refer to the main [flutter_secure_storage README](../README.md) for common usage instructions.
