@@ -1,3 +1,9 @@
+## Unreleased
+
+### Android
+- Fixed `deleteAll()` clearing data from other stores that share a `sharedPreferencesName`/`storageNamespace`.
+- If you use different `preferencesKeyPrefix` values under one shared name/namespace, check your data after upgrading, use `storageNamespace` if you need real isolation.
+
 ## 10.3.4
 
 ### Android
