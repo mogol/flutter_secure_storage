@@ -280,8 +280,9 @@ void main() {
       // Write under the default accessibility level (unlocked).
       await storage.write(key: key, value: 'written_under_unlocked');
 
-      // A read under a different level must still find the item: kSecAttrAccessible
-      // filters the search, but keychain uniqueness on account+service ignores it.
+      // A read under a different level must still find the item:
+      // kSecAttrAccessible filters the search, but keychain uniqueness on
+      // account+service ignores it.
       final containsUnderOtherLevel = await storage.containsKey(
         key: key,
         iOptions: firstUnlockOptions,
