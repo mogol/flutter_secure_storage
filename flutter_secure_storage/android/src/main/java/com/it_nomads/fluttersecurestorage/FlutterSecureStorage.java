@@ -1217,7 +1217,11 @@ public class FlutterSecureStorage {
             if (enforceRequired) {
                 throw new Exception("BIOMETRIC_UNAVAILABLE: Biometric authentication requires Android 9 (API 28) or higher");
             }
-            return; // Skip authentication if not enforced
+            // Skip authentication if not enforced. Callers wait on this callback to
+            // continue (e.g. to complete a migration), so it must still fire or the
+            // caller hangs forever with no prompt ever shown.
+            securePreferencesCallback.onSuccess(null);
+            return;
         }
 
         BiometricPrompt.CryptoObject crypto = new BiometricPrompt.CryptoObject(cipher);
