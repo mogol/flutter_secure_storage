@@ -86,10 +86,13 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
 
     private FlutterSecureStorage getOrCreateStorage(FlutterSecureStorageConfig config) {
         // Use "ns:" prefix for storageNamespace to avoid collisions with legacy
-        // sharedPreferencesName keys in the map.
-        final String name = config.hasStorageNamespace()
+        // sharedPreferencesName keys in the map. The key prefix is included so two
+        // configs sharing a namespace/name but using different key prefixes don't
+        // reuse (and go stale on) the same FlutterSecureStorage instance.
+        final String namespace = config.hasStorageNamespace()
                 ? "ns:" + config.getStorageNamespace()
                 : config.getSharedPreferencesName();
+        final String name = namespace + "|" + config.getSharedPreferencesKeyPrefix();
         synchronized (storagesBySharedPreferencesName) {
             FlutterSecureStorage existing = storagesBySharedPreferencesName.get(name);
             if (existing != null) {
