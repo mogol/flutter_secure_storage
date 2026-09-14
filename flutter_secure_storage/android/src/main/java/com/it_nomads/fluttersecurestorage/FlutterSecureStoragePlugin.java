@@ -182,8 +182,17 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                                 String value = getValueFromCall(call);
 
                                 if (value != null) {
-                                    secureStorage.write(key, value);
-                                    result.success(null);
+                                    secureStorage.write(key, value, new SecurePreferencesCallback<>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            result.success(null);
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e) {
+                                            handleException(e);
+                                        }
+                                    });
                                 } else {
                                     result.error("null", null, null);
                                 }
@@ -193,15 +202,34 @@ public class FlutterSecureStoragePlugin implements MethodCallHandler, FlutterPlu
                                 String key = getKeyFromCall(secureStorage, call);
 
                                 if (secureStorage.containsKey(key)) {
-                                    String value = secureStorage.read(key);
-                                    result.success(value);
+                                    secureStorage.read(key, new SecurePreferencesCallback<>() {
+                                        @Override
+                                        public void onSuccess(String value) {
+                                            result.success(value);
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e) {
+                                            handleException(e);
+                                        }
+                                    });
                                 } else {
                                     result.success(null);
                                 }
                                 break;
                             }
                             case "readAll": {
-                                result.success(secureStorage.readAll());
+                                secureStorage.readAll(new SecurePreferencesCallback<>() {
+                                    @Override
+                                    public void onSuccess(Map<String, String> value) {
+                                        result.success(value);
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+                                        handleException(e);
+                                    }
+                                });
                                 break;
                             }
                             case "containsKey": {

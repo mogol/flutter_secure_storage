@@ -52,35 +52,65 @@ public class FlutterSecureStorage {
         return preferences.contains(key);
     }
 
-    public String read(String key) throws Exception {
-        try {
-            return readUnsafe(key);
-        } catch (Exception e) {
-            if (handleStorageError("read", key, e)) {
-                return readUnsafe(key); // Retry after deleting corrupted data
+    public void read(String key, SecurePreferencesCallback<String> callback) {
+        withStorageCipher(new SecurePreferencesCallback<>() {
+            @Override
+            public void onSuccess(StorageCipher cipher) {
+                try {
+                    callback.onSuccess(readUnsafe(cipher, key));
+                } catch (Exception e) {
+                    if (handleStorageError("read", key, e)) {
+                        try {
+                            callback.onSuccess(readUnsafe(cipher, key)); // Retry after deleting corrupted data
+                        } catch (Exception retryError) {
+                            callback.onError(retryError);
+                        }
+                    } else {
+                        callback.onError(e);
+                    }
+                }
             }
-            throw e;
-        }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
     }
 
-    private String readUnsafe(String key) throws Exception {
+    private String readUnsafe(StorageCipher cipher, String key) throws Exception {
         String rawValue = preferences.getString(key, null);
-        return decodeRawValue(rawValue);
+        return decodeRawValue(cipher, rawValue);
     }
 
-    public Map<String, String> readAll() throws Exception {
-        try {
-            return readAllUnsafe();
-        } catch (Exception e) {
-            if (handleStorageError("readAll", null, e)) {
-                return readAllUnsafe(); // Retry after deleting corrupted data
+    public void readAll(SecurePreferencesCallback<Map<String, String>> callback) {
+        withStorageCipher(new SecurePreferencesCallback<>() {
+            @Override
+            public void onSuccess(StorageCipher cipher) {
+                try {
+                    callback.onSuccess(readAllUnsafe(cipher));
+                } catch (Exception e) {
+                    if (handleStorageError("readAll", null, e)) {
+                        try {
+                            callback.onSuccess(readAllUnsafe(cipher)); // Retry after deleting corrupted data
+                        } catch (Exception retryError) {
+                            callback.onError(retryError);
+                        }
+                    } else {
+                        callback.onError(e);
+                    }
+                }
             }
-            throw e;
-        }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, String> readAllUnsafe() throws Exception {
+    private Map<String, String> readAllUnsafe(StorageCipher cipher) throws Exception {
         Map<String, String> raw = (Map<String, String>) preferences.getAll();
 
         Map<String, String> all = new HashMap<>();
@@ -88,30 +118,84 @@ public class FlutterSecureStorage {
             String keyWithPrefix = entry.getKey();
             if (keyWithPrefix.contains(config.getSharedPreferencesKeyPrefix())) {
                 String key = entry.getKey().replaceFirst(config.getSharedPreferencesKeyPrefix() + '_', "");
-                String value = decodeRawValue(entry.getValue());
+                String value = decodeRawValue(cipher, entry.getValue());
                 all.put(key, value);
             }
         }
         return all;
     }
 
-    public void write(String key, String value) throws Exception {
-        try {
-            writeUnsafe(key, value);
-        } catch (Exception e) {
-            if (handleStorageError("write", key, e)) {
-                writeUnsafe(key, value); // Retry after deleting corrupted data
-            } else {
-                throw e;
+    public void write(String key, String value, SecurePreferencesCallback<Void> callback) {
+        withStorageCipher(new SecurePreferencesCallback<>() {
+            @Override
+            public void onSuccess(StorageCipher cipher) {
+                try {
+                    writeUnsafe(cipher, key, value);
+                    callback.onSuccess(null);
+                } catch (Exception e) {
+                    if (handleStorageError("write", key, e)) {
+                        try {
+                            writeUnsafe(cipher, key, value); // Retry after deleting corrupted data
+                            callback.onSuccess(null);
+                        } catch (Exception retryError) {
+                            callback.onError(retryError);
+                        }
+                    } else {
+                        callback.onError(e);
+                    }
+                }
             }
-        }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
     }
 
-    private void writeUnsafe(String key, String value) throws Exception {
+    private void writeUnsafe(StorageCipher cipher, String key, String value) throws Exception {
         SharedPreferences.Editor editor = preferences.edit();
-        byte[] result = storageCipher.encrypt(value.getBytes(charset));
+        byte[] result = cipher.encrypt(value.getBytes(charset));
         editor.putString(key, Base64.encodeToString(result, 0));
         editor.apply();
+    }
+
+    /**
+     * Supplies the {@link StorageCipher} to use for one read/write/readAll call.
+     * <p>
+     * When {@code requireBiometricsPerOperation} is off (the common case), this is the
+     * cached {@link #storageCipher} field, unlocked once at {@link #initialize}. When it's
+     * on for a biometric-protected store, {@link #storageCipher} is intentionally left
+     * null (see {@link #initializeStorageCipher}), so a fresh cipher is authenticated and
+     * derived here instead, then discarded once the caller is done with it.
+     */
+    private void withStorageCipher(SecurePreferencesCallback<StorageCipher> callback) {
+        if (storageCipher != null) {
+            callback.onSuccess(storageCipher);
+            return;
+        }
+
+        try {
+            Cipher cipher = storageCipherFactory.getCurrentKeyCipher(context).getCipher(context);
+            authenticateUser(cipher, new SecurePreferencesCallback<>() {
+                @Override
+                public void onSuccess(BiometricPrompt.AuthenticationResult result) {
+                    try {
+                        StorageCipher freshCipher = storageCipherFactory.getCurrentStorageCipher(context, result.getCryptoObject().getCipher());
+                        callback.onSuccess(freshCipher);
+                    } catch (Exception e) {
+                        callback.onError(e);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    callback.onError(e);
+                }
+            });
+        } catch (Exception e) {
+            callback.onError(e);
+        }
     }
 
     public void delete(String key) {
@@ -264,6 +348,17 @@ public class FlutterSecureStorage {
                 // For AES_GCM_NoPadding_BIOMETRIC, cipher is already initialized from KeyStore
                 // with setUserAuthenticationRequired(false) when device has no security
                 storageCipher = storageCipherFactory.getCurrentStorageCipher(context, cipher);
+                callback.onSuccess(null);
+                return;
+            }
+
+            if (config.getRequireBiometricsPerOperation()) {
+                // Per-operation mode: verify availability now (fail fast if enforced and
+                // unavailable), but don't authenticate or cache a decrypted cipher here.
+                // storageCipher stays null, which signals read/write/readAll to derive
+                // and discard their own freshly-authenticated cipher on every call.
+                ensureBiometricAvailable(enforceRequired);
+                storageCipher = null;
                 callback.onSuccess(null);
                 return;
             }
@@ -1220,12 +1315,12 @@ public class FlutterSecureStorage {
         }
     }
 
-    private String decodeRawValue(String value) throws Exception {
+    private String decodeRawValue(StorageCipher cipher, String value) throws Exception {
         if (value == null) {
             return null;
         }
         byte[] data = Base64.decode(value, 0);
-        byte[] result = storageCipher.decrypt(data);
+        byte[] result = cipher.decrypt(data);
 
         return new String(result, charset);
     }
