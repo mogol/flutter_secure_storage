@@ -264,6 +264,54 @@ void main() {
     });
 
     testWidgets(
+        'iOS: read/write finds an item after IOSOptions.accessibility '
+        'changes to a different level',
+        skip: !Platform.isIOS, (tester) async {
+      const storage = FlutterSecureStorage();
+      const key = 'it_cross_accessibility_key';
+      const firstUnlockOptions = IOSOptions(
+        accessibility: KeychainAccessibility.first_unlock,
+      );
+
+      // Clean up any leftovers from a previous failed run, under either level.
+      await storage.delete(key: key);
+      await storage.delete(key: key, iOptions: firstUnlockOptions);
+
+      // Write under the default accessibility level (unlocked).
+      await storage.write(key: key, value: 'written_under_unlocked');
+
+      // A read under a different level must still find the item: kSecAttrAccessible
+      // filters the search, but keychain uniqueness on account+service ignores it.
+      final containsUnderOtherLevel = await storage.containsKey(
+        key: key,
+        iOptions: firstUnlockOptions,
+      );
+      expect(containsUnderOtherLevel, isTrue);
+
+      final readUnderOtherLevel = await storage.read(
+        key: key,
+        iOptions: firstUnlockOptions,
+      );
+      expect(readUnderOtherLevel, 'written_under_unlocked');
+
+      // A write under the new level must migrate the item rather than throw
+      // errSecDuplicateItem.
+      await storage.write(
+        key: key,
+        value: 'written_under_first_unlock',
+        iOptions: firstUnlockOptions,
+      );
+      final readAfterMigration = await storage.read(
+        key: key,
+        iOptions: firstUnlockOptions,
+      );
+      expect(readAfterMigration, 'written_under_first_unlock');
+
+      // Cleanup
+      await storage.delete(key: key, iOptions: firstUnlockOptions);
+    });
+
+    testWidgets(
         'iOS device: useSecureEnclave=true with non-prompting access control (applicationPassword) write/read/delete',
         skip: !(Platform.isIOS &&
             !Platform.environment.containsKey('SIMULATOR_DEVICE_NAME')),
