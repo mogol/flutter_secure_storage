@@ -402,11 +402,16 @@ public class FlutterSecureStorage {
                     try {
                         storageCipher = storageCipherFactory.getCurrentStorageCipher(context, result.getCryptoObject().getCipher());
                         Log.d(TAG, "Biometric authentication succeeded");
+                        callback.onSuccess(null);
                     } catch (Exception e) {
-                        Log.e(TAG, "Failed to initialize storage cipher after authentication", e);
-                        callback.onError(e);
+                        // The Keystore authenticated the user, but the app key still can't be
+                        // decrypted (corrupted state, or an OEM Keystore invalidating it
+                        // independently of BiometricPrompt's own success signal). Recover the
+                        // same way a synchronous key mismatch does, instead of leaving the store
+                        // permanently broken.
+                        handleKeyMismatch(configSource, callback, e,
+                                "Biometric key decrypt failed after successful authentication");
                     }
-                    callback.onSuccess(null);
                 }
 
                 @Override
