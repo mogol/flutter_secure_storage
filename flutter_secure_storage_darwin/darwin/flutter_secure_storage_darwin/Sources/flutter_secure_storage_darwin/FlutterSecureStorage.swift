@@ -172,6 +172,37 @@ class FlutterSecureStorage {
         return query
     }
 
+    /// All accessibility levels the plugin has ever exposed, used to search for an item across
+    /// every level when the current query's level doesn't match. kSecAttrAccessible is a strict
+    /// filter, but keychain uniqueness on account+service+access group ignores it, so an item
+    /// written under one level becomes unreadable and un-addable after the caller switches
+    /// `IOSOptions(accessibility:)` to another.
+    private static let allAccessibilityLevels: [CFString] = [
+        kSecAttrAccessibleWhenUnlocked,
+        kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+        kSecAttrAccessibleAfterFirstUnlock,
+        kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+    ]
+
+    /// Builds a query for every accessibility level other than the one requested, so a lookup can
+    /// find an item written before the caller switched accessibility levels. Scoped the same way
+    /// as `legacyQuery`: skipped for accessControlFlags-protected and Secure Enclave items, which
+    /// have their own access semantics.
+    private func crossAccessibilityQueries(from params: KeychainQueryParameters) -> [[CFString: Any]] {
+        guard params.accessControlFlags == nil || params.accessControlFlags?.isEmpty == true else { return [] }
+        guard !(params.useSecureEnclave ?? false) else { return [] }
+
+        let currentLevel = parseAccessibleAttr(params.accessibilityLevel)
+        return FlutterSecureStorage.allAccessibilityLevels
+            .filter { $0 != currentLevel }
+            .map { level in
+                var query = baseQuery(from: params)
+                query[kSecAttrAccessible] = level
+                return query
+            }
+    }
+
     /// Constructs a keychain query dictionary from the given parameters.
     private func baseQuery(from params: KeychainQueryParameters) -> [CFString: Any] {
         // Validate parameters
@@ -408,8 +439,19 @@ class FlutterSecureStorage {
             // Fall back to the legacy SecAccessControl envelope for items written by older
             // plugin versions (see #1158).
             if status == errSecItemNotFound, let legacy = legacyQuery(from: modifiedParams) {
-                return SecItemCopyMatching(legacy as CFDictionary, nil)
+                let legacyStatus = SecItemCopyMatching(legacy as CFDictionary, nil)
+                if legacyStatus != errSecItemNotFound { return legacyStatus }
             }
+
+            // Fall back across every other accessibility level for items written before the
+            // caller switched IOSOptions(accessibility:).
+            if status == errSecItemNotFound {
+                for otherQuery in crossAccessibilityQueries(from: modifiedParams) {
+                    let otherStatus = SecItemCopyMatching(otherQuery as CFDictionary, nil)
+                    if otherStatus != errSecItemNotFound { return otherStatus }
+                }
+            }
+
             return status
         }
 
@@ -506,6 +548,20 @@ class FlutterSecureStorage {
             }
         }
 
+        // Also check every other accessibility level so items written before the caller
+        // switched levels are included.
+        for var otherQuery in crossAccessibilityQueries(from: params) {
+            otherQuery[kSecMatchLimit] = kSecMatchLimitAll
+            otherQuery[kSecReturnAttributes] = true
+            otherQuery[kSecReturnData] = true
+
+            var otherRef: AnyObject?
+            let otherStatus = SecItemCopyMatching(otherQuery as CFDictionary, &otherRef)
+            if otherStatus == errSecSuccess {
+                collectResults(from: otherRef, into: &results)
+            }
+        }
+
         return FlutterSecureStorageResponse(status: errSecSuccess, value: results)
     }
 
@@ -521,6 +577,15 @@ class FlutterSecureStorage {
             // plugin versions (see #1158).
             if status == errSecItemNotFound, let legacy = legacyQuery(from: params) {
                 status = SecItemCopyMatching(legacy as CFDictionary, &ref)
+            }
+
+            // Fall back across every other accessibility level for items written before the
+            // caller switched IOSOptions(accessibility:).
+            if status == errSecItemNotFound {
+                for otherQuery in crossAccessibilityQueries(from: params) {
+                    status = SecItemCopyMatching(otherQuery as CFDictionary, &ref)
+                    if status != errSecItemNotFound { break }
+                }
             }
 
             if (status == errSecItemNotFound) {
