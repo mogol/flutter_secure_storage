@@ -490,15 +490,18 @@ void main() {
       expect(options.toMap()['storageCipherAlgorithm'], 'AES_GCM_NoPadding');
     });
 
-    test('AndroidOptions.biometric with requireBiometricsPerOperation=true', () {
-      const options = AndroidOptions.biometric(
-        enforceBiometrics: true,
-        requireBiometricsPerOperation: true,
-      );
+    test(
+      'AndroidOptions.biometric with requireBiometricsPerOperation=true',
+      () {
+        const options = AndroidOptions.biometric(
+          enforceBiometrics: true,
+          requireBiometricsPerOperation: true,
+        );
 
-      expect(options.toMap()['enforceBiometrics'], 'true');
-      expect(options.toMap()['requireBiometricsPerOperation'], 'true');
-    });
+        expect(options.toMap()['enforceBiometrics'], 'true');
+        expect(options.toMap()['requireBiometricsPerOperation'], 'true');
+      },
+    );
 
     test('AndroidOptions with AES key cipher (for biometric support)', () {
       const options = AndroidOptions(
@@ -557,14 +560,17 @@ void main() {
       expect(copied.toMap()['storageNamespace'], 'updated');
     });
 
-    test('copyWith should correctly override requireBiometricsPerOperation', () {
-      const original = AndroidOptions.biometric(enforceBiometrics: true);
+    test(
+      'copyWith should correctly override requireBiometricsPerOperation',
+      () {
+        const original = AndroidOptions.biometric(enforceBiometrics: true);
 
-      final copied = original.copyWith(requireBiometricsPerOperation: true);
+        final copied = original.copyWith(requireBiometricsPerOperation: true);
 
-      expect(copied.toMap()['requireBiometricsPerOperation'], 'true');
-      expect(original.toMap()['requireBiometricsPerOperation'], 'false');
-    });
+        expect(copied.toMap()['requireBiometricsPerOperation'], 'true');
+        expect(original.toMap()['requireBiometricsPerOperation'], 'false');
+      },
+    );
 
     test('copyWith without changes should retain original values', () {
       const original = AndroidOptions(
