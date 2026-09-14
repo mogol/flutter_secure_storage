@@ -1251,13 +1251,13 @@ public class FlutterSecureStorage {
             // DEVICE_CREDENTIAL as a fallback conflicts with a negative button; only add one
             // when using strong-biometric-only (no credential fallback).
             if (config.isStrongBiometricOnly()) {
-                promptInfoBuilder.setNegativeButton(config.getBiometricPromptNegativeButton(), executor, (dialog, which) -> cancellationSignal.cancel());
+                promptInfoBuilder.setNegativeButton(config.getBiometricPromptNegativeButton(), executor, (dialog, which) -> {});
             }
         } else {
             // Android 10 (API level 29) and lower: setAllowedAuthenticators is unavailable.
             // Device credentials are not enabled (setDeviceCredentialAllowed defaults to false),
             // so a negative button is required.
-            promptInfoBuilder.setNegativeButton(config.getBiometricPromptNegativeButton(), executor, (dialog, which) -> cancellationSignal.cancel());
+            promptInfoBuilder.setNegativeButton(config.getBiometricPromptNegativeButton(), executor, (dialog, which) -> {});
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
