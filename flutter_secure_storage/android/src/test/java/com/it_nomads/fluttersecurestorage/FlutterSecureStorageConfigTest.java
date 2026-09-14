@@ -56,6 +56,11 @@ public class FlutterSecureStorageConfigTest {
     }
 
     @Test
+    public void defaults_requireBiometricsPerOperation_isFalse() {
+        assertFalse(emptyConfig().getRequireBiometricsPerOperation());
+    }
+
+    @Test
     public void defaults_isStrongBiometricOnly_isFalse() {
         assertFalse(emptyConfig().isStrongBiometricOnly());
     }
@@ -115,6 +120,12 @@ public class FlutterSecureStorageConfigTest {
     public void custom_enforceBiometrics_true() {
         FlutterSecureStorageConfig config = configFrom(FlutterSecureStorageConfig.PREF_OPTION_ENFORCE_BIOMETRICS, "true");
         assertTrue(config.getEnforceBiometrics());
+    }
+
+    @Test
+    public void custom_requireBiometricsPerOperation_true() {
+        FlutterSecureStorageConfig config = configFrom(FlutterSecureStorageConfig.PREF_OPTION_REQUIRE_BIOMETRICS_PER_OPERATION, "true");
+        assertTrue(config.getRequireBiometricsPerOperation());
     }
 
     @Test
@@ -279,6 +290,12 @@ public class FlutterSecureStorageConfigTest {
     public void toString_containsEnforceBiometrics() {
         FlutterSecureStorageConfig config = configFrom(FlutterSecureStorageConfig.PREF_OPTION_ENFORCE_BIOMETRICS, "true");
         assertTrue(config.toString().contains("enforceBiometrics=true"));
+    }
+
+    @Test
+    public void toString_containsRequireBiometricsPerOperation() {
+        FlutterSecureStorageConfig config = configFrom(FlutterSecureStorageConfig.PREF_OPTION_REQUIRE_BIOMETRICS_PER_OPERATION, "true");
+        assertTrue(config.toString().contains("requireBiometricsPerOperation=true"));
     }
 
     // -------------------------------------------------------------------------

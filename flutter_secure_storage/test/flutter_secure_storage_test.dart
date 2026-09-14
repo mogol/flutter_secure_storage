@@ -376,6 +376,7 @@ void main() {
         'migrateOnAlgorithmChange': 'true',
         'migrateWithBackup': 'false',
         'enforceBiometrics': 'false',
+        'requireBiometricsPerOperation': 'false',
         'keyCipherAlgorithm': 'RSA_ECB_OAEPwithSHA_256andMGF1Padding',
         'storageCipherAlgorithm': 'AES_GCM_NoPadding',
         'biometricType': 'biometricOrDeviceCredential',
@@ -414,6 +415,7 @@ void main() {
         'migrateOnAlgorithmChange': 'false',
         'migrateWithBackup': 'false',
         'enforceBiometrics': 'true',
+        'requireBiometricsPerOperation': 'false',
         'keyCipherAlgorithm': 'AES_GCM_NoPadding',
         'storageCipherAlgorithm': 'AES_GCM_NoPadding',
         'biometricType': 'biometricOrDeviceCredential',
@@ -436,6 +438,7 @@ void main() {
           'migrateOnAlgorithmChange': 'true',
           'migrateWithBackup': 'false',
           'enforceBiometrics': 'false',
+          'requireBiometricsPerOperation': 'false',
           'keyCipherAlgorithm': 'AES_GCM_NoPadding',
           'storageCipherAlgorithm': 'AES_GCM_NoPadding',
           'biometricType': 'biometricOrDeviceCredential',
@@ -462,6 +465,7 @@ void main() {
         'migrateOnAlgorithmChange': 'true',
         'migrateWithBackup': 'false',
         'enforceBiometrics': 'true',
+        'requireBiometricsPerOperation': 'false',
         'keyCipherAlgorithm': 'AES_GCM_NoPadding',
         'storageCipherAlgorithm': 'AES_GCM_NoPadding',
         'biometricType': 'biometricOrDeviceCredential',
@@ -485,6 +489,19 @@ void main() {
       expect(options.toMap()['keyCipherAlgorithm'], 'AES_GCM_NoPadding');
       expect(options.toMap()['storageCipherAlgorithm'], 'AES_GCM_NoPadding');
     });
+
+    test(
+      'AndroidOptions.biometric with requireBiometricsPerOperation=true',
+      () {
+        const options = AndroidOptions.biometric(
+          enforceBiometrics: true,
+          requireBiometricsPerOperation: true,
+        );
+
+        expect(options.toMap()['enforceBiometrics'], 'true');
+        expect(options.toMap()['requireBiometricsPerOperation'], 'true');
+      },
+    );
 
     test('AndroidOptions with AES key cipher (for biometric support)', () {
       const options = AndroidOptions(
@@ -516,6 +533,7 @@ void main() {
         'migrateOnAlgorithmChange': 'false',
         'migrateWithBackup': 'false',
         'enforceBiometrics': 'true',
+        'requireBiometricsPerOperation': 'false',
         'keyCipherAlgorithm': 'AES_GCM_NoPadding',
         'storageCipherAlgorithm': 'AES_GCM_NoPadding',
         'biometricType': 'biometricOrDeviceCredential',
@@ -541,6 +559,18 @@ void main() {
       expect(copied.toMap()['enforceBiometrics'], 'true');
       expect(copied.toMap()['storageNamespace'], 'updated');
     });
+
+    test(
+      'copyWith should correctly override requireBiometricsPerOperation',
+      () {
+        const original = AndroidOptions.biometric(enforceBiometrics: true);
+
+        final copied = original.copyWith(requireBiometricsPerOperation: true);
+
+        expect(copied.toMap()['requireBiometricsPerOperation'], 'true');
+        expect(original.toMap()['requireBiometricsPerOperation'], 'false');
+      },
+    );
 
     test('copyWith without changes should retain original values', () {
       const original = AndroidOptions(

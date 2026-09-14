@@ -52,6 +52,7 @@ class AndroidOptions extends Options {
     bool migrateOnAlgorithmChange = true,
     bool migrateWithBackup = false,
     bool enforceBiometrics = false,
+    bool requireBiometricsPerOperation = false,
     KeyCipherAlgorithm keyCipherAlgorithm =
         KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
     StorageCipherAlgorithm storageCipherAlgorithm =
@@ -68,6 +69,7 @@ class AndroidOptions extends Options {
        _migrateOnAlgorithmChange = migrateOnAlgorithmChange,
        _migrateWithBackup = migrateWithBackup,
        _enforceBiometrics = enforceBiometrics,
+       _requireBiometricsPerOperation = requireBiometricsPerOperation,
        _keyCipherAlgorithm = keyCipherAlgorithm,
        _storageCipherAlgorithm = storageCipherAlgorithm,
        _biometricType = biometricType,
@@ -86,6 +88,7 @@ class AndroidOptions extends Options {
     bool migrateOnAlgorithmChange = true,
     bool migrateWithBackup = false,
     bool enforceBiometrics = false,
+    bool requireBiometricsPerOperation = false,
     AndroidBiometricType biometricType =
         AndroidBiometricType.biometricOrDeviceCredential,
     bool requireBiometricConfirmation = true,
@@ -98,6 +101,7 @@ class AndroidOptions extends Options {
        _migrateOnAlgorithmChange = migrateOnAlgorithmChange,
        _migrateWithBackup = migrateWithBackup,
        _enforceBiometrics = enforceBiometrics,
+       _requireBiometricsPerOperation = requireBiometricsPerOperation,
        _keyCipherAlgorithm = KeyCipherAlgorithm.AES_GCM_NoPadding,
        _storageCipherAlgorithm = StorageCipherAlgorithm.AES_GCM_NoPadding,
        _biometricType = biometricType,
@@ -141,6 +145,22 @@ class AndroidOptions extends Options {
   ///
   /// Defaults to false.
   final bool _enforceBiometrics;
+
+  /// Whether a fresh biometric/PIN authentication is required for every
+  /// `read`/`readAll`/`write` call, instead of only the first one.
+  ///
+  /// By default, once the app key has been unlocked (on the first call after
+  /// the app starts), it is kept in memory and reused for later calls
+  /// without prompting again. Setting this to `true` disables that reuse:
+  /// the app key is decrypted fresh for each call and never cached, so a
+  /// biometric prompt appears every time.
+  ///
+  /// Only takes effect when biometric authentication is actually active
+  /// (i.e. combined with `AndroidOptions.biometric()` on a device that has
+  /// biometrics/device credentials enrolled); otherwise this is a no-op.
+  ///
+  /// Defaults to false.
+  final bool _requireBiometricsPerOperation;
 
   /// Algorithm used to encrypt the secret key.
   /// By default RSA/ECB/OAEPWithSHA-256AndMGF1Padding is used (API 23+).
@@ -214,6 +234,7 @@ class AndroidOptions extends Options {
     'migrateOnAlgorithmChange': '$_migrateOnAlgorithmChange',
     'migrateWithBackup': '$_migrateWithBackup',
     'enforceBiometrics': '$_enforceBiometrics',
+    'requireBiometricsPerOperation': '$_requireBiometricsPerOperation',
     'keyCipherAlgorithm': _keyCipherAlgorithm.name,
     'storageCipherAlgorithm': _storageCipherAlgorithm.name,
     'biometricType': _biometricType.name,
@@ -232,6 +253,7 @@ class AndroidOptions extends Options {
     bool? migrateOnAlgorithmChange,
     bool? migrateWithBackup,
     bool? enforceBiometrics,
+    bool? requireBiometricsPerOperation,
     KeyCipherAlgorithm? keyCipherAlgorithm,
     StorageCipherAlgorithm? storageCipherAlgorithm,
     AndroidBiometricType? biometricType,
@@ -247,6 +269,8 @@ class AndroidOptions extends Options {
         migrateOnAlgorithmChange ?? _migrateOnAlgorithmChange,
     migrateWithBackup: migrateWithBackup ?? _migrateWithBackup,
     enforceBiometrics: enforceBiometrics ?? _enforceBiometrics,
+    requireBiometricsPerOperation:
+        requireBiometricsPerOperation ?? _requireBiometricsPerOperation,
     keyCipherAlgorithm: keyCipherAlgorithm ?? _keyCipherAlgorithm,
     storageCipherAlgorithm: storageCipherAlgorithm ?? _storageCipherAlgorithm,
     biometricType: biometricType ?? _biometricType,
