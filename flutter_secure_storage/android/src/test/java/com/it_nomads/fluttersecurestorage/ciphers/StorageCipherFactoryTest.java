@@ -119,12 +119,8 @@ public class StorageCipherFactoryTest {
     }
 
     // -------------------------------------------------------------------------
-    // getSavedKeyAlgorithm / getCurrentKeyAlgorithm — must reflect what the
-    // factory actually resolved, not whatever the constructor most recently
-    // wrote to configSource as a side effect (a caller re-reading
-    // configSource afterwards would otherwise see the just-written CURRENT
-    // value and mistake it for the true saved one - see FlutterSecureStorage
-    // .migrateData(), which used to do exactly that).
+    // getSavedKeyAlgorithm / getCurrentKeyAlgorithm, must reflect what the
+    // factory resolved, not a later re-read of configSource
     // -------------------------------------------------------------------------
 
     @Test

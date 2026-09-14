@@ -1,11 +1,8 @@
 // Biometric namespace-switch harness for v11.x, write side. sharedPreferencesName
-// doesn't exist on v11, so the only way to give the write side a distinct legacy
-// shape is storageNamespace='FlutterSecureStorage' (the literal DEFAULT_PREF_NAME) -
-// same trick as harness_v11_recover_write.dart. Pair with
-// harness_biometric_v11_verify.dart (bare AndroidOptions.biometric(), no
-// storageNamespace) on the SAME ref/build to exercise BiometricNamespaceKeyRecovery's
-// real two-BiometricPrompt flow on an actual device. Requires a real fingerprint/PIN
-// confirmation - not automatable, run manually.
+// doesn't exist on v11, so the write side uses storageNamespace='FlutterSecureStorage'
+// (the literal DEFAULT_PREF_NAME), same trick as harness_v11_recover_write.dart. Pair
+// with harness_biometric_v11_verify.dart on the same ref/build. Requires a real
+// fingerprint/PIN confirmation, not automatable, run manually.
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

@@ -46,10 +46,8 @@ class KeyCipherImplementationAES23 implements KeyCipher {
     }
 
     /**
-     * A leftover key of the wrong type (e.g. an RSA key from a prior non-biometric algorithm that
-     * happens to compute the same alias) must never be used as-is - Cipher.init would throw deep
-     * inside a confusing provider error. Treat that the same as "no key yet": delete it and
-     * generate a fresh symmetric key instead.
+     * A leftover key of the wrong type must never be used as-is, since Cipher.init would throw
+     * deep inside a confusing provider error. Treat that the same as "no key yet".
      */
     private void ensureSymmetricKeyAtAlias() throws Exception {
         KeyStore ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID);
@@ -59,7 +57,7 @@ class KeyCipherImplementationAES23 implements KeyCipher {
             generateSymmetricKey();
         } else if (!(existingKey instanceof SecretKey)) {
             Log.w(TAG, "Alias " + keyAlias + " holds a " + existingKey.getClass().getSimpleName()
-                    + ", not a SecretKey - replacing it with a fresh symmetric key");
+                    + ", not a SecretKey, replacing it with a fresh symmetric key");
             ks.deleteEntry(keyAlias);
             generateSymmetricKey();
         }

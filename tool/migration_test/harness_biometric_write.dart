@@ -1,11 +1,10 @@
 // Biometric namespace-switch harness, write side: AndroidOptions.biometric()
 // with sharedPreferencesName set. Pair with harness_biometric_verify.dart
-// (same value, switched to storageNamespace) on the SAME ref/build to
+// (same value, switched to storageNamespace) on the same ref/build to
 // exercise BiometricNamespaceKeyRecovery's real two-BiometricPrompt flow on
-// an actual device. Requires a real fingerprint/PIN confirmation - not
-// automatable, run manually (see tool/migration_test/run.sh header for the
-// general pattern; this pair isn't wired into its automatic harness
-// selection).
+// an actual device. Requires a real fingerprint/PIN confirmation, not
+// automatable, run manually (this pair isn't wired into run.sh's automatic
+// harness selection).
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

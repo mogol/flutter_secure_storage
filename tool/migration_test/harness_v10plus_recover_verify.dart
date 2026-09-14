@@ -17,10 +17,10 @@ void main() async {
   ));
 
   final profiles = <String, FlutterSecureStorage>{
-    // storageNamespace dropped, but sharedPreferencesName kept at the SAME
-    // value - that's what "recover" actually means: the data prefs file name
-    // (driven by this value either way) stays put, only the wrapped key's
-    // location needs to move back. Dropping the option entirely instead would
+    // storageNamespace dropped, but sharedPreferencesName kept at the same
+    // value, since that's what "recover" actually means: the data prefs file
+    // name stays put, only the wrapped key's location needs to move back.
+    // Dropping the option entirely instead would
     // default sharedPreferencesName to "FlutterSecureStorage", pointing at a
     // different, unrelated data file.
     'namespace_migtest': const FlutterSecureStorage(

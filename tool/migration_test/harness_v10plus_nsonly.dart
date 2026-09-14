@@ -1,6 +1,6 @@
 // Isolated variant of harness_v10plus.dart: only the namespace-switch
-// profile, no 'default' profile alongside it. See harness_v9_nsonly.dart for
-// why - avoids a confound where multiple profiles in one app race over a
+// profile, no 'default' profile alongside it. See harness_v9_nsonly.dart,
+// which avoids a confound where multiple profiles in one app race over a
 // shared v9.x RSA key.
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint;

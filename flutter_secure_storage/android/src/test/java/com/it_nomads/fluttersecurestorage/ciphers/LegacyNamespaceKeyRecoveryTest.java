@@ -88,9 +88,8 @@ public class LegacyNamespaceKeyRecoveryTest {
     }
 
     /**
-     * Stores a real AES/GCM-encrypted entry so the recovery's decrypt-verification step can
-     * actually succeed against it, for tests that expect recovery to succeed. The key bytes must
-     * match what the test's fake KeyCipher unwraps the stored wrapped key to.
+     * Stores a real AES/GCM-encrypted entry so the decrypt-verification step can succeed
+     * against it. The key bytes must match what the fake KeyCipher unwraps to.
      */
     private void storeEncryptedData(byte[] aesKeyBytes) throws Exception {
         SecretKeySpec key = new SecretKeySpec(aesKeyBytes, "AES");
@@ -232,11 +231,7 @@ public class LegacyNamespaceKeyRecoveryTest {
     }
 
     // -------------------------------------------------------------------------
-    // Bug B, found on a real device (10.x line, ported here as a hardening
-    // check): the shared plain key file can in principle hold a different
-    // instance's own, perfectly valid key under this same preference name -
-    // v11.x has only one candidate name and algorithm (no legacy PKCS1/CBC
-    // support), so there's no alternate to fall back to, but a wrong key must
+    // A sibling instance's own, valid key under the same preference name must
     // still be rejected rather than relocated.
     // -------------------------------------------------------------------------
 

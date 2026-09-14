@@ -23,20 +23,16 @@ import javax.crypto.spec.SecretKeySpec;
  * the key across is enough. The source copy is left in place so switching back
  * keeps working. Non-biometric RSA-OAEP + AES-GCM only.
  * <p>
- * Every non-namespaced FlutterSecureStorage instance in an app shares the same
- * plain key-storage file (namespace is the only thing that isolates it), so
- * in principle a sibling instance's own wrapped key could sit under the same
- * preference name. A candidate is only trusted once it's confirmed to
- * actually decrypt this instance's own stored data, not just because it
- * unwrapped without throwing.
+ * Every non-namespaced instance shares the same plain key-storage file, so a
+ * sibling's wrapped key could sit under the same preference name. A candidate
+ * is only trusted once it's confirmed to decrypt this instance's own data.
  */
 public final class LegacyNamespaceKeyRecovery {
 
     private static final String TAG = "LegacyNamespaceKeyRecovery";
     private static final String KEY_STORAGE_PREFIX = "FlutterSecureKeyStorage";
-    // StorageCipherImplementationGCM wraps a 16-byte AES key. Some RSA/OAEP unwrap
-    // implementations don't reliably throw on a mismatch, so a wrong-key attempt can silently
-    // "succeed" with garbage; checking the result is actually AES-key-shaped catches that.
+    // A wrong-key unwrap can silently succeed with garbage instead of throwing, so the result
+    // is checked against the real key size (StorageCipherImplementationGCM wraps a 16-byte key).
     private static final int AES_KEY_SIZE_BYTES = 16;
     private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
     private static final int GCM_IV_SIZE = 12;

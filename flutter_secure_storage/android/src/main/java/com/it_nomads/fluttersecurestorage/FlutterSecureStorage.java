@@ -177,13 +177,11 @@ public class FlutterSecureStorage {
     /**
      * Moves the biometric app key to the new namespace/legacy location when the app
      * switched between sharedPreferencesName and storageNamespace, if needed. A no-op
-     * (immediate success) when recovery isn't needed - the common case for every app
-     * that isn't using biometric-protected storage.
+     * when recovery isn't needed.
      * <p>
-     * Unlike the RSA case, the wrapping key here lives in the Android Keystore and
-     * requires live authentication to use, so this takes two BiometricPrompt round
-     * trips: one to decrypt the app key at the old location, one to re-encrypt it at
-     * the new one.
+     * Unlike the RSA case, the wrapping key lives in the Android Keystore and needs
+     * live authentication, so this takes two BiometricPrompt round trips: one to
+     * decrypt the app key at the old location, one to re-encrypt it at the new one.
      */
     private void recoverBiometricNamespaceKeyIfNeeded(FlutterSecureStorageConfig config,
                                                        SecurePreferencesCallback<Void> callback) {
@@ -554,13 +552,8 @@ public class FlutterSecureStorage {
 
     /**
      * Whether the saved (old) key's Keystore alias is safe to delete after migrating off it.
-     * The alias is derived only from storageNamespace (see
-     * FlutterSecureStorageConfig.getKeyAliasSuffix()), not from sharedPreferencesName, so every
-     * FlutterSecureStorage instance that hasn't set storageNamespace shares the exact same alias.
-     * Deleting it as soon as one instance finishes migrating can permanently orphan a sibling
-     * instance that hasn't migrated yet and still needs that same key to read its own data. A
-     * namespaced alias is derived from that unique namespace, so it's never shared and safe to
-     * delete.
+     * Every instance without a storageNamespace shares the same alias, so deleting it can orphan
+     * a sibling instance that hasn't migrated yet. A namespaced alias is never shared.
      */
     private boolean canSafelyDeleteOldKey() {
         return config.hasStorageNamespace();

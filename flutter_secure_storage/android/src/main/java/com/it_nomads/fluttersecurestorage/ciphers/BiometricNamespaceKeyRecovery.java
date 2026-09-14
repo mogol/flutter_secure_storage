@@ -11,14 +11,11 @@ import java.util.Map;
 import javax.crypto.Cipher;
 
 /**
- * Moves the wrapped app key (the AES key that actually encrypts data, itself
- * wrapped by the biometric/PIN-gated Android Keystore key) when an app
- * switches between sharedPreferencesName and storageNamespace with the same
- * name. Mirrors LegacyNamespaceKeyRecovery, but the wrapping key here lives
- * in the Keystore and requires live user authentication to use, so this
- * class only does guard-checking and the raw unwrap/rewrap; the caller
- * drives the two BiometricPrompt round-trips (one for the old location's
- * key, one for the new one) and passes in each authenticated Cipher.
+ * Moves the wrapped app key when an app switches between sharedPreferencesName
+ * and storageNamespace with the same name. Mirrors LegacyNamespaceKeyRecovery,
+ * but the wrapping key lives in the Keystore and needs live authentication, so
+ * this class only does guard-checking and the raw unwrap/rewrap; the caller
+ * drives the two BiometricPrompt round trips and passes in each cipher.
  */
 public final class BiometricNamespaceKeyRecovery {
 

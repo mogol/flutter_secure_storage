@@ -43,9 +43,8 @@ enum SecureStorageUpgradeReason {
   /// Reading needs user authentication, so nothing was tried.
   authenticationRequired,
 
-  /// Key material is at the pre-namespace-switch location. Not tried, since a
-  /// trial decrypt against the current (not-yet-recovered) location would
-  /// misreport this as loss; the next `initialize()` call relocates it.
+  /// Key material is at the pre-namespace-switch location. Not tried yet;
+  /// the next `initialize()` call relocates it.
   pendingNamespaceRecovery,
 
   /// The platform does not implement this check.

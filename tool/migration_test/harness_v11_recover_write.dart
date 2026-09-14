@@ -3,8 +3,8 @@
 // prefs file name consistent after dropping storageNamespace is to have used
 // storageNamespace='FlutterSecureStorage' (the literal DEFAULT_PREF_NAME) in
 // the first place. Pair with harness_v10plus_recover_verify.dart's sibling,
-// but note that one won't compile on v11 (it sets sharedPreferencesName,
-// which no longer exists) - see the bare-config verify inlined below instead.
+// but note that one won't compile on v11, since it sets sharedPreferencesName,
+// which no longer exists; see the bare-config verify inlined below instead.
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
