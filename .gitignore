@@ -31,3 +31,6 @@ pubspec_overrides.yaml
 .packages
 build/
 flutter_secure_storage_windows/coverage/lcov.info
+
+# Local device-testing harnesses, not part of the published project
+/tool/
