@@ -206,7 +206,11 @@ public class FlutterSecureStorage {
 
     public void deleteAll() {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
+        for (String key : preferences.getAll().keySet()) {
+            if (key.contains(config.getSharedPreferencesKeyPrefix())) {
+                editor.remove(key);
+            }
+        }
         editor.apply();
     }
 
@@ -1057,12 +1061,18 @@ public class FlutterSecureStorage {
                 Log.w(TAG, "Failed to delete key from AndroidKeyStore (may not exist)", keyDeleteError);
             }
 
-            // Delete all encrypted data
+            // Delete all encrypted data for this key prefix
             SharedPreferences dataPrefs = context.getSharedPreferences(
                     config.getEffectiveDataPrefsName(),
                     Context.MODE_PRIVATE
             );
-            dataPrefs.edit().clear().apply();
+            SharedPreferences.Editor dataEditor = dataPrefs.edit();
+            for (String key : dataPrefs.getAll().keySet()) {
+                if (key.contains(config.getSharedPreferencesKeyPrefix())) {
+                    dataEditor.remove(key);
+                }
+            }
+            dataEditor.apply();
             Log.d(TAG, "Deleted all encrypted data");
 
             // Delete stored wrapped keys
