@@ -13,6 +13,7 @@
 - Fixed namespace-switch recovery occasionally relocating the wrong key when multiple non-namespaced instances shared the same legacy key storage file.
 - Fixed a crash (and subsequent data wipe) on the very first launch of a fresh `AndroidOptions.biometric()` store on a non-namespaced instance.
 - Fixed a fresh install with two non-namespaced instances, one using `AndroidOptions.biometric()` and one not, permanently losing the biometric instance's data.
+- Fixed `read`/`write` hanging forever when the biometric prompt's negative button was tapped with `AndroidBiometricType.strongBiometricOnly`.
 
 ## 10.3.3
 
