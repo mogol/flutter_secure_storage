@@ -450,6 +450,15 @@ Apart from `libsecret`, you also need a keyring service. This is typically alrea
 
 For more details, including known issues and CI setup, see the [`flutter_secure_storage_linux` README](https://pub.dev/packages/flutter_secure_storage_linux).
 
+#### Alternative implementations
+
+These are unofficial, non-endorsed plugin implementations of `flutter_secure_storage`:
+
+- [`flutter_secure_storage_linux_secret_service`](https://pub.dev/packages/flutter_secure_storage_linux_secret_service): a pure-Dart Linux implementation that communicates with the standard Secret Service API over D-Bus, without additional system packages (such as `libsecret`) to build or run the application.
+  - When `flutter_secure_storage_linux` is using the Secret Service API through the `org.freedesktop.secrets` D-Bus, existing secrets remain interoperable with this implementation. This is not an official interoperability guarantee.
+- [`flutter_secure_storage_linux_portal`](https://pub.dev/packages/flutter_secure_storage_linux_portal): a pure-Dart Linux implementation that uses the Secret Portal API to obtain a master secret and encrypts the secrets in a local file, without additional system packages (such as `libsecret`) to build or run the application.
+  - Secrets stored by this implementation are not interoperable with `flutter_secure_storage_linux`.
+
 ## Integration Tests
 
 To run the integration tests, navigate to the `example` directory and execute the following command:
